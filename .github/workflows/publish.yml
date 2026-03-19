@@ -43,7 +43,7 @@ jobs:
         run: mvn pmd:pmd
 
       - name: Enforce Coverage
-              run: |
-                mvn jacoco:check \
-                  -Djacoco.check.failOnViolation=true \
-                  -Djacoco.check.rules='rule:name=MinimumCoverage,element=BUNDLE,limits=[counter=INSTRUCTION,minimum=0.90]'
+        run: |
+          mvn jacoco:check \
+            -Djacoco.check.failOnViolation=true \
+            -Djacoco.check.rules='rule:name=MinimumCoverage,element=BUNDLE,limits=[counter=INSTRUCTION,minimum=0.90]'
