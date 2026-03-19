@@ -20,16 +20,14 @@ public class TraceContextFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
 
         String traceparent = request.getHeader(TRACEPARENT);
-
         String traceId;
 
-        if (traceparent != null && traceparent.split("-").length >= 4) {
-            // formato: version-traceId-spanId-flags
+        if (isValidTraceparent(traceparent)) {
             traceId = traceparent.split("-")[1];
         } else {
             traceId = generateTraceId();
@@ -56,5 +54,14 @@ public class TraceContextFilter extends OncePerRequestFilter {
         String flags = "01";
 
         return version + "-" + traceId + "-" + spanId + "-" + flags;
+    }
+
+    private boolean isValidTraceparent(String traceparent) {
+        if (traceparent == null)
+            return false;
+        String[] parts = traceparent.split("-");
+        if (parts.length != 4)
+            return false;
+        return parts[1].matches("[0-9a-f]{32}") && parts[2].matches("[0-9a-f]{16}");
     }
 }
