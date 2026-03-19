@@ -28,7 +28,7 @@ jobs:
         run: mvn clean verify -B jacoco:report
 
       - name: Dependency Check
-        uses: OWASP/dependency-check-action@v8
+        uses: dependency-check/owasp-dependency-check-action@v8
         with:
           project: 'spring-boot-starter-api-standard'
           scan: './'
