@@ -36,7 +36,7 @@ jobs:
 
       - name: SpotBugs + FindSecBugs
         run: |
-          mvn com.github.spotbugs:spotbugs-maven-plugin:4.7.5:check \
+          mvn com.github.spotbugs:spotbugs-maven-plugin:4.9.8.2:check \
               -Dspotbugs.failOnError=true
 
       - name: PMD Analysis
