@@ -24,18 +24,19 @@ public class TraceContextFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
-        String traceparent = request.getHeader(TRACEPARENT);
+        String traceparentHeader = request.getHeader(TRACEPARENT);
+
         String traceId;
 
-        if (isValidTraceparent(traceparent)) {
-            traceId = traceparent.split("-")[1];
+        if (isValidTraceparent(traceparentHeader)) {
+            traceId = traceparentHeader.split("-")[1];
         } else {
             traceId = generateTraceId();
-            traceparent = buildTraceparent(traceId);
         }
 
         MDC.put(MDC_KEY, traceId);
-        response.setHeader(TRACEPARENT, traceparent);
+        String safeTraceparent = buildTraceparent(traceId);
+        response.setHeader(TRACEPARENT, safeTraceparent);
 
         try {
             filterChain.doFilter(request, response);
