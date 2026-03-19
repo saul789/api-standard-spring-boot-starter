@@ -32,7 +32,7 @@ jobs:
         with:
           project: 'spring-boot-starter-api-standard'
           scan: './'
-          format: 'ALL'
+          format: ' HTML'
 
       - name: SpotBugs + FindSecBugs
         run: |
