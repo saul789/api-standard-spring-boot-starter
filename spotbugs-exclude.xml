@@ -1,0 +1,7 @@
+<FindBugsFilter>
+    <Match>
+        <Class name="io.github.saul789.api.standard.filter.TraceContextFilter"/>
+        <Method name="doFilterInternal"/>
+        <Bug pattern="HRS_REQUEST_PARAMETER_TO_HTTP_HEADER"/>
+    </Match>
+</FindBugsFilter>

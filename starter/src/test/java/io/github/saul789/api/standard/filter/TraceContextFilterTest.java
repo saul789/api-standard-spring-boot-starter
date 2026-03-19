@@ -15,6 +15,9 @@ import org.slf4j.MDC;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,17 +41,12 @@ class TraceContextFilterTest {
     }
 
     @Test
-    void shouldReuseTraceIdFromExistingTraceparent() throws ServletException, IOException {
-        // Preparación: Un traceparent válido según W3C (4 partes separadas por '-')
-        // 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
+    void shouldReuseTraceIdFromExistingTraceparent() throws Exception {
         String existingTraceId = "4bf92f3577b34da6a3ce929d0e0e4736";
         String traceparent = "00-" + existingTraceId + "-00f067aa0ba902b7-01";
 
         when(request.getHeader("traceparent")).thenReturn(traceparent);
 
-        // Ejecución
-        // Usamos una implementación real de doFilter para verificar que el MDC esté
-        // puesto DURANTE la ejecución
         doAnswer(invocation -> {
             assertEquals(existingTraceId, MDC.get("traceId"));
             return null;
@@ -56,9 +54,9 @@ class TraceContextFilterTest {
 
         traceContextFilter.doFilter(request, response, filterChain);
 
-        // Verificación
-        verify(response).setHeader("traceparent", traceparent);
-        assertNull(MDC.get("traceId"), "El MDC debería limpiarse en el bloque finally");
+        verify(response).setHeader(eq("traceparent"), contains(existingTraceId));
+
+        assertNull(MDC.get("traceId"));
     }
 
     @Test

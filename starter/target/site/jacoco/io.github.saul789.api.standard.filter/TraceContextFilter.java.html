@@ -20,42 +20,50 @@ import java.util.UUID;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
 
-<span class="fc" id="L27">        String traceparent = request.getHeader(TRACEPARENT);</span>
+<span class="fc" id="L27">        String traceparentHeader = request.getHeader(TRACEPARENT);</span>
 
         String traceId;
 
-<span class="fc bfc" id="L31" title="All 4 branches covered.">        if (traceparent != null &amp;&amp; traceparent.split(&quot;-&quot;).length &gt;= 4) {</span>
-            // formato: version-traceId-spanId-flags
-<span class="fc" id="L33">            traceId = traceparent.split(&quot;-&quot;)[1];</span>
-        } else {
-<span class="fc" id="L35">            traceId = generateTraceId();</span>
-<span class="fc" id="L36">            traceparent = buildTraceparent(traceId);</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        if (isValidTraceparent(traceparentHeader)) {</span>
+<span class="fc" id="L32">            traceId = traceparentHeader.split(&quot;-&quot;)[1];</span>
+<span class="fc" id="L33">        } else {</span>
+<span class="fc" id="L34">            traceId = generateTraceId();</span>
         }
 
-<span class="fc" id="L39">        MDC.put(MDC_KEY, traceId);</span>
-<span class="fc" id="L40">        response.setHeader(TRACEPARENT, traceparent);</span>
+<span class="fc" id="L37">        MDC.put(MDC_KEY, traceId);</span>
+<span class="fc" id="L38">        String safeTraceparent = buildTraceparent(traceId);</span>
+<span class="fc" id="L39">        response.setHeader(TRACEPARENT, safeTraceparent);</span>
 
         try {
-<span class="fc" id="L43">            filterChain.doFilter(request, response);</span>
-        } finally {
-<span class="fc" id="L45">            MDC.clear();</span>
+<span class="fc" id="L42">            filterChain.doFilter(request, response);</span>
+<span class="fc" id="L43">        } finally {</span>
+<span class="fc" id="L44">            MDC.clear();</span>
         }
-<span class="fc" id="L47">    }</span>
+<span class="fc" id="L46">    }</span>
 
     private String generateTraceId() {
-<span class="fc" id="L50">        return UUID.randomUUID().toString().replace(&quot;-&quot;, &quot;&quot;);</span>
+<span class="fc" id="L49">        return UUID.randomUUID().toString().replace(&quot;-&quot;, &quot;&quot;);</span>
     }
 
     private String buildTraceparent(String traceId) {
-<span class="fc" id="L54">        String version = &quot;00&quot;;</span>
-<span class="fc" id="L55">        String spanId = UUID.randomUUID().toString().replace(&quot;-&quot;, &quot;&quot;).substring(0, 16);</span>
-<span class="fc" id="L56">        String flags = &quot;01&quot;;</span>
+<span class="fc" id="L53">        String version = &quot;00&quot;;</span>
+<span class="fc" id="L54">        String spanId = UUID.randomUUID().toString().replace(&quot;-&quot;, &quot;&quot;).substring(0, 16);</span>
+<span class="fc" id="L55">        String flags = &quot;01&quot;;</span>
 
-<span class="fc" id="L58">        return version + &quot;-&quot; + traceId + &quot;-&quot; + spanId + &quot;-&quot; + flags;</span>
+<span class="fc" id="L57">        return version + &quot;-&quot; + traceId + &quot;-&quot; + spanId + &quot;-&quot; + flags;</span>
+    }
+
+    private boolean isValidTraceparent(String traceparent) {
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if (traceparent == null)</span>
+<span class="fc" id="L62">            return false;</span>
+<span class="fc" id="L63">        String[] parts = traceparent.split(&quot;-&quot;);</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        if (parts.length != 4)</span>
+<span class="fc" id="L65">            return false;</span>
+<span class="pc bpc" id="L66" title="2 of 4 branches missed.">        return parts[1].matches(&quot;[0-9a-f]{32}&quot;) &amp;&amp; parts[2].matches(&quot;[0-9a-f]{16}&quot;);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
