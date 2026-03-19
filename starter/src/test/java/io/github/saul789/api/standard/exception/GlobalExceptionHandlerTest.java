@@ -122,6 +122,74 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void shouldEnterClientErrorBranch() {
+        feign.FeignException ex = mock(feign.FeignException.class);
+
+        when(ex.status()).thenReturn(404);
+        when(ex.getMessage()).thenReturn("Not Found");
+        when(request.getRequestURI()).thenReturn("/test");
+
+        ResponseEntity<ApiResponse<Object>> response = globalExceptionHandler.handleFeignException(ex, request);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    void shouldFallbackToBadRequestWhenStatusUnknown() {
+        feign.FeignException ex = mock(feign.FeignException.class);
+
+        when(ex.status()).thenReturn(499); // 🔥 clave
+        when(ex.getMessage()).thenReturn("Custom error");
+        when(request.getRequestURI()).thenReturn("/test");
+
+        ResponseEntity<ApiResponse<Object>> response = globalExceptionHandler.handleFeignException(ex, request);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    @Test
+    void shouldEnterServerErrorBranch() {
+        feign.FeignException ex = mock(feign.FeignException.class);
+
+        when(ex.status()).thenReturn(500);
+        when(request.getRequestURI()).thenReturn("/test");
+
+        ResponseEntity<ApiResponse<Object>> response = globalExceptionHandler.handleFeignException(ex, request);
+
+        assertEquals(HttpStatus.BAD_GATEWAY, response.getStatusCode());
+    }
+
+    @Test
+    void shouldHandleStatusBelow400() {
+        feign.FeignException ex = mock(feign.FeignException.class);
+
+        when(ex.status()).thenReturn(200); // 🔥 clave
+        when(request.getRequestURI()).thenReturn("/test");
+
+        ResponseEntity<ApiResponse<Object>> response = globalExceptionHandler.handleFeignException(ex, request);
+
+        // Va al ELSE
+        assertEquals(HttpStatus.BAD_GATEWAY, response.getStatusCode());
+    }
+
+    @Test
+    void shouldFallbackToBadRequestWhenHttpStatusIsUnknown() {
+        feign.FeignException feignEx = mock(feign.FeignException.class);
+
+        // 499 no existe en HttpStatus
+        when(feignEx.status()).thenReturn(499);
+        when(feignEx.getMessage()).thenReturn("Custom client error");
+        when(request.getRequestURI()).thenReturn("/api/test");
+
+        ResponseEntity<ApiResponse<Object>> response = globalExceptionHandler.handleFeignException(feignEx, request);
+
+        // Aquí entra al fallback
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("External client error: Custom client error",
+                response.getBody().getMessage());
+    }
+
+    @Test
     void shouldHandleWeirdHttpStatus() {
         org.mockito.Mockito.when(request.getRequestURI()).thenReturn("/weird");
         globalExceptionHandler.handleGenericException(new RuntimeException("test"), request);

@@ -125,10 +125,10 @@ public class GlobalExceptionHandler {
         String errorMessage;
 
         // Lógica de mapeo: 4xx se propaga, 5xx se convierte en 502
-<span class="pc bpc" id="L128" title="1 of 4 branches missed.">        if (externalStatus &gt;= 400 &amp;&amp; externalStatus &lt; 500) {</span>
+<span class="fc bfc" id="L128" title="All 4 branches covered.">        if (externalStatus &gt;= 400 &amp;&amp; externalStatus &lt; 500) {</span>
 <span class="fc" id="L129">            responseStatus = HttpStatus.resolve(externalStatus);</span>
-<span class="pc bpc" id="L130" title="1 of 2 branches missed.">            if (responseStatus == null)</span>
-<span class="nc" id="L131">                responseStatus = HttpStatus.BAD_REQUEST;</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">            if (responseStatus == null)</span>
+<span class="fc" id="L131">                responseStatus = HttpStatus.BAD_REQUEST;</span>
 <span class="fc" id="L132">            errorMessage = &quot;External client error: &quot; + ex.getMessage();</span>
         } else {
             // El 500 del vecino es mi 502

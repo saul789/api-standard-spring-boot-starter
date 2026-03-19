@@ -63,7 +63,7 @@ import java.util.UUID;
 <span class="fc" id="L63">        String[] parts = traceparent.split(&quot;-&quot;);</span>
 <span class="fc bfc" id="L64" title="All 2 branches covered.">        if (parts.length != 4)</span>
 <span class="fc" id="L65">            return false;</span>
-<span class="pc bpc" id="L66" title="2 of 4 branches missed.">        return parts[1].matches(&quot;[0-9a-f]{32}&quot;) &amp;&amp; parts[2].matches(&quot;[0-9a-f]{16}&quot;);</span>
+<span class="fc bfc" id="L66" title="All 4 branches covered.">        return parts[1].matches(&quot;[0-9a-f]{32}&quot;) &amp;&amp; parts[2].matches(&quot;[0-9a-f]{16}&quot;);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -40,6 +40,41 @@ class TraceContextFilterTest {
         MDC.clear();
     }
 
+    private boolean isValid(String value) {
+        return (boolean) org.springframework.test.util.ReflectionTestUtils.invokeMethod(
+                traceContextFilter,
+                "isValidTraceparent",
+                value);
+    }
+
+    @Test
+    void shouldReturnFalseWhenTraceparentIsNull() {
+        assertFalse(isValid(null));
+    }
+
+    @Test
+    void shouldReturnFalseWhenPartsAreInvalid() {
+        assertFalse(isValid("00-abc"));
+    }
+
+    @Test
+    void shouldReturnTrueWhenTraceparentIsValid() {
+        String valid = "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01";
+        assertTrue(isValid(valid));
+    }
+
+    @Test
+    void shouldReturnFalseWhenTraceIdIsInvalid() {
+        String invalidTraceId = "00-INVALID_TRACE_ID-00f067aa0ba902b7-01";
+        assertFalse(isValid(invalidTraceId));
+    }
+
+    @Test
+    void shouldReturnFalseWhenSpanIdIsInvalid() {
+        String invalidSpanId = "00-4bf92f3577b34da6a3ce929d0e0e4736-INVALID_SPAN-01";
+        assertFalse(isValid(invalidSpanId));
+    }
+
     @Test
     void shouldReuseTraceIdFromExistingTraceparent() throws Exception {
         String existingTraceId = "4bf92f3577b34da6a3ce929d0e0e4736";
