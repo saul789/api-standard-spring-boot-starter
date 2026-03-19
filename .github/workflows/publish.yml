@@ -13,7 +13,7 @@ jobs:
   build-and-analyze:
     runs-on: ubuntu-latest
     container:
-      image: eclipse-temurin:25-jdk 
+      image: maven:4.0.0-eclipse-temurin-25
 
     steps:
       - name: Checkout
