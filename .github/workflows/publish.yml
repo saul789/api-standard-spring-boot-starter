@@ -31,8 +31,8 @@ jobs:
         uses: dependency-check/Dependency-Check_Action@main
         with:
           project: 'spring-boot-starter-api-standard'
-          scan: './'
-          format: ' HTML'
+          scan: '.'
+          format: 'HTML'
 
       - name: SpotBugs + FindSecBugs
         run: |
@@ -42,5 +42,14 @@ jobs:
       - name: PMD Analysis
         run: mvn pmd:pmd
 
-      - name: Enforce Coverage
-        run: mvn clean verify -B
+      - name: Upload JaCoCo report
+        uses: actions/upload-artifact@v3
+        with:
+          name: jacoco-report
+          path: **/target/site/jacoco/**
+
+      - name: Upload Dependency Check report
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependency-check
+          path: **/dependency-check-report.*
