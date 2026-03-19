@@ -13,11 +13,16 @@ jobs:
   build-and-analyze:
     runs-on: ubuntu-latest
     container:
-      image: maven:4.0.0-eclipse-temurin-25
+      image: eclipse-temurin:25-jdk 
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      
+      - name: Install Maven
+        run: |
+          apt-get update
+          apt-get install -y maven
 
       - name: Build, Test & Coverage
         run: mvn clean verify -B jacoco:report
