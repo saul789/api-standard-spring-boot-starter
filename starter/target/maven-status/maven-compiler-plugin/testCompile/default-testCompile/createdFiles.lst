@@ -1,0 +1,11 @@
+io\github\saul789\api\standard\GlobalExceptionHandlerTest.class
+io\github\saul789\api\standard\ApiStandardAutoConfigurationTest.class
+io\github\saul789\api\standard\filter\TraceContextFilterTest.class
+io\github\saul789\api\standard\exception\ErrorCodeTest.class
+io\github\saul789\api\standard\exception\GlobalExceptionHandlerTest.class
+io\github\saul789\api\standard\exception\GlobalExceptionHandlerTest$DummyDto.class
+io\github\saul789\api\standard\advice\ApiResponseAdviceTest.class
+io\github\saul789\api\standard\exception\GlobalExceptionHandlerTest$TestController.class
+io\github\saul789\api\standard\filter\RequestLoggingFilterTest.class
+io\github\saul789\api\standard\model\ApiResponseTest.class
+io\github\saul789\api\standard\exception\BusinessExceptionTest.class

@@ -1,0 +1,10 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+starter,io.github.saul789.api.standard.advice,ApiResponseAdvice,0,25,0,4,0,10,0,5,0,3
+starter,io.github.saul789.api.standard,ApiStandardAutoConfiguration,0,27,0,0,0,8,0,4,0,4
+starter,io.github.saul789.api.standard.exception,BusinessException,0,16,0,0,0,6,0,3,0,3
+starter,io.github.saul789.api.standard.exception,GlobalExceptionHandler,2,218,2,10,1,60,2,15,0,11
+starter,io.github.saul789.api.standard.exception,ErrorCode,0,27,0,0,0,5,0,1,0,1
+starter,io.github.saul789.api.standard.filter,RequestLoggingFilter,0,39,0,0,0,14,0,3,0,3
+starter,io.github.saul789.api.standard.filter,TraceContextFilter,0,67,0,4,0,16,0,6,0,4
+starter,io.github.saul789.api.standard.model,ApiResponse,0,49,0,0,0,14,0,8,0,8
+starter,io.github.saul789.api.standard.model,ValidationError,0,15,0,0,0,6,0,3,0,3
