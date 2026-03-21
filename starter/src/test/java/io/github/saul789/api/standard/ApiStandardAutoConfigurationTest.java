@@ -1,5 +1,6 @@
 package io.github.saul789.api.standard;
 
+import io.github.saul789.api.standard.filter.RequestLoggingFilter;
 import io.github.saul789.api.standard.filter.TraceContextFilter;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -17,6 +18,7 @@ class ApiStandardAutoConfigurationTest {
     void shouldLoadAutoConfiguration() {
         contextRunner.run(context -> {
             assertThat(context).hasSingleBean(TraceContextFilter.class);
+            assertThat(context).hasSingleBean(RequestLoggingFilter.class);
         });
     }
 }

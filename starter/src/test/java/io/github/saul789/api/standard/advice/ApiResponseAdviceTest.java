@@ -3,6 +3,7 @@ package io.github.saul789.api.standard.advice;
 import io.github.saul789.api.standard.model.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,38 +28,49 @@ class ApiResponseAdviceTest {
     @InjectMocks
     private ApiResponseAdvice apiResponseAdvice;
 
-    // Mocks auxiliares para los parámetros del método beforeBodyWrite
+    @Mock
     private MethodParameter returnType;
+
     private MediaType contentType;
     private ServerHttpRequest request;
     private ServerHttpResponse response;
 
     @BeforeEach
     void setUp() {
-        returnType = mock(MethodParameter.class);
         contentType = MediaType.APPLICATION_JSON;
         request = mock(ServerHttpRequest.class);
         response = mock(ServerHttpResponse.class);
     }
 
     @Test
-    void supportsShouldAlwaysReturnTrue() {
-        // Cubre el método supports al 100%
-        assertTrue(apiResponseAdvice.supports(returnType, null));
+    @DisplayName("Debe retornar FALSE si el tipo de parámetro es nulo")
+    void supports_ShouldReturnFalse_WhenParamTypeIsNull() {
+        when(returnType.getParameterType()).thenReturn(null);
+
+        boolean result = apiResponseAdvice.supports(returnType, null);
+
+        assertFalse(result, "Debería ser false si el tipo es null");
     }
 
     @Test
-    void shouldWrapSimpleResponseIntoApiResponse() {
-        // Preparación
-        String body = "Hello World";
+    @DisplayName("Debe retornar TRUE para tipos de datos estándar (DTOs)")
+    void supports_ShouldReturnTrue_ForStandardTypes() {
+        when(returnType.getParameterType()).thenAnswer(invocation -> Object.class);
+
+        boolean result = apiResponseAdvice.supports(returnType, null);
+
+        assertTrue(result, "Debería ser true para tipos que no están excluidos");
+    }
+
+    @Test
+    void shouldWrapObjectResponseIntoApiResponse() {
+        Object body = new Object();
         String uri = "/api/test";
         when(httpServletRequest.getRequestURI()).thenReturn(uri);
 
-        // Ejecución
         Object result = apiResponseAdvice.beforeBodyWrite(
                 body, returnType, contentType, null, request, response);
 
-        // Verificación (Cubre la rama por defecto / éxito)
         assertNotNull(result);
         assertTrue(result instanceof ApiResponse);
         ApiResponse<?> apiResponse = (ApiResponse<?>) result;
@@ -68,29 +80,34 @@ class ApiResponseAdviceTest {
     }
 
     @Test
-    void shouldReturnBodyAsIsWhenItIsProblemDetail() {
-        // Preparación
-        ProblemDetail body = ProblemDetail.forStatus(400);
+    @DisplayName("supports() debe retornar FALSE para String")
+    void supports_ShouldReturnFalse_ForString() {
+        when(returnType.getParameterType()).thenAnswer(i -> String.class);
+        assertFalse(apiResponseAdvice.supports(returnType, null));
+    }
 
-        // Ejecución
+    @Test
+    @DisplayName("supports() debe retornar FALSE para byte[]")
+    void supports_ShouldReturnFalse_ForByteArray() {
+        when(returnType.getParameterType()).thenAnswer(i -> byte[].class);
+        assertFalse(apiResponseAdvice.supports(returnType, null));
+    }
+
+    @Test
+    void shouldReturnBodyAsIsWhenItIsProblemDetail() {
+        ProblemDetail body = ProblemDetail.forStatus(400);
         Object result = apiResponseAdvice.beforeBodyWrite(
                 body, returnType, contentType, null, request, response);
-
-        // Verificación (Cubre la rama: if (body instanceof ProblemDetail))
         assertSame(body, result);
         assertTrue(result instanceof ProblemDetail);
     }
 
     @Test
     void shouldReturnBodyAsIsWhenItIsAlreadyApiResponse() {
-        // Preparación
         ApiResponse<String> body = ApiResponse.success("already wrapped", "CUSTOM", "/path");
-
-        // Ejecución
         Object result = apiResponseAdvice.beforeBodyWrite(
                 body, returnType, contentType, null, request, response);
 
-        // Verificación (Cubre la rama: if (body instanceof ApiResponse<?>))
         assertSame(body, result);
     }
 }
