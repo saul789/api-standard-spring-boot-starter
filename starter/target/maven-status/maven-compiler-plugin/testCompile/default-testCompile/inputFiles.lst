@@ -1,9 +1,0 @@
-C:\Users\saulb\Downloads\SAUL\spring-boot-starter-api-standard\starter\src\test\java\io\github\saul789\api\standard\advice\ApiResponseAdviceTest.java
-C:\Users\saulb\Downloads\SAUL\spring-boot-starter-api-standard\starter\src\test\java\io\github\saul789\api\standard\ApiStandardAutoConfigurationTest.java
-C:\Users\saulb\Downloads\SAUL\spring-boot-starter-api-standard\starter\src\test\java\io\github\saul789\api\standard\exception\BusinessExceptionTest.java
-C:\Users\saulb\Downloads\SAUL\spring-boot-starter-api-standard\starter\src\test\java\io\github\saul789\api\standard\exception\ErrorCodeTest.java
-C:\Users\saulb\Downloads\SAUL\spring-boot-starter-api-standard\starter\src\test\java\io\github\saul789\api\standard\exception\GlobalExceptionHandlerTest.java
-C:\Users\saulb\Downloads\SAUL\spring-boot-starter-api-standard\starter\src\test\java\io\github\saul789\api\standard\filter\RequestLoggingFilterTest.java
-C:\Users\saulb\Downloads\SAUL\spring-boot-starter-api-standard\starter\src\test\java\io\github\saul789\api\standard\filter\TraceContextFilterTest.java
-C:\Users\saulb\Downloads\SAUL\spring-boot-starter-api-standard\starter\src\test\java\io\github\saul789\api\standard\GlobalExceptionHandlerTest.java
-C:\Users\saulb\Downloads\SAUL\spring-boot-starter-api-standard\starter\src\test\java\io\github\saul789\api\standard\model\ApiResponseTest.java

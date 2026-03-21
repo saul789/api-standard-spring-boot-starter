@@ -1,9 +1,0 @@
-C:\Users\saulb\Downloads\SAUL\spring-boot-starter-api-standard\starter\src\main\java\io\github\saul789\api\standard\advice\ApiResponseAdvice.java
-C:\Users\saulb\Downloads\SAUL\spring-boot-starter-api-standard\starter\src\main\java\io\github\saul789\api\standard\ApiStandardAutoConfiguration.java
-C:\Users\saulb\Downloads\SAUL\spring-boot-starter-api-standard\starter\src\main\java\io\github\saul789\api\standard\exception\BusinessException.java
-C:\Users\saulb\Downloads\SAUL\spring-boot-starter-api-standard\starter\src\main\java\io\github\saul789\api\standard\exception\ErrorCode.java
-C:\Users\saulb\Downloads\SAUL\spring-boot-starter-api-standard\starter\src\main\java\io\github\saul789\api\standard\exception\GlobalExceptionHandler.java
-C:\Users\saulb\Downloads\SAUL\spring-boot-starter-api-standard\starter\src\main\java\io\github\saul789\api\standard\filter\RequestLoggingFilter.java
-C:\Users\saulb\Downloads\SAUL\spring-boot-starter-api-standard\starter\src\main\java\io\github\saul789\api\standard\filter\TraceContextFilter.java
-C:\Users\saulb\Downloads\SAUL\spring-boot-starter-api-standard\starter\src\main\java\io\github\saul789\api\standard\model\ApiResponse.java
-C:\Users\saulb\Downloads\SAUL\spring-boot-starter-api-standard\starter\src\main\java\io\github\saul789\api\standard\model\ValidationError.java
