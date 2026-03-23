@@ -264,7 +264,8 @@ class GlobalExceptionHandlerTest {
     void shouldHandleAnnotatedException() throws Exception {
         mockMvc.perform(get("/annotated"))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("BAD_REQUEST")); // 409 is in 4xx range, so BAD_REQUEST as default for non-explicit 4xx
+                .andExpect(jsonPath("$.code").value("BAD_REQUEST")); // 409 is in 4xx range, so BAD_REQUEST as default
+                                                                     // for non-explicit 4xx
     }
 
 }
