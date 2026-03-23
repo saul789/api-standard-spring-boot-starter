@@ -20,5 +20,35 @@ public enum ErrorCode {
     BAD_REQUEST,
 
     /** The requested resource could not be found. */
-    NOT_FOUND
+    NOT_FOUND,
+
+    /** The HTTP method is not supported for this endpoint. */
+    METHOD_NOT_ALLOWED,
+
+    /** The media type is not supported. */
+    UNSUPPORTED_MEDIA_TYPE,
+
+    /** Client is not authenticated. */
+    UNAUTHORIZED,
+
+    /** Client is authenticated but lacks required permissions. */
+    FORBIDDEN;
+
+    /**
+     * Resolves a default {@link ErrorCode} based on an HTTP status code.
+     *
+     * @param status the HTTP status to resolve from
+     * @return the most appropriate {@link ErrorCode}
+     */
+    public static ErrorCode fromStatus(int status) {
+        return switch (status) {
+            case 400 -> BAD_REQUEST;
+            case 401 -> UNAUTHORIZED;
+            case 403 -> FORBIDDEN;
+            case 404 -> NOT_FOUND;
+            case 405 -> METHOD_NOT_ALLOWED;
+            case 415 -> UNSUPPORTED_MEDIA_TYPE;
+            default -> (status >= 400 && status < 500) ? BAD_REQUEST : INTERNAL_ERROR;
+        };
+    }
 }

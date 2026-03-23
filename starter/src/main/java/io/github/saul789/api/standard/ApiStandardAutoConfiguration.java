@@ -1,5 +1,6 @@
 package io.github.saul789.api.standard;
 
+import io.github.saul789.api.standard.exception.FeignExceptionHandler;
 import io.github.saul789.api.standard.exception.GlobalExceptionHandler;
 import io.github.saul789.api.standard.filter.RequestLoggingFilter;
 import io.github.saul789.api.standard.filter.TraceContextFilter;
@@ -56,6 +57,16 @@ public class ApiStandardAutoConfiguration {
     @ConditionalOnMissingBean
     public GlobalExceptionHandler globalExceptionHandler(MessageSource messageSource) {
         return new GlobalExceptionHandler(messageSource);
+    }
+
+    /**
+     * Registers the Feign-specific exception handler if Feign is on the classpath.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @org.springframework.boot.autoconfigure.condition.ConditionalOnClass(name = "feign.FeignException")
+    public FeignExceptionHandler feignExceptionHandler() {
+        return new FeignExceptionHandler();
     }
 
     /**

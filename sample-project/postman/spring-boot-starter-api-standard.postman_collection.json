@@ -1,0 +1,292 @@
+{
+	"info": {
+		"_postman_id": "7a3b1c8d-2e4a-5f6b-7c8d-9e0a1b2c3d4e",
+		"name": "Spring Boot Starter API Standard - Demo",
+		"description": "Colección de pruebas para el proyecto de ejemplo del starter de estandarización de APIs.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Standard Responses",
+			"item": [
+				{
+					"name": "GET Object",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/demo/responses/object",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"responses",
+								"object"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET List",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/demo/responses/list",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"responses",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Raw String (Not Wrapped)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/demo/responses/raw",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"responses",
+								"raw"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Validation Errors",
+			"item": [
+				{
+					"name": "POST Body Error (Invalid)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"\",\n    \"age\": 150\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/demo/validation/body",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"validation",
+								"body"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Param Error (Invalid Code)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/demo/validation/params?code=a",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"validation",
+								"params"
+							],
+							"query": [
+								{
+									"key": "code",
+									"value": "a"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Exceptions",
+			"item": [
+				{
+					"name": "Throw Business Exception",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/demo/exceptions/business-logic",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"exceptions",
+								"business-logic"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Throw Annotated (@ResponseStatus)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/demo/exceptions/annotated",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"exceptions",
+								"annotated"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Throw Not Found (ResponseStatusException)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/demo/exceptions/not-found",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"exceptions",
+								"not-found"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Throw Unknown Server Error",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/demo/exceptions/server-error",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"exceptions",
+								"server-error"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Feign Client Errors",
+			"item": [
+				{
+					"name": "Feign Upstream Failure (502 Gateway)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/demo/feign/upstream-failure",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"feign",
+								"upstream-failure"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Feign Upstream Not Found (404 Propagation)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/demo/feign/upstream-notfound",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"feign",
+								"upstream-notfound"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}

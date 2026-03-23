@@ -23,6 +23,7 @@
 
     <modules>
         <module>starter</module>
+        <module>sample-project</module>
     </modules>
 
     <build>

@@ -1,11 +1,10 @@
 package io.github.saul789.api.standard.exception;
 
-import io.github.saul789.api.standard.model.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.ProblemDetail;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -30,23 +29,25 @@ class FeignExceptionHandlerTest {
         when(ex.getMessage()).thenReturn("Not Found");
         when(request.getRequestURI()).thenReturn("/test");
 
-        ResponseEntity<ApiResponse<Object>> response = feignExceptionHandler.handleFeignException(ex, request);
+        ProblemDetail response = feignExceptionHandler.handleFeignException(ex, request);
 
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("External client error: Not Found", response.getBody().getMessage());
+        assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatus());
+        assertEquals("External client error: Not Found", response.getDetail());
     }
 
     @Test
     void shouldFallbackToBadRequestWhenStatusUnknown() {
         feign.FeignException ex = mock(feign.FeignException.class);
 
+        // 499 is not a standard HttpStatus that Spring Boot might resolve easily in all
+        // versions
         when(ex.status()).thenReturn(499);
         when(ex.getMessage()).thenReturn("Custom error");
         when(request.getRequestURI()).thenReturn("/test");
 
-        ResponseEntity<ApiResponse<Object>> response = feignExceptionHandler.handleFeignException(ex, request);
+        ProblemDetail response = feignExceptionHandler.handleFeignException(ex, request);
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
     }
 
     @Test
@@ -56,9 +57,9 @@ class FeignExceptionHandlerTest {
         when(ex.status()).thenReturn(500);
         when(request.getRequestURI()).thenReturn("/test");
 
-        ResponseEntity<ApiResponse<Object>> response = feignExceptionHandler.handleFeignException(ex, request);
+        ProblemDetail response = feignExceptionHandler.handleFeignException(ex, request);
 
-        assertEquals(HttpStatus.BAD_GATEWAY, response.getStatusCode());
+        assertEquals(HttpStatus.BAD_GATEWAY.value(), response.getStatus());
     }
 
     @Test
@@ -68,9 +69,9 @@ class FeignExceptionHandlerTest {
         when(ex.status()).thenReturn(200);
         when(request.getRequestURI()).thenReturn("/test");
 
-        ResponseEntity<ApiResponse<Object>> response = feignExceptionHandler.handleFeignException(ex, request);
+        ProblemDetail response = feignExceptionHandler.handleFeignException(ex, request);
 
         // Va al ELSE
-        assertEquals(HttpStatus.BAD_GATEWAY, response.getStatusCode());
+        assertEquals(HttpStatus.BAD_GATEWAY.value(), response.getStatus());
     }
 }

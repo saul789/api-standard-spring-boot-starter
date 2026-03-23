@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @SpringBootTest(classes = ApiStandardAutoConfiguration.class)
 @Import({ GlobalExceptionHandler.class })
@@ -72,8 +73,14 @@ class GlobalExceptionHandlerTest {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found");
         }
 
+        @GetMapping("/annotated")
+        public void annotated() {
+            throw new CustomAnnotatedException();
+        }
+
         @PostMapping("/validation")
         public void validation(@Valid @RequestBody DummyDto dto) {
+            // Se usa para disparar MethodArgumentNotValidException en los tests
         }
 
         @GetMapping("/constraint")
@@ -164,4 +171,100 @@ class GlobalExceptionHandlerTest {
 
         org.junit.jupiter.api.Assertions.assertEquals("Error", problem.getTitle());
     }
+
+    @Test
+    void shouldDirectlyHandleNoResourceFound() {
+        var ex = new org.springframework.web.servlet.resource.NoResourceFoundException(
+                org.springframework.http.HttpMethod.GET,
+                "/path",
+                null);
+
+        when(request.getRequestURI()).thenReturn("/path");
+
+        ProblemDetail detail = globalExceptionHandler.handleNoResourceFoundException(ex, request);
+
+        org.junit.jupiter.api.Assertions.assertEquals(404, detail.getStatus());
+        org.junit.jupiter.api.Assertions.assertEquals("El recurso solicitado no fue encontrado.", detail.getDetail());
+    }
+
+    @Test
+    void shouldHandleEnrichWithValidStatusButNoTitleTranslation() {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.PAYMENT_REQUIRED);
+        when(request.getRequestURI()).thenReturn("/payment");
+
+        ReflectionTestUtils.invokeMethod(globalExceptionHandler, "enrich", problem, request, "error.test",
+                "UNKNOWN_CODE");
+
+        // Debería tomar el Reason Phrase de HttpStatus ("Payment Required")
+        org.junit.jupiter.api.Assertions.assertEquals("Payment Required", problem.getTitle());
+    }
+
+    @Test
+    void shouldHandleValidationBodyError() throws Exception {
+        mockMvc.perform(post("/validation")
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .content("{\"name\": \"\"}"))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.errors[0].field").value("name"))
+                .andExpect(jsonPath("$.errors[0].message").exists());
+    }
+
+    @Test
+    void shouldHandleMethodNotAllowed() throws Exception {
+        // Intentamos un POST en un endpoint que solo permite GET
+        mockMvc.perform(post("/business"))
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(jsonPath("$.code").value("METHOD_NOT_ALLOWED"));
+    }
+
+    @Test
+    void shouldHandleHttpMediaTypeNotSupported() throws Exception {
+        // Enviamos un Content-Type que el controller no espera
+        mockMvc.perform(post("/validation")
+                .contentType("application/xml")
+                .content("<xml></xml>"))
+                .andExpect(status().isUnsupportedMediaType());
+    }
+
+    @Test
+    void shouldHandleResponseStatusException() throws Exception {
+        mockMvc.perform(get("/response-status"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("NOT_FOUND"));
+    }
+
+    @Test
+    void shouldHandleAccessDeniedException() throws Exception {
+        // Simulamos la excepción de Spring Security por nombre
+        mockMvc = MockMvcBuilders.standaloneSetup(new SecurityTestController())
+                .setControllerAdvice(globalExceptionHandler)
+                .build();
+
+        mockMvc.perform(get("/access-denied"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FORBIDDEN"))
+                .andExpect(jsonPath("$.detail").value("error.forbidden"));
+    }
+
+    @RestController
+    static class SecurityTestController {
+        @GetMapping("/access-denied")
+        public void accessDenied() {
+            throw new org.springframework.security.access.AccessDeniedException("Denied");
+        }
+    }
+
+    @org.springframework.web.bind.annotation.ResponseStatus(HttpStatus.CONFLICT)
+    static class CustomAnnotatedException extends RuntimeException {
+    }
+
+    @Test
+    void shouldHandleAnnotatedException() throws Exception {
+        mockMvc.perform(get("/annotated"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("BAD_REQUEST")); // 409 is in 4xx range, so BAD_REQUEST as default for non-explicit 4xx
+    }
+
 }

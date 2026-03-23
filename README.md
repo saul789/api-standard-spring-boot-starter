@@ -5,7 +5,8 @@ A comprehensive, "plug and play" Spring Boot starter library designed to standar
 ## 🚀 Features
 
 - **Standardized API Responses:** Automatically wraps all controller responses in a consistent JSON envelope, maintaining a clean and uniform API contract.
-- **Robust Error Handling (RFC 9457):** Out-of-the-box global exception handling implementing Spring Boot 4's `ProblemDetail` specification. Includes built-in support for validation errors, business exceptions, and generic server errors.
+- **Robust Error Handling (RFC 9457):** Out-of-the-box global exception handling implementing Spring Boot 3+ `ProblemDetail` specification. Includes built-in support for validation errors, business exceptions, and generic server errors.
+- **Intelligent Exception Mapping:** Automatically respects `@ResponseStatus` annotations and `ResponseStatusException`. Resolves appropriate machine-readable `ErrorCode` based on HTTP status (e.g., 404 -> `NOT_FOUND`).
 - **OpenFeign Integration:** Seamlessly handles Feign client exceptions, propagating error details correctly across microservices.
 - **Trace Context Propagation:** Automatically generates and propagates a `traceId` for every incoming request. Intercepts logs using MDC (Mapped Diagnostic Context) to facilitate distributed tracing.
 - **i18n Support:** Fully compatible with Spring's `MessageSource` for localizing error messages.
@@ -78,21 +79,51 @@ public class UserService {
 
 **Client Error Response (HTTP 400):**
 ```json
-{
-    "type": "about:blank",
-    "title": "Bad Request",
-    "status": 400,
-    "detail": "Email already exists",
-    "instance": "/api/users",
-    "code": "BAD_REQUEST",
-    "timestamp": "2023-10-25T10:05:00Z",
-    "traceId": "5f9b3b8c-1234-4a56-b789-abcdef123456"
-}
-```
+ {
+     "type": "about:blank",
+     "title": "Bad Request",
+     "status": 400,
+     "detail": "Email already exists",
+     "instance": "/api/users",
+     "code": "BAD_REQUEST",
+     "timestamp": "2023-10-25T10:05:00Z",
+     "traceId": "5f9b3b8c-1234-4a56-b789-abcdef123456"
+ }
+ ```
 
 _Notice the inclusion of the `traceId` which helps with debugging and log tracing!_
 
-### 3. Validation Errors (`@Valid` / `@Validated`)
+### 3. Annotation-based Exceptions (`@ResponseStatus`)
+
+The library is intelligent enough to respect your own custom exceptions decorated with `@ResponseStatus`. It will even map the correct `code` based on the status provided.
+
+**Custom Exception:**
+```java
+@ResponseStatus(HttpStatus.CONFLICT)
+public class UserAlreadyExistsException extends RuntimeException {
+    public UserAlreadyExistsException(String message) {
+        super(message);
+    }
+}
+```
+
+**Resulting JSON:**
+```json
+{
+    "title": "Conflict",
+    "status": 409,
+    "detail": "User with email john@doe.com already exists",
+    "code": "BAD_REQUEST",
+    "timestamp": "...",
+    "traceId": "..."
+}
+```
+
+### 4. ResponseStatusException
+
+Direct use of `ResponseStatusException` is also fully supported and localized.
+
+### 5. Validation Errors (`@Valid` / `@Validated`)
 
 If you use annotation-based validation for your request payloads, the library automatically formats the field errors in a standardized way:
 ```json
@@ -114,7 +145,7 @@ If you use annotation-based validation for your request payloads, the library au
 }
 ```
 
-### 4. Trace Context & Logging
+### 6. Trace Context & Logging
 
 The included filters (`TraceContextFilter` and `RequestLoggingFilter`) automatically:
 1. Extract an incoming `traceId` header or generate a new UUID.
@@ -135,3 +166,8 @@ Contributions are welcome! Please open an issue or submit a Pull Request if you 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 📮 Postman Collection
+
+Para facilitar las pruebas, se incluye una colección de Postman en:
+`sample-project/postman/spring-boot-starter-api-standard.postman_collection.json`

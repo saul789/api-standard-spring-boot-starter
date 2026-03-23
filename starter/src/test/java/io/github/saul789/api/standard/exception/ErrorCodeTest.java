@@ -16,7 +16,11 @@ class ErrorCodeTest {
                         ErrorCode.INTERNAL_ERROR,
                         ErrorCode.VALIDATION_ERROR,
                         ErrorCode.BAD_REQUEST,
-                        ErrorCode.NOT_FOUND);
+                        ErrorCode.NOT_FOUND,
+                        ErrorCode.METHOD_NOT_ALLOWED,
+                        ErrorCode.UNSUPPORTED_MEDIA_TYPE,
+                        ErrorCode.UNAUTHORIZED,
+                        ErrorCode.FORBIDDEN);
     }
 
     @Test
