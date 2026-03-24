@@ -1,4 +1,5 @@
 package io.github.saul789.api.standard.exception;
+import io.github.saul789.api.standard.ApiStandardProperties;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +18,8 @@ class FeignExceptionHandlerTest {
 
     @BeforeEach
     void setUp() {
-        feignExceptionHandler = new FeignExceptionHandler();
+        ApiStandardProperties properties = new ApiStandardProperties();
+        feignExceptionHandler = new FeignExceptionHandler(properties);
         request = mock(HttpServletRequest.class);
     }
 

@@ -1,43 +1,55 @@
 package io.github.saul789.api.standard.exception;
 
 /**
- * Canonical error codes surfaced in API responses.
+ * Definition of canonical error codes for the API.
  *
- * <p>Each constant is serialised as-is into the {@code "code"} extension
- * property of an RFC 9457 {@code ProblemDetail} response, allowing API
- * consumers to branch on machine-readable values rather than HTTP status
- * codes or localised messages.
+ * <p>These codes provide a machine-readable identifier for specific error conditions,
+ * allowing clients to handle errors programmatically without relying on localized messages.
  */
 public enum ErrorCode {
-
-    /** An unexpected condition prevented the server from fulfilling the request. */
+    /** Generic internal server error (500). */
     INTERNAL_ERROR,
 
-    /** One or more request fields failed constraint validation. */
-    VALIDATION_ERROR,
-
-    /** The request was syntactically or semantically invalid. */
+    /** Client sent an invalid request or parameters (400). */
     BAD_REQUEST,
 
-    /** The requested resource could not be found. */
-    NOT_FOUND,
+    /** Input validation failed (400). */
+    VALIDATION_ERROR,
 
-    /** The HTTP method is not supported for this endpoint. */
-    METHOD_NOT_ALLOWED,
-
-    /** The media type is not supported. */
-    UNSUPPORTED_MEDIA_TYPE,
-
-    /** Client is not authenticated. */
+    /** Authentication is required (401). */
     UNAUTHORIZED,
 
-    /** Client is authenticated but lacks required permissions. */
-    FORBIDDEN;
+    /** Client lacks permissions for the resource (403). */
+    FORBIDDEN,
+
+    /** Resource not found (404). */
+    NOT_FOUND,
+
+    /** HTTP method not allowed for the URI (405). */
+    METHOD_NOT_ALLOWED,
+
+    /** Unsupported media type in request (415). */
+    UNSUPPORTED_MEDIA_TYPE,
+
+    /** Resource conflict or optimistic locking failure (409). */
+    CONFLICT,
+
+    /** Client has sent too many requests (429). */
+    TOO_MANY_REQUESTS,
+
+    /** Upstream server returned an invalid response (502). */
+    BAD_GATEWAY,
+
+    /** Upstream server is currently unavailable (503). */
+    SERVICE_UNAVAILABLE,
+
+    /** Upstream server timed out (504). */
+    GATEWAY_TIMEOUT;
 
     /**
-     * Resolves a default {@link ErrorCode} based on an HTTP status code.
+     * Resolves a sensible default {@link ErrorCode} based on an HTTP status code.
      *
-     * @param status the HTTP status to resolve from
+     * @param status the HTTP status (e.g., 404, 500)
      * @return the most appropriate {@link ErrorCode}
      */
     public static ErrorCode fromStatus(int status) {
@@ -47,8 +59,23 @@ public enum ErrorCode {
             case 403 -> FORBIDDEN;
             case 404 -> NOT_FOUND;
             case 405 -> METHOD_NOT_ALLOWED;
+            case 409 -> CONFLICT;
             case 415 -> UNSUPPORTED_MEDIA_TYPE;
+            case 429 -> TOO_MANY_REQUESTS;
+            case 502 -> BAD_GATEWAY;
+            case 503 -> SERVICE_UNAVAILABLE;
+            case 504 -> GATEWAY_TIMEOUT;
             default -> (status >= 400 && status < 500) ? BAD_REQUEST : INTERNAL_ERROR;
         };
+    }
+
+    /**
+     * Converts the enum name to kebab-case (e.g., INTERNAL_ERROR -> internal-error).
+     * Useful for generating standardized URIs for problem types.
+     *
+     * @return the kebab-case version of the error code
+     */
+    public String toKebabCase() {
+        return this.name().toLowerCase().replace('_', '-');
     }
 }

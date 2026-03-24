@@ -71,24 +71,27 @@ import io.github.saul789.api.standard.exception.ErrorCode;
 @Service
 public class UserService {
     public void validateUser(String email) {
-        // ...
-        throw new BusinessException(ErrorCode.BAD_REQUEST, "Email already exists");
+        // Option 1: Full control with explicit ErrorCode
+        throw new BusinessException(ErrorCode.BAD_REQUEST, "error.user_exists", HttpStatus.BAD_REQUEST);
+
+        // Option 2: Simple usage (ErrorCode resolved from status 400 -> BAD_REQUEST)
+        // throw new BusinessException("Email already exists", HttpStatus.BAD_REQUEST);
     }
 }
 ```
 
 **Client Error Response (HTTP 400):**
 ```json
- {
-     "type": "about:blank",
-     "title": "Bad Request",
-     "status": 400,
-     "detail": "Email already exists",
-     "instance": "/api/users",
-     "code": "BAD_REQUEST",
-     "timestamp": "2023-10-25T10:05:00Z",
-     "traceId": "5f9b3b8c-1234-4a56-b789-abcdef123456"
- }
+{
+    "type": "urn:problem-type:bad-request",
+    "title": "Bad Request",
+    "status": 400,
+    "detail": "Email already exists",
+    "instance": "/api/users",
+    "code": "BAD_REQUEST",
+    "timestamp": "2023-10-25T10:05:00Z",
+    "traceId": "5f9b3b8c-1234-4a56-b789-abcdef123456"
+}
  ```
 
 _Notice the inclusion of the `traceId` which helps with debugging and log tracing!_
@@ -110,25 +113,46 @@ public class UserAlreadyExistsException extends RuntimeException {
 **Resulting JSON:**
 ```json
 {
+    "type": "urn:problem-type:conflict",
     "title": "Conflict",
     "status": 409,
     "detail": "User with email john@doe.com already exists",
-    "code": "BAD_REQUEST",
+    "code": "CONFLICT",
     "timestamp": "...",
     "traceId": "..."
 }
 ```
 
-### 4. ResponseStatusException
+### 4. Custom documentation URLs
+
+You can override the default URN by providing a custom documentation URL:
+
+```java
+// Option 1: Using BusinessException / ProblemException constructor
+throw new BusinessException("No funds", HttpStatus.BAD_REQUEST, "https://docs.myapi.com/errors/insufficient-funds");
+
+// Option 2: Using @ProblemType annotation on your custom exception
+@ProblemType("https://docs.myapi.com/errors/custom-error")
+public class MySpecificException extends RuntimeException { ... }
+
+// Option 3: Global configuration in application.yml
+api:
+  standard:
+    errors:
+      type-overrides:
+        BAD_REQUEST: "https://docs.myapi.com/errors/general-bad-request"
+```
+
+### 5. ResponseStatusException
 
 Direct use of `ResponseStatusException` is also fully supported and localized.
 
-### 5. Validation Errors (`@Valid` / `@Validated`)
+### 6. Validation Errors (`@Valid` / `@Validated`)
 
 If you use annotation-based validation for your request payloads, the library automatically formats the field errors in a standardized way:
 ```json
 {
-    "type": "about:blank",
+    "type": "urn:problem-type:validation-error",
     "title": "Validation Error",
     "status": 400,
     "detail": "error.validation.body",
@@ -145,7 +169,22 @@ If you use annotation-based validation for your request payloads, the library au
 }
 ```
 
-### 6. Trace Context & Logging
+### 7. OpenFeign Integration
+
+The library automatically handles exceptions thrown by Feign clients. If a downstream service returns a `ProblemDetail` or a generic error, the starter intercepts it and translates it to the standardized format, preserving the HTTP status and providing a `BAD_GATEWAY` or `GATEWAY_TIMEOUT` code if appropriate.
+
+### 8. i18n Support
+
+The `detail` and `title` fields in the `ProblemDetail` response are automatically translated using Spring's `MessageSource`. The library looks for keys in your `messages.properties` following the pattern `error.<CODE_NAME>`.
+
+Example `messages.properties`:
+```properties
+error.BAD_REQUEST=Solicitud Inválida
+error.NOT_FOUND=Recurso no encontrado
+error.user_exists=El usuario ya existe en el sistema
+```
+
+### 9. Trace Context & Logging
 
 The included filters (`TraceContextFilter` and `RequestLoggingFilter`) automatically:
 1. Extract an incoming `traceId` header or generate a new UUID.

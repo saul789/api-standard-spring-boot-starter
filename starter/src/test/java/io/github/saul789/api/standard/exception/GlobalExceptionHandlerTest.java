@@ -1,4 +1,6 @@
 package io.github.saul789.api.standard.exception;
+import io.github.saul789.api.standard.ApiStandardProperties;
+import org.springframework.context.MessageSource;
 
 import io.github.saul789.api.standard.ApiStandardAutoConfiguration;
 import jakarta.validation.ConstraintViolation;
@@ -40,11 +42,15 @@ class GlobalExceptionHandlerTest {
 
     @Autowired
     private GlobalExceptionHandler globalExceptionHandler;
+    private MessageSource messageSource;
 
     private jakarta.servlet.http.HttpServletRequest request;
 
     @BeforeEach
     void setUp() {
+        this.messageSource = mock(MessageSource.class);
+        ApiStandardProperties properties = new ApiStandardProperties();
+        this.globalExceptionHandler = new GlobalExceptionHandler(this.messageSource, properties);
         this.mockMvc = MockMvcBuilders.standaloneSetup(new TestController())
                 .setControllerAdvice(globalExceptionHandler)
                 .build();
@@ -167,7 +173,7 @@ class GlobalExceptionHandlerTest {
         ProblemDetail problem = ProblemDetail.forStatus(600);
         when(request.getRequestURI()).thenReturn("/test-weird-status");
 
-        ReflectionTestUtils.invokeMethod(globalExceptionHandler, "enrich", problem, request, "error.key", "TEST_CODE");
+        ReflectionTestUtils.invokeMethod(globalExceptionHandler, "enrich", problem, request, "error.key", "TEST_CODE", null);
 
         org.junit.jupiter.api.Assertions.assertEquals("Error", problem.getTitle());
     }
@@ -181,6 +187,9 @@ class GlobalExceptionHandlerTest {
 
         when(request.getRequestURI()).thenReturn("/path");
 
+        when(messageSource.getMessage(org.mockito.ArgumentMatchers.eq("error.not_found"), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq("error.not_found"), org.mockito.ArgumentMatchers.any()))
+                .thenReturn("El recurso solicitado no fue encontrado.");
+
         ProblemDetail detail = globalExceptionHandler.handleNoResourceFoundException(ex, request);
 
         org.junit.jupiter.api.Assertions.assertEquals(404, detail.getStatus());
@@ -193,7 +202,7 @@ class GlobalExceptionHandlerTest {
         when(request.getRequestURI()).thenReturn("/payment");
 
         ReflectionTestUtils.invokeMethod(globalExceptionHandler, "enrich", problem, request, "error.test",
-                "UNKNOWN_CODE");
+                "UNKNOWN_CODE", null);
 
         // Debería tomar el Reason Phrase de HttpStatus ("Payment Required")
         org.junit.jupiter.api.Assertions.assertEquals("Payment Required", problem.getTitle());

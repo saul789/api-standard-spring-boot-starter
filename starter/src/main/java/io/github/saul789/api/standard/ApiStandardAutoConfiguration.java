@@ -7,6 +7,7 @@ import io.github.saul789.api.standard.filter.TraceContextFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -21,16 +22,12 @@ import org.springframework.context.support.ResourceBundleMessageSource;
  *   <li>{@link RequestLoggingFilter} — structured per-request access log</li>
  *   <li>{@link GlobalExceptionHandler} — RFC 9457 exception-to-response mapping</li>
  *   <li>{@link MessageSource} — i18n resolver backed by {@code i18n/messages} and
- *       {@code messages} resource bundles with UTF-8 encoding and no system-locale
- *       fallback</li>
+ *       {@code messages} resource bundles</li>
  * </ul>
- *
- * <p>Uses {@link AutoConfiguration} (preferred over {@code @Configuration} in
- * Spring Boot 3+) and {@link ConditionalOnWebApplication} to remain inert in
- * non-web or reactive contexts.
  */
 @AutoConfiguration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+@EnableConfigurationProperties(ApiStandardProperties.class)
 public class ApiStandardAutoConfiguration {
 
     /** Registers the W3C Trace Context filter. */
@@ -51,31 +48,31 @@ public class ApiStandardAutoConfiguration {
      * Registers the global exception handler.
      *
      * @param messageSource the i18n source used for title and detail resolution
+     * @param properties    configuration properties for the starter
      * @return a fully configured {@link GlobalExceptionHandler}
      */
     @Bean
     @ConditionalOnMissingBean
-    public GlobalExceptionHandler globalExceptionHandler(MessageSource messageSource) {
-        return new GlobalExceptionHandler(messageSource);
+    public GlobalExceptionHandler globalExceptionHandler(MessageSource messageSource, ApiStandardProperties properties) {
+        return new GlobalExceptionHandler(messageSource, properties);
     }
 
     /**
      * Registers the Feign-specific exception handler if Feign is on the classpath.
+     *
+     * @param properties configuration properties for the starter
+     * @return a fully configured {@link FeignExceptionHandler}
      */
     @Bean
     @ConditionalOnMissingBean
     @org.springframework.boot.autoconfigure.condition.ConditionalOnClass(name = "feign.FeignException")
-    public FeignExceptionHandler feignExceptionHandler() {
-        return new FeignExceptionHandler();
+    public FeignExceptionHandler feignExceptionHandler(ApiStandardProperties properties) {
+        return new FeignExceptionHandler(properties);
     }
 
     /**
      * Registers a {@link MessageSource} backed by the {@code i18n/messages} and
      * {@code messages} resource bundles.
-     *
-     * <p>Only activated when the application does not already define a
-     * {@code MessageSource} bean. System-locale fallback is disabled to ensure
-     * the base bundle is always used when no locale-specific file matches.
      *
      * @return a UTF-8 {@link ResourceBundleMessageSource}
      */

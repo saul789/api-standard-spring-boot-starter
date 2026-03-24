@@ -260,6 +260,113 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "5. RFC 9457 Validation",
+			"item": [
+				{
+					"name": "Case 1: Default URN Type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"RFC 9457: Type field matches your URN standard\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.type).to.include(\"urn:problem-type:\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/demo/exceptions/business-logic",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"exceptions",
+								"business-logic"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Case 2: Specific Client URL (Override)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"RFC 9457: Type field is the CLIENT documentation URL\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.type).to.equal(\"https://docs.saul.dev/errors/validation-guide\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/demo/exceptions/problem-external",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"exceptions",
+								"problem-external"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Case 3: Hidden Type (about:blank)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"RFC 9457: Type field is absent when using about:blank\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.type).to.be.undefined;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/demo/exceptions/business-logic",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"exceptions",
+								"business-logic"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"event": [
