@@ -1,4 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <FindBugsFilter>
+    <Match>
+        <Class name="io.github.saul789.api.standard.ApiStandardProperties" />
+        <Bug pattern="EI_EXPOSE_REP" />
+    </Match>
+    
     <Match>
         <Class name="io.github.saul789.api.standard.filter.TraceContextFilter"/>
         <Method name="doFilterInternal"/>
