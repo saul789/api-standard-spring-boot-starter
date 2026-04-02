@@ -1,4 +1,5 @@
 package io.github.saul789.api.standard.exception;
+
 import io.github.saul789.api.standard.ApiStandardProperties;
 import org.springframework.context.MessageSource;
 
@@ -7,16 +8,15 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,21 +40,32 @@ class GlobalExceptionHandlerTest {
 
     private MockMvc mockMvc;
 
-    @Autowired
     private GlobalExceptionHandler globalExceptionHandler;
     private MessageSource messageSource;
+    private ProblemDetailService problemDetailService;
 
-    private jakarta.servlet.http.HttpServletRequest request;
+    private HttpServletRequest request;
 
     @BeforeEach
     void setUp() {
         this.messageSource = mock(MessageSource.class);
+        // Default behavior: return the defaultMessage (arg 2)
+        when(messageSource.getMessage(org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.any()))
+                .thenAnswer(invocation -> invocation.getArgument(2));
+
         ApiStandardProperties properties = new ApiStandardProperties();
-        this.globalExceptionHandler = new GlobalExceptionHandler(this.messageSource, properties);
+        java.util.List<ProblemDetailEnricher> enrichers = java.util.List.of(
+                new StandardMetadataEnricher(),
+                new TraceIdEnricher());
+        this.problemDetailService = new ProblemDetailService(messageSource, properties, enrichers);
+        this.globalExceptionHandler = new GlobalExceptionHandler(this.messageSource, this.problemDetailService);
         this.mockMvc = MockMvcBuilders.standaloneSetup(new TestController())
                 .setControllerAdvice(globalExceptionHandler)
                 .build();
-        this.request = mock(jakarta.servlet.http.HttpServletRequest.class);
+        this.request = mock(HttpServletRequest.class);
     }
 
     @AfterEach
@@ -164,18 +175,17 @@ class GlobalExceptionHandlerTest {
     @Test
     void shouldHandleWeirdHttpStatus() {
         when(request.getRequestURI()).thenReturn("/weird");
-        ProblemDetail detail = globalExceptionHandler.handleGenericException(new RuntimeException("test"), request);
+        ProblemDetail detail = globalExceptionHandler.handleGenericException(new RuntimeException("test"), request,
+                java.util.Locale.ENGLISH);
         org.junit.jupiter.api.Assertions.assertNotNull(detail);
     }
 
     @Test
-    void shouldHandleInvalidHttpStatusToCoverElseBranch() {
-        ProblemDetail problem = ProblemDetail.forStatus(600);
-        when(request.getRequestURI()).thenReturn("/test-weird-status");
+    void shouldCreateProblemThroughService() {
+        ProblemDetail detail = problemDetailService.createProblem(
+                HttpStatus.BAD_REQUEST, request, "error.key", "TEST_CODE", null, java.util.Locale.ENGLISH);
 
-        ReflectionTestUtils.invokeMethod(globalExceptionHandler, "enrich", problem, request, "error.key", "TEST_CODE", null);
-
-        org.junit.jupiter.api.Assertions.assertEquals("Error", problem.getTitle());
+        org.junit.jupiter.api.Assertions.assertEquals("Bad Request", detail.getTitle());
     }
 
     @Test
@@ -187,22 +197,24 @@ class GlobalExceptionHandlerTest {
 
         when(request.getRequestURI()).thenReturn("/path");
 
-        when(messageSource.getMessage(org.mockito.ArgumentMatchers.eq("error.not_found"), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq("error.not_found"), org.mockito.ArgumentMatchers.any()))
+        when(messageSource.getMessage(org.mockito.ArgumentMatchers.eq("error.not_found"),
+                org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq("error.not_found"),
+                org.mockito.ArgumentMatchers.any()))
                 .thenReturn("El recurso solicitado no fue encontrado.");
 
-        ProblemDetail detail = globalExceptionHandler.handleNoResourceFoundException(ex, request);
+        ProblemDetail detail = globalExceptionHandler.handleNoResourceFoundException(ex, request,
+                java.util.Locale.ENGLISH);
 
         org.junit.jupiter.api.Assertions.assertEquals(404, detail.getStatus());
         org.junit.jupiter.api.Assertions.assertEquals("El recurso solicitado no fue encontrado.", detail.getDetail());
     }
 
     @Test
-    void shouldHandleEnrichWithValidStatusButNoTitleTranslation() {
-        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.PAYMENT_REQUIRED);
+    void shouldHandleServiceEnrichWithValidStatusButNoTitleTranslation() {
         when(request.getRequestURI()).thenReturn("/payment");
 
-        ReflectionTestUtils.invokeMethod(globalExceptionHandler, "enrich", problem, request, "error.test",
-                "UNKNOWN_CODE", null);
+        ProblemDetail problem = problemDetailService.createProblem(
+                HttpStatus.PAYMENT_REQUIRED, request, "error.test", "UNKNOWN_CODE", null, java.util.Locale.ENGLISH);
 
         // Debería tomar el Reason Phrase de HttpStatus ("Payment Required")
         org.junit.jupiter.api.Assertions.assertEquals("Payment Required", problem.getTitle());
@@ -273,8 +285,7 @@ class GlobalExceptionHandlerTest {
     void shouldHandleAnnotatedException() throws Exception {
         mockMvc.perform(get("/annotated"))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("BAD_REQUEST")); // 409 is in 4xx range, so BAD_REQUEST as default
-                                                                     // for non-explicit 4xx
+                .andExpect(jsonPath("$.code").value("CONFLICT"));
     }
 
 }

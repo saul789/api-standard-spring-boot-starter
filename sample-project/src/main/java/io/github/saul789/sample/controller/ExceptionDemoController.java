@@ -53,4 +53,32 @@ public class ExceptionDemoController {
     public void throwResponseStatus() {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recurso no encontrado.");
     }
+
+    /**
+     * Muestra la traducción automática si el mensaje coincide con una clave en messages.properties.
+     * Si enviamos Accept-Language: es, se traducirá usando la clave 'error.business.default'.
+     */
+    @GetMapping("/i18n-key")
+    public void throwI18nKey() {
+        // 'error.business.default' está en messages.properties y messages_es.properties
+        throw new BusinessException(ErrorCode.BAD_REQUEST, "error.business.default", HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Muestra que si el texto NO es una clave, se devuelve tal cual (personalización total del cliente).
+     */
+    @GetMapping("/custom-message")
+    public void throwCustomMessage() {
+        throw new BusinessException(ErrorCode.BAD_REQUEST, "Este es un mensaje totalmente personalizado que no está en los properties.", HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Muestra que el cliente puede definir sus propios mensajes en su PROPIO 'messages.properties'
+     * (fuera del starter) y la librería los resolverá correctamente.
+     */
+    @GetMapping("/client-key")
+    public void throwClientKey() {
+        // 'sample.error.limit_reached' está definido en sample-project/src/main/resources/messages.properties
+        throw new BusinessException(ErrorCode.FORBIDDEN, "sample.error.limit_reached", HttpStatus.FORBIDDEN);
+    }
 }

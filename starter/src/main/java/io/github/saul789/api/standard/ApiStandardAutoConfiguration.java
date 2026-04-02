@@ -4,12 +4,14 @@ import io.github.saul789.api.standard.exception.FeignExceptionHandler;
 import io.github.saul789.api.standard.exception.GlobalExceptionHandler;
 import io.github.saul789.api.standard.filter.RequestLoggingFilter;
 import io.github.saul789.api.standard.filter.TraceContextFilter;
+import io.github.saul789.api.standard.exception.*;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.support.ResourceBundleMessageSource;
 
 /**
@@ -52,9 +54,27 @@ public class ApiStandardAutoConfiguration {
      * @return a fully configured {@link GlobalExceptionHandler}
      */
     @Bean
-    @ConditionalOnMissingBean
-    public GlobalExceptionHandler globalExceptionHandler(MessageSource messageSource, ApiStandardProperties properties) {
-        return new GlobalExceptionHandler(messageSource, properties);
+    @ConditionalOnMissingBean(GlobalExceptionHandler.class)
+    public GlobalExceptionHandler globalExceptionHandler(MessageSource messageSource, ProblemDetailService problemDetailService) {
+        return new GlobalExceptionHandler(messageSource, problemDetailService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ProblemDetailService.class)
+    public ProblemDetailService problemDetailService(MessageSource messageSource, 
+                                                     ApiStandardProperties properties, 
+                                                     java.util.List<ProblemDetailEnricher> enrichers) {
+        return new ProblemDetailService(messageSource, properties, enrichers);
+    }
+
+    @Bean
+    public ProblemDetailEnricher traceIdEnricher() {
+        return new TraceIdEnricher();
+    }
+
+    @Bean
+    public ProblemDetailEnricher standardMetadataEnricher() {
+        return new StandardMetadataEnricher();
     }
 
     /**
@@ -66,8 +86,8 @@ public class ApiStandardAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @org.springframework.boot.autoconfigure.condition.ConditionalOnClass(name = "feign.FeignException")
-    public FeignExceptionHandler feignExceptionHandler(ApiStandardProperties properties) {
-        return new FeignExceptionHandler(properties);
+    public FeignExceptionHandler feignExceptionHandler(ApiStandardProperties properties, MessageSource messageSource) {
+        return new FeignExceptionHandler(properties, messageSource);
     }
 
     /**
@@ -77,8 +97,8 @@ public class ApiStandardAutoConfiguration {
      * @return a UTF-8 {@link ResourceBundleMessageSource}
      */
     @Bean
-    @ConditionalOnMissingBean(MessageSource.class)
-    public MessageSource messageSource() {
+    @Primary
+    public MessageSource apiStandardMessageSource() {
         ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
         messageSource.setBasenames("i18n/messages", "messages");
         messageSource.setDefaultEncoding("UTF-8");

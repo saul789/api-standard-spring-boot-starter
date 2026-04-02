@@ -367,6 +367,184 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "6. Customization & i18n",
+			"item": [
+				{
+					"name": "I18n Key (Spanish)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept-Language",
+								"value": "es",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/demo/exceptions/i18n-key",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"exceptions",
+								"i18n-key"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Custom Text (No Key)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/demo/exceptions/custom-message",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"exceptions",
+								"custom-message"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Client-Specific Key (from Sample Project)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept-Language",
+								"value": "es",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/demo/exceptions/client-key",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"exceptions",
+								"client-key"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "7. User Audited (Full Example)",
+			"item": [
+				{
+					"name": "Create User (Success)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Saul\",\n    \"email\": \"saul@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/demo/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create User (Validation Error)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept-Language",
+								"value": "es",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"\",\n    \"email\": \"invalid-email\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/demo/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create User (Conflict - User Exists)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept-Language",
+								"value": "es",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"test@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/demo/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"event": [

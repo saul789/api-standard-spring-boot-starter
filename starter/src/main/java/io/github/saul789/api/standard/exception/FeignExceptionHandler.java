@@ -25,9 +25,11 @@ import java.time.Instant;
 @ConditionalOnClass(name = "feign.FeignException")
 public class FeignExceptionHandler {
     private final ApiStandardProperties properties;
+    private final org.springframework.context.MessageSource messageSource;
 
-    public FeignExceptionHandler(ApiStandardProperties properties) {
+    public FeignExceptionHandler(ApiStandardProperties properties, org.springframework.context.MessageSource messageSource) {
         this.properties = properties;
+        this.messageSource = messageSource;
     }
 
     /**
@@ -39,7 +41,7 @@ public class FeignExceptionHandler {
      * @return the formatted ProblemDetail response
      */
     @ExceptionHandler(feign.FeignException.class)
-    public ProblemDetail handleFeignException(feign.FeignException ex, HttpServletRequest request) {
+    public ProblemDetail handleFeignException(feign.FeignException ex, HttpServletRequest request, java.util.Locale locale) {
         int externalStatus = ex.status();
         HttpStatus responseStatus = (externalStatus >= 400 && externalStatus < 500) ? HttpStatus.resolve(externalStatus)
                 : HttpStatus.BAD_GATEWAY;
@@ -50,9 +52,17 @@ public class FeignExceptionHandler {
         String codeName = errorCode.name();
 
         ProblemDetail problem = ProblemDetail.forStatus(responseStatus);
-        problem.setTitle(responseStatus.getReasonPhrase());
-        problem.setDetail(responseStatus.is4xxClientError() ? "Upstream client error: " + ex.getMessage()
-                : "Upstream service failure");
+        
+        String titleKey = "error." + codeName;
+        String defaultTitle = responseStatus.getReasonPhrase();
+        problem.setTitle(messageSource.getMessage(titleKey, null, defaultTitle, locale));
+
+        String detailKey = responseStatus.is4xxClientError() ? "error.feign.client" : "error.feign.failure";
+        String defaultDetail = responseStatus.is4xxClientError() 
+                ? "Upstream service reported client-side error: " + ex.getMessage() 
+                : "Upstream service reported server-side failure";
+        
+        problem.setDetail(messageSource.getMessage(detailKey, null, defaultDetail, locale));
         problem.setProperty("code", codeName);
 
         if (properties.getErrors().getTypeOverrides().containsKey(codeName)) {

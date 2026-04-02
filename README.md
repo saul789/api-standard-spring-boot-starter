@@ -173,15 +173,32 @@ If you use annotation-based validation for your request payloads, the library au
 
 The library automatically handles exceptions thrown by Feign clients. If a downstream service returns a `ProblemDetail` or a generic error, the starter intercepts it and translates it to the standardized format, preserving the HTTP status and providing a `BAD_GATEWAY` or `GATEWAY_TIMEOUT` code if appropriate.
 
-### 8. i18n Support
+### 8. i18n Support & Message Personalization
 
-The `detail` and `title` fields in the `ProblemDetail` response are automatically translated using Spring's `MessageSource`. The library looks for keys in your `messages.properties` following the pattern `error.<CODE_NAME>`.
+The library intelligently resolves the `detail` and `title` fields using Spring's `MessageSource` and the current `Locale` (automatically extracted from the `Accept-Language` header).
 
-Example `messages.properties`:
+#### How it works:
+1. **Title Translation:** The library always attempts to translate the title using the key `error.<CODE_NAME>`. If no translation is found, it falls back to the standard HTTP Reason Phrase.
+2. **Detail Personalization:**
+   - **Using a Key:** If the message passed to `BusinessException` is a key in your `messages.properties` (e.g., `error.low_balance`), it will be translated to the user's language.
+   - **Using Fixed Text:** If the message is NOT a key (e.g., "User 'saul' not found"), the library detects this and returns the text exactly as provided. This allows for dynamic, personalized error messages.
+
+**Example `messages_es.properties`:**
 ```properties
-error.BAD_REQUEST=Solicitud Inválida
-error.NOT_FOUND=Recurso no encontrado
-error.user_exists=El usuario ya existe en el sistema
+error.BAD_REQUEST=Petición Incorrecta
+error.business.default=Se ha violado una regla de negocio.
+```
+
+**Scenario: Throwing a key**
+```java
+throw new BusinessException(ErrorCode.BAD_REQUEST, "error.business.default", HttpStatus.BAD_REQUEST);
+// Result (Accept-Language: es) -> detail: "Se ha violado una regla de negocio."
+```
+
+**Scenario: Throwing custom text**
+```java
+throw new BusinessException(ErrorCode.BAD_REQUEST, "El usuario Saul ya tiene un plan activo", HttpStatus.BAD_REQUEST);
+// Result -> detail: "El usuario Saul ya tiene un plan activo" (No translation attempted as it's not a key)
 ```
 
 ### 9. Trace Context & Logging
@@ -210,3 +227,31 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Para facilitar las pruebas, se incluye una colección de Postman en:
 `sample-project/postman/spring-boot-starter-api-standard.postman_collection.json`
+
+---
+
+### 10. UserController Example (Audited & Standardized)
+
+To see everything in action, the `sample-project` includes a `UserController` that demonstrates the full power of the library:
+
+**Model Validation + Business Logic:**
+```java
+@PostMapping
+public String createUser(@Valid @RequestBody UserRequest request) {
+    if ("test@example.com".equals(request.email())) {
+        throw new BusinessException(
+            ErrorCode.CONFLICT, 
+            "error.user.already_exists", 
+            HttpStatus.CONFLICT,
+            "https://api.saul.dev/docs/errors/user-limits"
+        );
+    }
+    return "User created!";
+}
+```
+
+**Scenario 1: Validation Error (Empty Name)**
+Returns HTTP 400 with `code: VALIDATION_ERROR` and a list of field-specific messages from your `messages.properties`.
+
+**Scenario 2: Business Logic Error (Duplicate Email)**
+Returns HTTP 409 with `code: CONFLICT`, the translated message from `error.user.already_exists`, and the custom documentation URL in the `type` field.

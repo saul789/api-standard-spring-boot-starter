@@ -20,7 +20,12 @@ class ErrorCodeTest {
                         ErrorCode.METHOD_NOT_ALLOWED,
                         ErrorCode.UNSUPPORTED_MEDIA_TYPE,
                         ErrorCode.UNAUTHORIZED,
-                        ErrorCode.FORBIDDEN);
+                        ErrorCode.FORBIDDEN,
+                        ErrorCode.CONFLICT,
+                        ErrorCode.TOO_MANY_REQUESTS,
+                        ErrorCode.BAD_GATEWAY,
+                        ErrorCode.SERVICE_UNAVAILABLE,
+                        ErrorCode.GATEWAY_TIMEOUT);
     }
 
     @Test
