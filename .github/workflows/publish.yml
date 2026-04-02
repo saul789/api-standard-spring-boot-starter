@@ -35,7 +35,7 @@ jobs:
             dependency-check-data-${{ runner.os }}-
 
       - name: Dependency Check (Aggregate)
-        run: mvn org.owasp:dependency-check-maven:aggregate -B -Dformat=HTML -DnvdApiKey=${{ secrets.NVD_API_KEY }}
+        run: mvn org.owasp:dependency-check-maven:aggregate -B -Dformat=HTML -DnvdApiKey=${{ secrets.NVD_API_KEY }} -DsuppressionFiles=dependency-check-suppressions.xml
 
       - name: Quality Checks (SpotBugs & PMD)
         run: |
