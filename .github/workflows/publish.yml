@@ -27,7 +27,7 @@ jobs:
         run: mvn clean install -B jacoco:report
 
       - name: Dependency Check
-        run: mvn org.owasp:dependency-check-maven:check -Dformat=HTML
+        run: mvn org.owasp:dependency-check-maven:check -Dformat=HTML -DnvdApiKey=${{ secrets.NVD_API_KEY }}
 
       - name: Quality Checks (SpotBugs & PMD)
         run: |
