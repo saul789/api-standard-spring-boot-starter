@@ -14,7 +14,7 @@
 
     <groupId>io.github.saul789</groupId>
     <artifactId>spring-boot-starter-api-standard</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -25,6 +25,16 @@
         <module>starter</module>
         <module>sample-project</module>
     </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>commons-fileupload</groupId>
+                <artifactId>commons-fileupload</artifactId>
+                <version>1.6.0</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
