@@ -34,13 +34,13 @@ jobs:
           restore-keys: |
             dependency-check-data-${{ runner.os }}-
 
-      - name: Dependency Check
-        run: mvn org.owasp:dependency-check-maven:check -Dformat=HTML -DnvdApiKey=${{ secrets.NVD_API_KEY }}
+      - name: Dependency Check (Aggregate)
+        run: mvn org.owasp:dependency-check-maven:aggregate -B -Dformat=HTML -DnvdApiKey=${{ secrets.NVD_API_KEY }}
 
       - name: Quality Checks (SpotBugs & PMD)
         run: |
-          mvn com.github.spotbugs:spotbugs-maven-plugin:4.9.8.2:check -Dspotbugs.failOnError=true
-          mvn pmd:pmd
+          mvn com.github.spotbugs:spotbugs-maven-plugin:4.9.8.2:check -B -Dspotbugs.failOnError=true -DskipTests
+          mvn pmd:pmd -B -DskipTests
 
       - name: Upload JaCoCo report
         uses: actions/upload-artifact@v4
@@ -52,4 +52,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dependency-check
-          path: "**/dependency-check-report.*"
+          path: "target/dependency-check-report.html"
