@@ -109,10 +109,14 @@ public class ProblemDetailService {
         // Default URN generation
         String baseUri = properties.getErrors().getTypeBaseUri();
         String typeSuffix;
-        try {
-            typeSuffix = ErrorCode.valueOf(code).toKebabCase();
-        } catch (Exception _) {
-            typeSuffix = code.toLowerCase().replace('_', '-');
+        if (code == null || code.isBlank()) {
+            typeSuffix = "unknown-error";
+        } else {
+            try {
+                typeSuffix = ErrorCode.valueOf(code).toKebabCase();
+            } catch (Exception _) {
+                typeSuffix = code.toLowerCase().replace('_', '-');
+            }
         }
         return URI.create(baseUri + typeSuffix);
     }

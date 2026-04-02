@@ -13,8 +13,11 @@ public enum ErrorCode {
     /** Client sent an invalid request or parameters (400). */
     BAD_REQUEST,
 
-    /** Input validation failed (400). */
+    /** Input validation failed (400, 422). */
     VALIDATION_ERROR,
+    
+    /** Resource is no longer available (410). */
+    GONE,
 
     /** Authentication is required (401). */
     UNAUTHORIZED,
@@ -60,7 +63,9 @@ public enum ErrorCode {
             case 404 -> NOT_FOUND;
             case 405 -> METHOD_NOT_ALLOWED;
             case 409 -> CONFLICT;
+            case 410 -> GONE;
             case 415 -> UNSUPPORTED_MEDIA_TYPE;
+            case 422 -> VALIDATION_ERROR;
             case 429 -> TOO_MANY_REQUESTS;
             case 502 -> BAD_GATEWAY;
             case 503 -> SERVICE_UNAVAILABLE;

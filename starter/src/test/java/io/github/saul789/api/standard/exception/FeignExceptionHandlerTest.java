@@ -88,4 +88,77 @@ class FeignExceptionHandlerTest {
         // Va al ELSE
         assertEquals(HttpStatus.BAD_GATEWAY.value(), response.getStatus());
     }
+
+    @Test
+    void shouldParseValidProblemDetailFromJson() {
+        feign.FeignException ex = mock(feign.FeignException.class);
+        String json = "{\"type\":\"http://example.com\", \"title\":\"Original Title\", \"detail\":\"Original Detail\", \"code\":\"ORIGINAL_CODE\"}";
+        
+        when(ex.status()).thenReturn(400);
+        when(ex.contentUTF8()).thenReturn(json);
+        when(request.getRequestURI()).thenReturn("/test");
+
+        ProblemDetail response = feignExceptionHandler.handleFeignException(ex, request, java.util.Locale.ENGLISH);
+        
+        assertEquals("Original Detail", response.getDetail());
+        assertEquals("ORIGINAL_CODE", response.getProperties().get("code"));
+    }
+
+    @Test
+    void shouldHandleInvalidJsonInContent() {
+        feign.FeignException ex = mock(feign.FeignException.class);
+        String invalidJson = "{ invalid }";
+        
+        when(ex.status()).thenReturn(400);
+        when(ex.contentUTF8()).thenReturn(invalidJson);
+        when(ex.getMessage()).thenReturn("Standard Message");
+        when(request.getRequestURI()).thenReturn("/test");
+
+        ProblemDetail response = feignExceptionHandler.handleFeignException(ex, request, java.util.Locale.ENGLISH);
+        
+        // Debe usar el mensaje de la excepción por el catch
+        assertEquals("Upstream service reported client-side error: Standard Message", response.getDetail());
+    }
+
+    @Test
+    void shouldHandleNullContentGracefully() {
+        feign.FeignException ex = mock(feign.FeignException.class);
+        
+        when(ex.status()).thenReturn(400);
+        when(ex.contentUTF8()).thenReturn(null);
+        when(ex.getMessage()).thenReturn("Safe Message");
+        when(request.getRequestURI()).thenReturn("/test");
+
+        ProblemDetail response = feignExceptionHandler.handleFeignException(ex, request, java.util.Locale.ENGLISH);
+        assertEquals("Upstream service reported client-side error: Safe Message", response.getDetail());
+    }
+
+    @Test
+    void shouldHandleFeignExceptionWithTypeOverride() {
+        feign.FeignException ex = mock(feign.FeignException.class);
+        when(ex.status()).thenReturn(400);
+        when(request.getRequestURI()).thenReturn("/test");
+        
+        ApiStandardProperties props = new ApiStandardProperties();
+        props.getErrors().getTypeOverrides().put("BAD_REQUEST", "http://overridden.com");
+        FeignExceptionHandler customHandler = new FeignExceptionHandler(props, messageSource);
+        
+        ProblemDetail response = customHandler.handleFeignException(ex, request, java.util.Locale.ENGLISH);
+        assertEquals("http://overridden.com", response.getType().toString());
+    }
+
+    @Test
+    void shouldIncludeTraceIdInFeignResponse() {
+        feign.FeignException ex = mock(feign.FeignException.class);
+        when(ex.status()).thenReturn(400);
+        when(request.getRequestURI()).thenReturn("/test");
+        
+        org.slf4j.MDC.put("traceId", "feign-trace");
+        try {
+            ProblemDetail response = feignExceptionHandler.handleFeignException(ex, request, java.util.Locale.ENGLISH);
+            assertEquals("feign-trace", response.getProperties().get("traceId"));
+        } finally {
+            org.slf4j.MDC.remove("traceId");
+        }
+    }
 }

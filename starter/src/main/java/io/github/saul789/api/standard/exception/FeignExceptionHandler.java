@@ -42,27 +42,23 @@ public class FeignExceptionHandler {
      */
     @ExceptionHandler(feign.FeignException.class)
     public ProblemDetail handleFeignException(feign.FeignException ex, HttpServletRequest request, java.util.Locale locale) {
-        int externalStatus = ex.status();
-        HttpStatus responseStatus = (externalStatus >= 400 && externalStatus < 500) ? HttpStatus.resolve(externalStatus)
-                : HttpStatus.BAD_GATEWAY;
-        if (responseStatus == null)
-            responseStatus = HttpStatus.BAD_REQUEST;
-
+        HttpStatus responseStatus = resolveHttpStatus(ex.status());
         ErrorCode errorCode = ErrorCode.fromStatus(responseStatus.value());
         String codeName = errorCode.name();
 
         ProblemDetail problem = ProblemDetail.forStatus(responseStatus);
+        problem.setTitle(resolveTitle(codeName, responseStatus, locale));
         
-        String titleKey = "error." + codeName;
-        String defaultTitle = responseStatus.getReasonPhrase();
-        problem.setTitle(messageSource.getMessage(titleKey, null, defaultTitle, locale));
+        String finalizedDetail = resolveInitialDetail(responseStatus, ex, locale);
+        
+        // Try to parse the remote error body if present
+        RemoteErrorDetails remoteDetails = extractRemoteErrorDetails(ex);
+        if (remoteDetails != null) {
+            if (remoteDetails.detail() != null) finalizedDetail = remoteDetails.detail();
+            if (remoteDetails.code() != null) codeName = remoteDetails.code();
+        }
 
-        String detailKey = responseStatus.is4xxClientError() ? "error.feign.client" : "error.feign.failure";
-        String defaultDetail = responseStatus.is4xxClientError() 
-                ? "Upstream service reported client-side error: " + ex.getMessage() 
-                : "Upstream service reported server-side failure";
-        
-        problem.setDetail(messageSource.getMessage(detailKey, null, defaultDetail, locale));
+        problem.setDetail(finalizedDetail);
         problem.setProperty("code", codeName);
 
         if (properties.getErrors().getTypeOverrides().containsKey(codeName)) {
@@ -87,6 +83,45 @@ public class FeignExceptionHandler {
 
         return problem;
     }
+
+    private HttpStatus resolveHttpStatus(int externalStatus) {
+        HttpStatus status = (externalStatus >= 400 && externalStatus < 500) ? HttpStatus.resolve(externalStatus)
+                : HttpStatus.BAD_GATEWAY;
+        return status != null ? status : HttpStatus.BAD_REQUEST;
+    }
+
+    private String resolveTitle(String codeName, HttpStatus status, java.util.Locale locale) {
+        String titleKey = "error." + codeName;
+        String defaultTitle = status.getReasonPhrase();
+        return messageSource.getMessage(titleKey, null, defaultTitle, locale);
+    }
+
+    private String resolveInitialDetail(HttpStatus status, feign.FeignException ex, java.util.Locale locale) {
+        String detailKey = status.is4xxClientError() ? "error.feign.client" : "error.feign.failure";
+        String fallbackDetail = status.is4xxClientError() 
+                ? "Upstream service reported client-side error: " + ex.getMessage() 
+                : "Upstream service reported server-side failure";
+        return messageSource.getMessage(detailKey, null, fallbackDetail, locale);
+    }
+
+    private RemoteErrorDetails extractRemoteErrorDetails(feign.FeignException ex) {
+        if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank()) {
+            try {
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                java.util.Map<String, Object> remoteBody = mapper.readValue(ex.contentUTF8(), new com.fasterxml.jackson.core.type.TypeReference<java.util.Map<String, Object>>() {});
+                
+                String detail = (String) remoteBody.get("detail");
+                String code = (String) remoteBody.get("code");
+                return new RemoteErrorDetails(detail, code);
+            } catch (Exception _) {
+                // Ignore parsing errors
+            }
+        }
+        return null;
+    }
+
+    private record RemoteErrorDetails(String detail, String code) {}
 
     private URI generateDefaultType(String code) {
         String baseUri = properties.getErrors().getTypeBaseUri();

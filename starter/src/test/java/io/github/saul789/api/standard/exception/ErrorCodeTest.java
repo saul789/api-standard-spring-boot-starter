@@ -22,6 +22,7 @@ class ErrorCodeTest {
                         ErrorCode.UNAUTHORIZED,
                         ErrorCode.FORBIDDEN,
                         ErrorCode.CONFLICT,
+                        ErrorCode.GONE,
                         ErrorCode.TOO_MANY_REQUESTS,
                         ErrorCode.BAD_GATEWAY,
                         ErrorCode.SERVICE_UNAVAILABLE,

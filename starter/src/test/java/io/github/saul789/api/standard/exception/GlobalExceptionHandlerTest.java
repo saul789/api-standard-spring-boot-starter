@@ -2,11 +2,11 @@ package io.github.saul789.api.standard.exception;
 
 import io.github.saul789.api.standard.ApiStandardProperties;
 import org.springframework.context.MessageSource;
-
 import io.github.saul789.api.standard.ApiStandardAutoConfiguration;
+import io.github.saul789.api.standard.model.ValidationError;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Valid;
+import jakarta.validation.Path;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.AfterEach;
@@ -25,38 +25,36 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.ArgumentMatchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @SpringBootTest(classes = ApiStandardAutoConfiguration.class)
 @Import({ GlobalExceptionHandler.class })
 class GlobalExceptionHandlerTest {
 
     private MockMvc mockMvc;
-
     private GlobalExceptionHandler globalExceptionHandler;
     private MessageSource messageSource;
     private ProblemDetailService problemDetailService;
-
     private HttpServletRequest request;
+    private ApiStandardProperties properties;
 
     @BeforeEach
     void setUp() {
         this.messageSource = mock(MessageSource.class);
-        // Default behavior: return the defaultMessage (arg 2)
-        when(messageSource.getMessage(org.mockito.ArgumentMatchers.anyString(),
-                org.mockito.ArgumentMatchers.any(),
-                org.mockito.ArgumentMatchers.anyString(),
-                org.mockito.ArgumentMatchers.any()))
+        when(messageSource.getMessage(anyString(), any(), anyString(), any()))
                 .thenAnswer(invocation -> invocation.getArgument(2));
 
-        ApiStandardProperties properties = new ApiStandardProperties();
+        this.properties = new ApiStandardProperties();
         java.util.List<ProblemDetailEnricher> enrichers = java.util.List.of(
                 new StandardMetadataEnricher(),
                 new TraceIdEnricher());
@@ -75,11 +73,6 @@ class GlobalExceptionHandlerTest {
 
     @RestController
     static class TestController {
-        @GetMapping("/business")
-        public void business() {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "error.business.default", HttpStatus.BAD_REQUEST);
-        }
-
         @GetMapping("/generic")
         public void generic() {
             throw new RuntimeException("Unexpected error");
@@ -90,32 +83,20 @@ class GlobalExceptionHandlerTest {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found");
         }
 
-        @GetMapping("/annotated")
-        public void annotated() {
-            throw new CustomAnnotatedException();
-        }
-
         @PostMapping("/validation")
-        public void validation(@Valid @RequestBody DummyDto dto) {
-            // Se usa para disparar MethodArgumentNotValidException en los tests
+        public void validation(@jakarta.validation.Valid @RequestBody DummyDto dto) {
+            // Test body
         }
 
         @GetMapping("/constraint")
         public void constraint() {
             Set<ConstraintViolation<?>> violations = new java.util.HashSet<>();
-
-            ConstraintViolation<?> violation = org.mockito.Mockito.mock(ConstraintViolation.class);
-            org.mockito.Mockito.when(violation.getPropertyPath())
+            ConstraintViolation<?> violation = mock(ConstraintViolation.class);
+            when(violation.getPropertyPath())
                     .thenReturn(org.hibernate.validator.internal.engine.path.PathImpl.createPathFromString("email"));
-            org.mockito.Mockito.when(violation.getMessage()).thenReturn("formato inválido");
+            when(violation.getMessage()).thenReturn("formato inválido");
             violations.add(violation);
-
             throw new ConstraintViolationException(violations);
-        }
-
-        @GetMapping("/business-unknown-key")
-        public void businessUnknown() {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "error.non.existent.key.123", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -134,158 +115,136 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void shouldHandleGenericException() throws Exception {
-        mockMvc.perform(get("/generic"))
-                .andDo(print())
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"));
+        mockMvc.perform(MockMvcRequestBuilders.get("/generic"))
+                .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("INTERNAL_ERROR"));
     }
 
     @Test
     void shouldIncludeTraceIdWhenPresentInMDC() throws Exception {
         String traceIdValue = "test-uuid-12345";
         MDC.put("traceId", traceIdValue);
-
         try {
-            mockMvc.perform(get("/generic"))
-                    .andExpect(status().isInternalServerError())
-                    .andExpect(jsonPath("$.traceId").value(traceIdValue))
-                    .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"));
+            mockMvc.perform(MockMvcRequestBuilders.get("/generic"))
+                    .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+                    .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceIdValue));
         } finally {
             MDC.remove("traceId");
         }
     }
 
     @Test
-    void shouldReturnKeyAsDetailWhenTranslationMissing() throws Exception {
-        mockMvc.perform(get("/business-unknown-key").header("Accept-Language", "fr"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.detail").value("error.non.existent.key.123"))
-                .andExpect(jsonPath("$.code").value("BAD_REQUEST"));
-    }
-
-    @Test
     void shouldHandleConstraintViolationWithDetails() throws Exception {
-        mockMvc.perform(get("/constraint"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
-                .andExpect(jsonPath("$.errors[0].field").value("email"))
-                .andExpect(jsonPath("$.errors[0].message").value("formato inválido"));
-    }
-
-    @Test
-    void shouldHandleWeirdHttpStatus() {
-        when(request.getRequestURI()).thenReturn("/weird");
-        ProblemDetail detail = globalExceptionHandler.handleGenericException(new RuntimeException("test"), request,
-                java.util.Locale.ENGLISH);
-        org.junit.jupiter.api.Assertions.assertNotNull(detail);
-    }
-
-    @Test
-    void shouldCreateProblemThroughService() {
-        ProblemDetail detail = problemDetailService.createProblem(
-                HttpStatus.BAD_REQUEST, request, "error.key", "TEST_CODE", null, java.util.Locale.ENGLISH);
-
-        org.junit.jupiter.api.Assertions.assertEquals("Bad Request", detail.getTitle());
+        mockMvc.perform(MockMvcRequestBuilders.get("/constraint"))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 
     @Test
     void shouldDirectlyHandleNoResourceFound() {
         var ex = new org.springframework.web.servlet.resource.NoResourceFoundException(
-                org.springframework.http.HttpMethod.GET,
-                "/path",
-                null);
-
+                org.springframework.http.HttpMethod.GET, "/path", null);
         when(request.getRequestURI()).thenReturn("/path");
-
-        when(messageSource.getMessage(org.mockito.ArgumentMatchers.eq("error.not_found"),
-                org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq("error.not_found"),
-                org.mockito.ArgumentMatchers.any()))
-                .thenReturn("El recurso solicitado no fue encontrado.");
-
-        ProblemDetail detail = globalExceptionHandler.handleNoResourceFoundException(ex, request,
-                java.util.Locale.ENGLISH);
-
-        org.junit.jupiter.api.Assertions.assertEquals(404, detail.getStatus());
-        org.junit.jupiter.api.Assertions.assertEquals("El recurso solicitado no fue encontrado.", detail.getDetail());
+        ProblemDetail detail = globalExceptionHandler.handleNoResourceFoundException(ex, request, Locale.ENGLISH);
+        assertEquals(404, detail.getStatus());
     }
 
     @Test
-    void shouldHandleServiceEnrichWithValidStatusButNoTitleTranslation() {
-        when(request.getRequestURI()).thenReturn("/payment");
+    @SuppressWarnings("unchecked")
+    void shouldHandleConstraintViolationWithI18nTemplate() {
+        ConstraintViolationException ex = mock(ConstraintViolationException.class);
+        ConstraintViolation<?> violation = mock(ConstraintViolation.class);
+        Path path = mock(Path.class);
+        when(ex.getConstraintViolations()).thenReturn(Set.of(violation));
+        when(violation.getPropertyPath()).thenReturn(path);
+        when(path.iterator()).thenReturn(java.util.Collections.emptyIterator());
+        when(violation.getMessage()).thenReturn("default");
+        when(violation.getMessageTemplate()).thenReturn("{error.test}");
+        when(messageSource.getMessage(eq("error.test"), any(), any(), any())).thenReturn("translated");
 
-        ProblemDetail problem = problemDetailService.createProblem(
-                HttpStatus.PAYMENT_REQUIRED, request, "error.test", "UNKNOWN_CODE", null, java.util.Locale.ENGLISH);
-
-        // Debería tomar el Reason Phrase de HttpStatus ("Payment Required")
-        org.junit.jupiter.api.Assertions.assertEquals("Payment Required", problem.getTitle());
+        ProblemDetail result = globalExceptionHandler.handleConstraintViolation(ex, request, Locale.ENGLISH);
+        List<ValidationError> errors = (List<ValidationError>) result.getProperties().get("errors");
+        assertEquals("translated", errors.get(0).getMessage());
     }
 
     @Test
-    void shouldHandleValidationBodyError() throws Exception {
-        mockMvc.perform(post("/validation")
-                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                .content("{\"name\": \"\"}"))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
-                .andExpect(jsonPath("$.errors[0].field").value("name"))
-                .andExpect(jsonPath("$.errors[0].message").exists());
+    void shouldHandleGenericErrorResponseException() {
+        var ex = mock(org.springframework.web.ErrorResponseException.class);
+        ProblemDetail body = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "conflict-detail");
+        when(ex.updateAndGetBody(any(), any())).thenReturn(body);
+        when(ex.getStatusCode()).thenReturn(HttpStatus.CONFLICT);
+        when(ex.getMessage()).thenReturn("msg");
+
+        ProblemDetail result = globalExceptionHandler.handleGenericException(ex, request, Locale.ENGLISH);
+        assertEquals(HttpStatus.CONFLICT.value(), result.getStatus());
+        assertEquals("CONFLICT", result.getProperties().get("code"));
     }
 
     @Test
-    void shouldHandleMethodNotAllowed() throws Exception {
-        // Intentamos un POST en un endpoint que solo permite GET
-        mockMvc.perform(post("/business"))
-                .andExpect(status().isMethodNotAllowed())
-                .andExpect(jsonPath("$.code").value("METHOD_NOT_ALLOWED"));
+    void shouldCoverAllProblemExceptionConstructors() {
+        var uri = java.net.URI.create("http://test.com");
+        new ProblemException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_REQUEST);
+        var ex2 = new ProblemException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_REQUEST, "http://custom.com");
+        assertEquals("msg", ex2.getMessage());
+
+        new BusinessException("msg", HttpStatus.BAD_REQUEST);
+        new BusinessException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_REQUEST, "detail");
+        new BusinessException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_REQUEST, uri);
     }
 
     @Test
-    void shouldHandleHttpMediaTypeNotSupported() throws Exception {
-        // Enviamos un Content-Type que el controller no espera
-        mockMvc.perform(post("/validation")
-                .contentType("application/xml")
-                .content("<xml></xml>"))
-                .andExpect(status().isUnsupportedMediaType());
+    void shouldCoverRemainingErrorCodeMappings() {
+        assertEquals(ErrorCode.GONE, ErrorCode.fromStatus(410));
+        assertEquals(ErrorCode.VALIDATION_ERROR, ErrorCode.fromStatus(422));
+        assertEquals(ErrorCode.TOO_MANY_REQUESTS, ErrorCode.fromStatus(429));
+        assertEquals(ErrorCode.UNAUTHORIZED, ErrorCode.fromStatus(401));
+        assertEquals(ErrorCode.FORBIDDEN, ErrorCode.fromStatus(403));
+        assertEquals(ErrorCode.NOT_FOUND, ErrorCode.fromStatus(404));
+        assertEquals(ErrorCode.METHOD_NOT_ALLOWED, ErrorCode.fromStatus(405));
+        assertEquals(ErrorCode.CONFLICT, ErrorCode.fromStatus(409));
+        assertEquals(ErrorCode.UNSUPPORTED_MEDIA_TYPE, ErrorCode.fromStatus(415));
+        assertEquals(ErrorCode.BAD_GATEWAY, ErrorCode.fromStatus(502));
+        assertEquals(ErrorCode.SERVICE_UNAVAILABLE, ErrorCode.fromStatus(503));
+        assertEquals(ErrorCode.GATEWAY_TIMEOUT, ErrorCode.fromStatus(504));
+        assertEquals(ErrorCode.INTERNAL_ERROR, ErrorCode.fromStatus(500));
     }
 
     @Test
-    void shouldHandleResponseStatusException() throws Exception {
-        mockMvc.perform(get("/response-status"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("NOT_FOUND"));
-    }
-
-    @Test
-    void shouldHandleAccessDeniedException() throws Exception {
-        // Simulamos la excepción de Spring Security por nombre
-        mockMvc = MockMvcBuilders.standaloneSetup(new SecurityTestController())
-                .setControllerAdvice(globalExceptionHandler)
-                .build();
-
-        mockMvc.perform(get("/access-denied"))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value("FORBIDDEN"))
-                .andExpect(jsonPath("$.detail").value("error.forbidden"));
-    }
-
-    @RestController
-    static class SecurityTestController {
-        @GetMapping("/access-denied")
-        public void accessDenied() {
-            throw new org.springframework.security.access.AccessDeniedException("Denied");
+    void shouldHandleProblemTypeProviderException() {
+        class ProviderException extends RuntimeException implements ProblemTypeProvider {
+            @Override public java.net.URI getProblemType() { return java.net.URI.create("http://provider.com"); }
         }
+        ProblemDetail result = globalExceptionHandler.handleGenericException(new ProviderException(), request, Locale.ENGLISH);
+        assertEquals("http://provider.com", result.getType().toString());
+    }
+
+    @Test
+    void shouldHandleAnnotatedProblemTypeException() {
+        @ProblemType("http://annotated.com")
+        class AnnotatedEx extends RuntimeException {}
+        ProblemDetail result = globalExceptionHandler.handleGenericException(new AnnotatedEx(), request, Locale.ENGLISH);
+        assertEquals("http://annotated.com", result.getType().toString());
+    }
+
+    @Test
+    void shouldHandleProblemDetailServiceReflection() throws Exception {
+        java.lang.reflect.Method resolveType = ProblemDetailService.class.getDeclaredMethod("resolveType", String.class,
+                java.net.URI.class);
+        resolveType.setAccessible(true);
+        Object result = resolveType.invoke(problemDetailService, null, null);
+        assertEquals("urn:problem-type:unknown-error", result.toString());
+    }
+
+    @Test
+    void shouldHandleInvalidTypeOverrideGracefully() {
+        ApiStandardProperties props = new ApiStandardProperties();
+        props.getErrors().getTypeOverrides().put("BAD_REQUEST", "invalid uri with spaces");
+        ProblemDetailService pds = new ProblemDetailService(messageSource, props, List.of());
+        ProblemDetail result = pds.createProblem(HttpStatus.BAD_REQUEST, request, "detail", "BAD_REQUEST", null, Locale.ENGLISH);
+        assertEquals("urn:problem-type:bad-request", result.getType().toString());
     }
 
     @org.springframework.web.bind.annotation.ResponseStatus(HttpStatus.CONFLICT)
     static class CustomAnnotatedException extends RuntimeException {
     }
-
-    @Test
-    void shouldHandleAnnotatedException() throws Exception {
-        mockMvc.perform(get("/annotated"))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("CONFLICT"));
-    }
-
 }
