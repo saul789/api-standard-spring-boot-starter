@@ -12,13 +12,15 @@ import java.util.Locale;
  */
 @Component
 public class StandardMetadataEnricher implements ProblemDetailEnricher {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(StandardMetadataEnricher.class);
+
     @Override
     public void enrich(ProblemDetail problem, HttpServletRequest request, Locale locale) {
         problem.setProperty("timestamp", Instant.now());
         try {
             problem.setInstance(URI.create(request.getRequestURI()));
-        } catch (Exception _) {
-            // Null or invalid request URI fallback handled at higher level if needed
+        } catch (Exception e) {
+            log.trace("Failed to resolve request URI for problem instance: {}", e.getMessage());
         }
     }
 

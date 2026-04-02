@@ -81,6 +81,6 @@ public enum ErrorCode {
      * @return the kebab-case version of the error code
      */
     public String toKebabCase() {
-        return this.name().toLowerCase().replace('_', '-');
+        return this.name().toLowerCase(java.util.Locale.ROOT).replace('_', '-');
     }
 }

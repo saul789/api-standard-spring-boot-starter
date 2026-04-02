@@ -31,8 +31,26 @@ class ErrorCodeTest {
 
     @Test
     void shouldSupportValueOf() {
-
         assertThat(ErrorCode.valueOf("INTERNAL_ERROR"))
                 .isEqualTo(ErrorCode.INTERNAL_ERROR);
+    }
+
+    @Test
+    void shouldMapStatusToErrorCode() {
+        assertThat(ErrorCode.fromStatus(400)).isEqualTo(ErrorCode.BAD_REQUEST);
+        assertThat(ErrorCode.fromStatus(404)).isEqualTo(ErrorCode.NOT_FOUND);
+        assertThat(ErrorCode.fromStatus(500)).isEqualTo(ErrorCode.INTERNAL_ERROR);
+        
+        // Edge cases for branch coverage in default -> clause
+        assertThat(ErrorCode.fromStatus(418)).isEqualTo(ErrorCode.BAD_REQUEST); // 4xx default
+        assertThat(ErrorCode.fromStatus(501)).isEqualTo(ErrorCode.INTERNAL_ERROR); // Other default
+        assertThat(ErrorCode.fromStatus(200)).isEqualTo(ErrorCode.INTERNAL_ERROR); // Unexpected success status
+    }
+
+    @Test
+    void shouldConvertToKebabCase() {
+        assertThat(ErrorCode.INTERNAL_ERROR.toKebabCase()).isEqualTo("internal-error");
+        assertThat(ErrorCode.GONE.toKebabCase()).isEqualTo("gone");
+        assertThat(ErrorCode.BAD_REQUEST.toKebabCase()).isEqualTo("bad-request");
     }
 }

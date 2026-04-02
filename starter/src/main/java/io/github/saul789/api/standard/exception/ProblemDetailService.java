@@ -115,7 +115,7 @@ public class ProblemDetailService {
             try {
                 typeSuffix = ErrorCode.valueOf(code).toKebabCase();
             } catch (Exception _) {
-                typeSuffix = code.toLowerCase().replace('_', '-');
+                typeSuffix = code.toLowerCase(java.util.Locale.ROOT).replace('_', '-');
             }
         }
         return URI.create(baseUri + typeSuffix);

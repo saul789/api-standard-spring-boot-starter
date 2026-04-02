@@ -76,4 +76,17 @@ class RequestLoggingFilterTest {
 
         // Al terminar este test, JaCoCo marcará el bloque finally como cubierto.
     }
+
+    @Test
+    void shouldLogWithTraceparentHeader() throws ServletException, IOException {
+        when(request.getMethod()).thenReturn("GET");
+        when(request.getRequestURI()).thenReturn("/api/test");
+        when(response.getStatus()).thenReturn(200);
+        // Standard W3C Traceparent header
+        when(response.getHeader("traceparent")).thenReturn("00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01");
+
+        requestLoggingFilter.doFilter(request, response, filterChain);
+
+        verify(filterChain).doFilter(request, response);
+    }
 }

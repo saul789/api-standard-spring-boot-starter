@@ -110,4 +110,18 @@ class ApiResponseAdviceTest {
 
         assertSame(body, result);
     }
+
+    @Test
+    @DisplayName("supports() debe retornar FALSE para Resource")
+    void supports_ShouldReturnFalse_ForResource() {
+        when(returnType.getParameterType()).thenAnswer(i -> org.springframework.core.io.Resource.class);
+        assertFalse(apiResponseAdvice.supports(returnType, null));
+    }
+    
+    @Test
+    @DisplayName("supports() debe retornar FALSE para subtipo de Resource")
+    void supports_ShouldReturnFalse_ForResourceSubtype() {
+        when(returnType.getParameterType()).thenAnswer(i -> org.springframework.core.io.ByteArrayResource.class);
+        assertFalse(apiResponseAdvice.supports(returnType, null));
+    }
 }

@@ -140,7 +140,7 @@ class FeignExceptionHandlerTest {
         when(request.getRequestURI()).thenReturn("/test");
         
         ApiStandardProperties props = new ApiStandardProperties();
-        props.getErrors().getTypeOverrides().put("BAD_REQUEST", "http://overridden.com");
+        props.getErrors().setTypeOverrides(java.util.Map.of("BAD_REQUEST", "http://overridden.com"));
         FeignExceptionHandler customHandler = new FeignExceptionHandler(props, messageSource);
         
         ProblemDetail response = customHandler.handleFeignException(ex, request, java.util.Locale.ENGLISH);
@@ -160,5 +160,84 @@ class FeignExceptionHandlerTest {
         } finally {
             org.slf4j.MDC.remove("traceId");
         }
+    }
+
+    @Test
+    void shouldHandleFeignExceptionWithInvalidTypeOverride() {
+        feign.FeignException ex = mock(feign.FeignException.class);
+        when(ex.status()).thenReturn(400);
+        when(request.getRequestURI()).thenReturn("/test");
+        
+        ApiStandardProperties props = new ApiStandardProperties();
+        // Invalid URI string with spaces
+        props.getErrors().setTypeOverrides(java.util.Map.of("BAD_REQUEST", "invalid uri with spaces"));
+        FeignExceptionHandler customHandler = new FeignExceptionHandler(props, messageSource);
+        
+        ProblemDetail response = customHandler.handleFeignException(ex, request, java.util.Locale.ENGLISH);
+        // Should fallback to default type
+        assertEquals("urn:problem-type:bad-request", response.getType().toString());
+    }
+
+    @Test
+    void shouldHandleFeignExceptionWithEmptyContent() {
+        feign.FeignException ex = mock(feign.FeignException.class);
+        when(ex.status()).thenReturn(400);
+        when(ex.contentUTF8()).thenReturn(""); // Blank
+        when(request.getRequestURI()).thenReturn("/test");
+
+        ProblemDetail response = feignExceptionHandler.handleFeignException(ex, request, java.util.Locale.ENGLISH);
+        assertEquals(400, response.getStatus());
+    }
+
+    @Test
+    void shouldHandleFeignExceptionWithNullRequestUri() {
+        feign.FeignException ex = mock(feign.FeignException.class);
+        when(ex.status()).thenReturn(400);
+        when(request.getRequestURI()).thenThrow(new RuntimeException("Uri failure"));
+
+        ProblemDetail response = feignExceptionHandler.handleFeignException(ex, request, java.util.Locale.ENGLISH);
+        assertEquals(400, response.getStatus());
+    }
+
+    @Test
+    void shouldHandleFeignExceptionWithRemoteDetailsButNoCode() {
+        feign.FeignException ex = mock(feign.FeignException.class);
+        String json = "{\"detail\":\"Remote custom detail\"}"; // No code
+        
+        when(ex.status()).thenReturn(400);
+        when(ex.contentUTF8()).thenReturn(json);
+        when(request.getRequestURI()).thenReturn("/test");
+
+        ProblemDetail response = feignExceptionHandler.handleFeignException(ex, request, java.util.Locale.ENGLISH);
+        assertEquals("Remote custom detail", response.getDetail());
+    }
+
+    @Test
+    void shouldHandleFeignServerErrorPrefix() {
+        feign.FeignException ex = mock(feign.FeignException.class);
+        when(ex.status()).thenReturn(503);
+        when(ex.getMessage()).thenReturn("Service Unavailable");
+        when(request.getRequestURI()).thenReturn("/test");
+
+        ProblemDetail response = feignExceptionHandler.handleFeignException(ex, request, java.util.Locale.ENGLISH);
+        assertEquals("Upstream service reported server-side failure", response.getDetail());
+    }
+
+    @Test
+    void shouldHandleFeignExceptionWithEmptyJsonRemoteDetails() {
+        feign.FeignException ex = mock(feign.FeignException.class);
+        String json = "{}"; // Valid JSON but empty
+        
+        when(ex.status()).thenReturn(400);
+        when(ex.contentUTF8()).thenReturn(json);
+        when(ex.getMessage()).thenReturn("Standard message");
+        when(request.getRequestURI()).thenReturn("/test");
+
+        ProblemDetail response = feignExceptionHandler.handleFeignException(ex, request, java.util.Locale.ENGLISH);
+        assertEquals("Bad Request", response.getTitle());
+        // detail should remain fallback since remote detail is null
+        assertEquals("Upstream service reported client-side error: Standard message", response.getDetail());
+        // code should remain default (BAD_REQUEST)
+        assertEquals("BAD_REQUEST", response.getProperties().get("code"));
     }
 }

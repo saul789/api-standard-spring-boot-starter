@@ -33,11 +33,11 @@ public class ApiStandardProperties {
         }
 
         public Map<String, String> getTypeOverrides() {
-            return typeOverrides;
+            return typeOverrides != null ? java.util.Collections.unmodifiableMap(typeOverrides) : null;
         }
 
         public void setTypeOverrides(Map<String, String> typeOverrides) {
-            this.typeOverrides = typeOverrides;
+            this.typeOverrides = typeOverrides != null ? new java.util.HashMap<>(typeOverrides) : new java.util.HashMap<>();
         }
     }
 }

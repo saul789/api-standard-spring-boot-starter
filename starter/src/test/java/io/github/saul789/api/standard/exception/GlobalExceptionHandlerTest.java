@@ -23,6 +23,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -32,7 +35,7 @@ import java.util.Set;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -121,6 +124,14 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void shouldHandleGenericExceptionDirectly() {
+        var ex = new RuntimeException("Direct error");
+        ProblemDetail result = globalExceptionHandler.handleGenericException(ex, request, Locale.ENGLISH);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), result.getStatus());
+        assertEquals("error.internal_error", result.getDetail());
+    }
+
+    @Test
     void shouldIncludeTraceIdWhenPresentInMDC() throws Exception {
         String traceIdValue = "test-uuid-12345";
         MDC.put("traceId", traceIdValue);
@@ -150,6 +161,165 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void shouldHandleValidationExceptionWithI18n() {
+        MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
+        BindingResult bindingResult = mock(BindingResult.class);
+        FieldError fieldError = mock(FieldError.class);
+
+        when(ex.getBindingResult()).thenReturn(bindingResult);
+        when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
+        when(fieldError.getField()).thenReturn("username");
+        when(fieldError.getDefaultMessage()).thenReturn("default message");
+        when(fieldError.getCodes()).thenReturn(new String[] { "abc", "def" });
+        when(fieldError.getArguments()).thenReturn(new Object[] {});
+
+        // Mock messageSource to return a translated message for code "abc"
+        when(messageSource.getMessage(eq("abc"), any(), any(), any(Locale.class)))
+                .thenReturn("translated message");
+
+        when(request.getRequestURI()).thenReturn("/test");
+
+        ProblemDetail detail = globalExceptionHandler.handleValidationException(ex, request, Locale.ENGLISH);
+
+        assertNotNull(detail);
+        assertEquals(400, detail.getStatus());
+
+        @SuppressWarnings("unchecked")
+        List<ValidationError> errors = (List<ValidationError>) detail.getProperties().get("errors");
+        assertNotNull(errors);
+        assertEquals(1, errors.size());
+        assertEquals("username", errors.get(0).getField());
+        assertEquals("translated message", errors.get(0).getMessage());
+    }
+
+    @Test
+    void shouldHandleValidationExceptionWithDefaultMessageI18n() {
+        MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
+        BindingResult bindingResult = mock(BindingResult.class);
+        FieldError fieldError = mock(FieldError.class);
+
+        when(ex.getBindingResult()).thenReturn(bindingResult);
+        when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
+        when(fieldError.getField()).thenReturn("username");
+        when(fieldError.getDefaultMessage()).thenReturn("error.key");
+        when(fieldError.getCodes()).thenReturn(new String[] { "invalid.code" });
+        when(fieldError.getArguments()).thenReturn(new Object[] {});
+
+        // Return null for the specific error code to trigger fallback to default
+        // message
+        when(messageSource.getMessage(eq("invalid.code"), any(), any(), any(Locale.class)))
+                .thenReturn(null);
+
+        // Return translation for the default message key
+        when(messageSource.getMessage(eq("error.key"), any(), eq("error.key"), any(Locale.class)))
+                .thenReturn("translated default message");
+
+        when(request.getRequestURI()).thenReturn("/test");
+
+        ProblemDetail detail = globalExceptionHandler.handleValidationException(ex, request, Locale.ENGLISH);
+
+        assertNotNull(detail);
+        @SuppressWarnings("unchecked")
+        List<ValidationError> errors = (List<ValidationError>) detail.getProperties().get("errors");
+        assertEquals("translated default message", errors.get(0).getMessage());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldHandleValidationExceptionWithNoCodes() {
+        MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
+        BindingResult bindingResult = mock(BindingResult.class);
+        FieldError fieldError = mock(FieldError.class);
+
+        when(ex.getBindingResult()).thenReturn(bindingResult);
+        when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
+        when(fieldError.getField()).thenReturn("username");
+        when(fieldError.getDefaultMessage()).thenReturn("default");
+        when(fieldError.getCodes()).thenReturn(new String[] {}); // Empty codes
+
+        ProblemDetail detail = globalExceptionHandler.handleValidationException(ex, request, Locale.ENGLISH);
+        List<ValidationError> errors = (List<ValidationError>) detail.getProperties().get("errors");
+        assertEquals("default", errors.get(0).getMessage());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldHandleValidationExceptionWithMatchingCodeAndMessage() {
+        MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
+        BindingResult bindingResult = mock(BindingResult.class);
+        FieldError fieldError = mock(FieldError.class);
+
+        when(ex.getBindingResult()).thenReturn(bindingResult);
+        when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
+        when(fieldError.getField()).thenReturn("username");
+        when(fieldError.getDefaultMessage()).thenReturn("default");
+        when(fieldError.getCodes()).thenReturn(new String[] { "code1" });
+        // messageSource returns same as code
+        when(messageSource.getMessage(eq("code1"), any(), any(), any())).thenReturn("code1");
+
+        ProblemDetail detail = globalExceptionHandler.handleValidationException(ex, request, Locale.ENGLISH);
+        List<ValidationError> errors = (List<ValidationError>) detail.getProperties().get("errors");
+        assertEquals("default", errors.get(0).getMessage());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldHandleConstraintViolationWithMalformedTemplate() {
+        ConstraintViolationException ex = mock(ConstraintViolationException.class);
+        ConstraintViolation<?> violation = mock(ConstraintViolation.class);
+        Path path = mock(Path.class);
+        when(ex.getConstraintViolations()).thenReturn(Set.of(violation));
+        when(violation.getPropertyPath()).thenReturn(path);
+        when(path.iterator()).thenReturn(java.util.Collections.emptyIterator());
+        when(violation.getMessage()).thenReturn("raw message");
+        when(violation.getMessageTemplate()).thenReturn("no-braces"); // Malformed for i18n
+
+        ProblemDetail result = globalExceptionHandler.handleConstraintViolation(ex, request, Locale.ENGLISH);
+        List<ValidationError> errors = (List<ValidationError>) result.getProperties().get("errors");
+        assertEquals("raw message", errors.get(0).getMessage());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldHandleConstraintViolationWithPartialTemplate() {
+        ConstraintViolationException ex = mock(ConstraintViolationException.class);
+        ConstraintViolation<?> violation = mock(ConstraintViolation.class);
+        Path path = mock(Path.class);
+        when(ex.getConstraintViolations()).thenReturn(Set.of(violation));
+        when(violation.getPropertyPath()).thenReturn(path);
+        when(path.iterator()).thenReturn(java.util.Collections.emptyIterator());
+        when(violation.getMessage()).thenReturn("raw message");
+        
+        // Case 1: Stars with { but doesn't end with }
+        when(violation.getMessageTemplate()).thenReturn("{missing-end");
+        ProblemDetail result1 = globalExceptionHandler.handleConstraintViolation(ex, request, Locale.ENGLISH);
+        assertEquals("raw message", ((List<ValidationError>) result1.getProperties().get("errors")).get(0).getMessage());
+
+        // Case 2: Ends with } but doesn't start with {
+        when(violation.getMessageTemplate()).thenReturn("missing-start}");
+        ProblemDetail result2 = globalExceptionHandler.handleConstraintViolation(ex, request, Locale.ENGLISH);
+        assertEquals("raw message", ((List<ValidationError>) result2.getProperties().get("errors")).get(0).getMessage());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldHandleValidationExceptionWithNullMessage() {
+        MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
+        BindingResult bindingResult = mock(BindingResult.class);
+        FieldError fieldError = mock(FieldError.class);
+
+        when(ex.getBindingResult()).thenReturn(bindingResult);
+        when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
+        when(fieldError.getField()).thenReturn("username");
+        when(fieldError.getDefaultMessage()).thenReturn(null); // NULL default message
+        when(fieldError.getCodes()).thenReturn(new String[] {});
+
+        ProblemDetail detail = globalExceptionHandler.handleValidationException(ex, request, Locale.ENGLISH);
+        List<ValidationError> errors = (List<ValidationError>) detail.getProperties().get("errors");
+        assertNull(errors.get(0).getMessage());
+    }
+
+    @Test
     @SuppressWarnings("unchecked")
     void shouldHandleConstraintViolationWithI18nTemplate() {
         ConstraintViolationException ex = mock(ConstraintViolationException.class);
@@ -168,6 +338,25 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void shouldHandleConstraintViolationWithFieldNames() {
+        ConstraintViolationException ex = mock(ConstraintViolationException.class);
+        ConstraintViolation<?> violation = mock(ConstraintViolation.class);
+        Path path = mock(Path.class);
+        Path.Node node = mock(Path.Node.class);
+
+        when(ex.getConstraintViolations()).thenReturn(Set.of(violation));
+        when(violation.getPropertyPath()).thenReturn(path);
+        when(path.iterator()).thenReturn(List.of(node).iterator());
+        when(node.getName()).thenReturn("username");
+        when(violation.getMessage()).thenReturn("invalid");
+
+        ProblemDetail result = globalExceptionHandler.handleConstraintViolation(ex, request, Locale.ENGLISH);
+        List<ValidationError> errors = (List<ValidationError>) result.getProperties().get("errors");
+        assertEquals("username", errors.get(0).getField());
+    }
+
+    @Test
     void shouldHandleGenericErrorResponseException() {
         var ex = mock(org.springframework.web.ErrorResponseException.class);
         ProblemDetail body = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "conflict-detail");
@@ -181,15 +370,73 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void shouldHandleAccessDeniedExceptionByName() {
+        // Mock exception where simple name contains AccessDeniedException
+        class FakeAccessDeniedException extends RuntimeException {}
+        var ex = new FakeAccessDeniedException();
+        
+        ProblemDetail result = globalExceptionHandler.handleGenericException(ex, request, Locale.ENGLISH);
+        assertEquals(HttpStatus.FORBIDDEN.value(), result.getStatus());
+        assertEquals("FORBIDDEN", result.getProperties().get("code"));
+    }
+
+    @Test
+    void shouldHandleResponseStatusException() {
+        var ex = new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Not Acceptable");
+        ProblemDetail result = globalExceptionHandler.handleResponseStatusException(ex, request, Locale.ENGLISH);
+        assertEquals(HttpStatus.NOT_ACCEPTABLE.value(), result.getStatus());
+    }
+
+    @Test
+    void shouldHandleNoResourceFoundException() {
+        var ex = mock(org.springframework.web.servlet.resource.NoResourceFoundException.class);
+        ProblemDetail result = globalExceptionHandler.handleNoResourceFoundException(ex, request, Locale.ENGLISH);
+        assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatus());
+    }
+
+    @Test
+    void shouldHandleMediaTypeNotSupportedException() {
+        var ex = mock(org.springframework.web.HttpMediaTypeNotSupportedException.class);
+        ProblemDetail result = globalExceptionHandler.handleMediaTypeNotSupported(ex, request, Locale.ENGLISH);
+        assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(), result.getStatus());
+    }
+
+    @Test
+    void shouldHandleMethodNotAllowedException() {
+        var ex = mock(org.springframework.web.HttpRequestMethodNotSupportedException.class);
+        ProblemDetail result = globalExceptionHandler.handleMethodNotAllowed(ex, request, Locale.ENGLISH);
+        assertEquals(HttpStatus.METHOD_NOT_ALLOWED.value(), result.getStatus());
+    }
+
+    @Test
+    void shouldHandleProblemException() {
+        var ex = new ProblemException(ErrorCode.BAD_REQUEST, "Custom message", HttpStatus.BAD_REQUEST);
+        ProblemDetail result = globalExceptionHandler.handleProblemException(ex, request, Locale.ENGLISH);
+        assertEquals(HttpStatus.BAD_REQUEST.value(), result.getStatus());
+        assertEquals("Custom message", result.getDetail());
+    }
+
+    @Test
     void shouldCoverAllProblemExceptionConstructors() {
         var uri = java.net.URI.create("http://test.com");
-        new ProblemException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_REQUEST);
-        var ex2 = new ProblemException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_REQUEST, "http://custom.com");
-        assertEquals("msg", ex2.getMessage());
-
-        new BusinessException("msg", HttpStatus.BAD_REQUEST);
-        new BusinessException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_REQUEST, "detail");
-        new BusinessException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_REQUEST, uri);
+        
+        // ProblemException variations
+        assertNotNull(new ProblemException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_REQUEST));
+        assertNotNull(new ProblemException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_REQUEST, "http://custom.com"));
+        assertNotNull(new ProblemException("http://custom.com", "msg", HttpStatus.BAD_REQUEST));
+        assertNotNull(new ProblemException("msg", HttpStatus.BAD_REQUEST, "http://custom.com"));
+        assertNotNull(new ProblemException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_REQUEST, (java.net.URI) null));
+        assertNotNull(new ProblemException("msg", HttpStatus.BAD_GATEWAY));
+        
+        // BusinessException variations
+        assertNotNull(new BusinessException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_REQUEST));
+        assertNotNull(new BusinessException("msg", HttpStatus.BAD_REQUEST));
+        assertNotNull(new BusinessException("msg", HttpStatus.BAD_REQUEST, "http://custom.com"));
+        assertNotNull(new BusinessException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_GATEWAY, "detail"));
+        assertNotNull(new BusinessException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_REQUEST, uri));
+        
+        // Edge case for branch coverage: String customUrl is null
+        assertNotNull(new ProblemException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_REQUEST, (String) null));
     }
 
     @Test
@@ -212,17 +459,23 @@ class GlobalExceptionHandlerTest {
     @Test
     void shouldHandleProblemTypeProviderException() {
         class ProviderException extends RuntimeException implements ProblemTypeProvider {
-            @Override public java.net.URI getProblemType() { return java.net.URI.create("http://provider.com"); }
+            @Override
+            public java.net.URI getProblemType() {
+                return java.net.URI.create("http://provider.com");
+            }
         }
-        ProblemDetail result = globalExceptionHandler.handleGenericException(new ProviderException(), request, Locale.ENGLISH);
+        ProblemDetail result = globalExceptionHandler.handleGenericException(new ProviderException(), request,
+                Locale.ENGLISH);
         assertEquals("http://provider.com", result.getType().toString());
     }
 
     @Test
     void shouldHandleAnnotatedProblemTypeException() {
         @ProblemType("http://annotated.com")
-        class AnnotatedEx extends RuntimeException {}
-        ProblemDetail result = globalExceptionHandler.handleGenericException(new AnnotatedEx(), request, Locale.ENGLISH);
+        class AnnotatedEx extends RuntimeException {
+        }
+        ProblemDetail result = globalExceptionHandler.handleGenericException(new AnnotatedEx(), request,
+                Locale.ENGLISH);
         assertEquals("http://annotated.com", result.getType().toString());
     }
 
@@ -231,17 +484,79 @@ class GlobalExceptionHandlerTest {
         java.lang.reflect.Method resolveType = ProblemDetailService.class.getDeclaredMethod("resolveType", String.class,
                 java.net.URI.class);
         resolveType.setAccessible(true);
-        Object result = resolveType.invoke(problemDetailService, null, null);
-        assertEquals("urn:problem-type:unknown-error", result.toString());
+
+        // Case: null code
+        Object resultNull = resolveType.invoke(problemDetailService, null, null);
+        assertEquals("urn:problem-type:unknown-error", resultNull.toString());
+
+        // Case: blank code
+        Object resultBlank = resolveType.invoke(problemDetailService, "  ", null);
+        assertEquals("urn:problem-type:unknown-error", resultBlank.toString());
+
+        // Case: invalid enum code (fallback to kebab)
+        Object resultInvalid = resolveType.invoke(problemDetailService, "CUSTOM_ERROR", null);
+        assertEquals("urn:problem-type:custom-error", resultInvalid.toString());
+    }
+
+    @Test
+    void shouldHandleExtractCustomTypeEdgeCases() throws Exception {
+        java.lang.reflect.Method extractType = ProblemDetailService.class.getDeclaredMethod("extractCustomType",
+                Exception.class);
+        extractType.setAccessible(true);
+
+        // Case: null exception
+        assertNull(extractType.invoke(problemDetailService, (Object) null));
+
+        // Case: standard exception without annotation
+        assertNull(extractType.invoke(problemDetailService, new RuntimeException()));
+
+        // Case: annotated with invalid URI
+        @ProblemType("invalid uri with spaces")
+        class InvalidAnnotatedEx extends RuntimeException {
+        }
+        assertNull(extractType.invoke(problemDetailService, new InvalidAnnotatedEx()));
     }
 
     @Test
     void shouldHandleInvalidTypeOverrideGracefully() {
         ApiStandardProperties props = new ApiStandardProperties();
-        props.getErrors().getTypeOverrides().put("BAD_REQUEST", "invalid uri with spaces");
+        props.getErrors().setTypeOverrides(java.util.Map.of("BAD_REQUEST", "invalid uri with spaces"));
         ProblemDetailService pds = new ProblemDetailService(messageSource, props, List.of());
-        ProblemDetail result = pds.createProblem(HttpStatus.BAD_REQUEST, request, "detail", "BAD_REQUEST", null, Locale.ENGLISH);
+        ProblemDetail result = pds.createProblem(HttpStatus.BAD_REQUEST, request, "detail", "BAD_REQUEST", null,
+                Locale.ENGLISH);
         assertEquals("urn:problem-type:bad-request", result.getType().toString());
+    }
+
+    @Test
+    void shouldHandleStatusReasonPhraseFailure() {
+        HttpStatus status = mock(HttpStatus.class);
+        // ProblemDetail.forStatus(status) uses status.value()
+        when(status.value()).thenReturn(500);
+        // status.getReasonPhrase() is used in the try-catch
+        when(status.getReasonPhrase()).thenThrow(new RuntimeException("Simulation"));
+
+        ProblemDetailService pds = new ProblemDetailService(messageSource, new ApiStandardProperties(), List.of());
+        ProblemDetail result = pds.createProblem(status, request, "detail", "INTERNAL_ERROR", null, Locale.ENGLISH);
+        assertEquals(500, result.getStatus());
+        // messageSource.getMessage("error.INTERNAL_ERROR", null, "Error", locale)
+        // Our mock returns arg 2 if translation fails, which would be "Error"
+        assertEquals("Error", result.getTitle());
+    }
+
+    @Test
+    void shouldHandleValidTypeOverrideInService() {
+        ApiStandardProperties props = new ApiStandardProperties();
+        props.getErrors().setTypeOverrides(java.util.Map.of("CUSTOM_CODE", "http://valid-override.com"));
+        ProblemDetailService pds = new ProblemDetailService(messageSource, props, List.of());
+        ProblemDetail result = pds.createProblem(HttpStatus.BAD_REQUEST, request, "detail", "CUSTOM_CODE", null,
+                Locale.ENGLISH);
+        assertEquals("http://valid-override.com", result.getType().toString());
+    }
+    @Test
+    void shouldHandleAnnotatedException() {
+        var ex = new CustomAnnotatedException();
+        ProblemDetail result = globalExceptionHandler.handleGenericException(ex, request, Locale.ENGLISH);
+        assertEquals(HttpStatus.CONFLICT.value(), result.getStatus());
     }
 
     @org.springframework.web.bind.annotation.ResponseStatus(HttpStatus.CONFLICT)

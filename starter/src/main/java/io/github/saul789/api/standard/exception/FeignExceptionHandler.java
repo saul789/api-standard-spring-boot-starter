@@ -24,9 +24,12 @@ import java.time.Instant;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ConditionalOnClass(name = "feign.FeignException")
 public class FeignExceptionHandler {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FeignExceptionHandler.class);
     private final ApiStandardProperties properties;
     private final org.springframework.context.MessageSource messageSource;
 
+    private static final com.fasterxml.jackson.core.type.TypeReference<java.util.Map<String, Object>> MAP_TYPE = new com.fasterxml.jackson.core.type.TypeReference<>() {};
+    
     public FeignExceptionHandler(ApiStandardProperties properties, org.springframework.context.MessageSource messageSource) {
         this.properties = properties;
         this.messageSource = messageSource;
@@ -64,7 +67,8 @@ public class FeignExceptionHandler {
         if (properties.getErrors().getTypeOverrides().containsKey(codeName)) {
             try {
                 problem.setType(URI.create(properties.getErrors().getTypeOverrides().get(codeName)));
-            } catch (Exception _) {
+            } catch (Exception e) {
+                log.debug("Invalid override URI for {}: {}", codeName, e.getMessage());
                 problem.setType(generateDefaultType(codeName));
             }
         } else {
@@ -73,8 +77,8 @@ public class FeignExceptionHandler {
 
         try {
             problem.setInstance(URI.create(request.getRequestURI()));
-        } catch (Exception _) {
-            // Standard problem detail instantiation fallback
+        } catch (Exception e) {
+            log.trace("Failed to resolve request URI: {}", e.getMessage());
         }
         problem.setProperty("timestamp", Instant.now());
         String traceId = MDC.get("traceId");
@@ -109,13 +113,13 @@ public class FeignExceptionHandler {
             try {
                 com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper()
                     .configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                java.util.Map<String, Object> remoteBody = mapper.readValue(ex.contentUTF8(), new com.fasterxml.jackson.core.type.TypeReference<java.util.Map<String, Object>>() {});
+                java.util.Map<String, Object> remoteBody = mapper.readValue(ex.contentUTF8(), MAP_TYPE);
                 
                 String detail = (String) remoteBody.get("detail");
                 String code = (String) remoteBody.get("code");
                 return new RemoteErrorDetails(detail, code);
-            } catch (Exception _) {
-                // Ignore parsing errors
+            } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+                log.debug("Failed to parse Feign error body: {}", e.getMessage());
             }
         }
         return null;
@@ -129,7 +133,7 @@ public class FeignExceptionHandler {
         try {
             typeSuffix = ErrorCode.valueOf(code).toKebabCase();
         } catch (Exception _) {
-            typeSuffix = code.toLowerCase().replace('_', '-');
+            typeSuffix = code.toLowerCase(java.util.Locale.ROOT).replace('_', '-');
         }
         return URI.create(baseUri + typeSuffix);
     }
