@@ -26,6 +26,14 @@ jobs:
       - name: Build & Test (Multi-module)
         run: mvn clean install -B jacoco:report
 
+      - name: Cache Dependency Check Data
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/owasp/dependency-check-data
+          key: dependency-check-data-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            dependency-check-data-${{ runner.os }}-
+
       - name: Dependency Check
         run: mvn org.owasp:dependency-check-maven:check -Dformat=HTML -DnvdApiKey=${{ secrets.NVD_API_KEY }}
 
