@@ -1,24 +1,98 @@
-# Compiled class file
+############################
+# Java / Maven
+############################
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Compiled class files
 *.class
 
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
+# Package files
 *.jar
 *.war
 *.nar
 *.ear
+
+############################
+# Logs
+############################
+*.log
+logs/
+*.out
+
+############################
+# Spring Boot
+############################
+spring.log
+
+############################
+# JaCoCo / Coverage
+############################
+jacoco.exec
+jacoco-report/
+target/site/jacoco/
+
+############################
+# SpotBugs / Reports
+############################
+spotbugsXml.xml
+spotbugs.html
+target/spotbugs*
+dependency-check-report.*
+dependency-check-data/
+
+############################
+# IDE - IntelliJ
+############################
+.idea/
+*.iml
+*.iws
+out/
+
+############################
+# IDE - Eclipse
+############################
+.project
+.classpath
+.settings/
+bin/
+
+############################
+# IDE - VSCode
+############################
+.vscode/
+
+############################
+# OS Files
+############################
+.DS_Store
+Thumbs.db
+
+############################
+# Temp / Misc
+############################
+*.tmp
+*.swp
+*~
+.mtj.tmp/
+
+############################
+# JVM Crash Logs
+############################
+hs_err_pid*
+replay_pid*
+
+############################
+# Archives
+############################
 *.zip
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
+############################
+# Docker (si usas)
+############################
+*.pid
+*.seed
+*.pid.lock
+**/target/
