@@ -37,7 +37,7 @@ public class ApiStandardProperties {
         }
 
         public void setTypeOverrides(Map<String, String> typeOverrides) {
-            this.typeOverrides = typeOverrides != null ? new java.util.HashMap<>(typeOverrides) : new java.util.HashMap<>();
+            this.typeOverrides = typeOverrides != null ? new HashMap<>(typeOverrides) : new HashMap<>();
         }
     }
 }

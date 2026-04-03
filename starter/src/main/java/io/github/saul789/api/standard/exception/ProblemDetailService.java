@@ -86,7 +86,7 @@ public class ProblemDetailService {
         if (annotation != null) {
             try {
                 return URI.create(annotation.value());
-            } catch (Exception _) {
+            } catch (Exception ignored) {
                 // Return null if annotation value is not a valid URI
             }
         }
@@ -101,7 +101,7 @@ public class ProblemDetailService {
         if (typeVal != null) {
             try {
                 return URI.create(typeVal);
-            } catch (Exception _) {
+            } catch (Exception ignored) {
                 // If override is an invalid URI, proceed to default generation
             }
         }
@@ -114,8 +114,8 @@ public class ProblemDetailService {
         } else {
             try {
                 typeSuffix = ErrorCode.valueOf(code).toKebabCase();
-            } catch (Exception _) {
-                typeSuffix = code.toLowerCase(java.util.Locale.ROOT).replace('_', '-');
+            } catch (Exception ignored) {
+                typeSuffix = code.toLowerCase(Locale.ROOT).replace('_', '-');
             }
         }
         return URI.create(baseUri + typeSuffix);
