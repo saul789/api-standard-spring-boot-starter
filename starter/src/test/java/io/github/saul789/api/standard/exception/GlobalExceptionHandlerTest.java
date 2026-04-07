@@ -289,16 +289,16 @@ class GlobalExceptionHandlerTest {
         when(violation.getPropertyPath()).thenReturn(path);
         when(path.iterator()).thenReturn(java.util.Collections.emptyIterator());
         when(violation.getMessage()).thenReturn("raw message");
-        
-        // Case 1: Stars with { but doesn't end with }
+
         when(violation.getMessageTemplate()).thenReturn("{missing-end");
         ProblemDetail result1 = globalExceptionHandler.handleConstraintViolation(ex, request, Locale.ENGLISH);
-        assertEquals("raw message", ((List<ValidationError>) result1.getProperties().get("errors")).get(0).getMessage());
+        assertEquals("raw message",
+                ((List<ValidationError>) result1.getProperties().get("errors")).get(0).getMessage());
 
-        // Case 2: Ends with } but doesn't start with {
         when(violation.getMessageTemplate()).thenReturn("missing-start}");
         ProblemDetail result2 = globalExceptionHandler.handleConstraintViolation(ex, request, Locale.ENGLISH);
-        assertEquals("raw message", ((List<ValidationError>) result2.getProperties().get("errors")).get(0).getMessage());
+        assertEquals("raw message",
+                ((List<ValidationError>) result2.getProperties().get("errors")).get(0).getMessage());
     }
 
     @Test
@@ -372,9 +372,10 @@ class GlobalExceptionHandlerTest {
     @Test
     void shouldHandleAccessDeniedExceptionByName() {
         // Mock exception where simple name contains AccessDeniedException
-        class FakeAccessDeniedException extends RuntimeException {}
+        class FakeAccessDeniedException extends RuntimeException {
+        }
         var ex = new FakeAccessDeniedException();
-        
+
         ProblemDetail result = globalExceptionHandler.handleGenericException(ex, request, Locale.ENGLISH);
         assertEquals(HttpStatus.FORBIDDEN.value(), result.getStatus());
         assertEquals("FORBIDDEN", result.getProperties().get("code"));
@@ -382,7 +383,8 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void shouldHandleResponseStatusException() {
-        var ex = new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Not Acceptable");
+        var ex = new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
+                "Not Acceptable");
         ProblemDetail result = globalExceptionHandler.handleResponseStatusException(ex, request, Locale.ENGLISH);
         assertEquals(HttpStatus.NOT_ACCEPTABLE.value(), result.getStatus());
     }
@@ -419,7 +421,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void shouldCoverAllProblemExceptionConstructors() {
         var uri = java.net.URI.create("http://test.com");
-        
+
         // ProblemException variations
         assertNotNull(new ProblemException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_REQUEST));
         assertNotNull(new ProblemException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_REQUEST, "http://custom.com"));
@@ -427,14 +429,14 @@ class GlobalExceptionHandlerTest {
         assertNotNull(new ProblemException("msg", HttpStatus.BAD_REQUEST, "http://custom.com"));
         assertNotNull(new ProblemException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_REQUEST, (java.net.URI) null));
         assertNotNull(new ProblemException("msg", HttpStatus.BAD_GATEWAY));
-        
+
         // BusinessException variations
         assertNotNull(new BusinessException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_REQUEST));
         assertNotNull(new BusinessException("msg", HttpStatus.BAD_REQUEST));
         assertNotNull(new BusinessException("msg", HttpStatus.BAD_REQUEST, "http://custom.com"));
         assertNotNull(new BusinessException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_GATEWAY, "detail"));
         assertNotNull(new BusinessException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_REQUEST, uri));
-        
+
         // Edge case for branch coverage: String customUrl is null
         assertNotNull(new ProblemException(ErrorCode.BAD_REQUEST, "msg", HttpStatus.BAD_REQUEST, (String) null));
     }
@@ -493,7 +495,7 @@ class GlobalExceptionHandlerTest {
         Object resultBlank = resolveType.invoke(problemDetailService, "  ", null);
         assertEquals("urn:problem-type:unknown-error", resultBlank.toString());
 
-        // Case: invalid enum code (fallback to kebab)
+        // Case 2: Ends with a closing brace but does not start with an opening bracekebab)
         Object resultInvalid = resolveType.invoke(problemDetailService, "CUSTOM_ERROR", null);
         assertEquals("urn:problem-type:custom-error", resultInvalid.toString());
     }
@@ -507,7 +509,7 @@ class GlobalExceptionHandlerTest {
         // Case: null exception
         assertNull(extractType.invoke(problemDetailService, (Object) null));
 
-        // Case: standard exception without annotation
+        // Case 1: Starts with an opening brace but does not end with a closing braceout annotation
         assertNull(extractType.invoke(problemDetailService, new RuntimeException()));
 
         // Case: annotated with invalid URI
@@ -552,6 +554,7 @@ class GlobalExceptionHandlerTest {
                 Locale.ENGLISH);
         assertEquals("http://valid-override.com", result.getType().toString());
     }
+
     @Test
     void shouldHandleAnnotatedException() {
         var ex = new CustomAnnotatedException();
@@ -569,7 +572,8 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void shouldHandleResilience4jCircuitBreakerAs503() {
-        // Mock actual Resilience4j exception so that the class name contains the package name
+        // Mock actual Resilience4j exception so that the class name contains the
+        // package name
         var ex = mock(io.github.resilience4j.circuitbreaker.CallNotPermittedException.class);
         ProblemDetail result = globalExceptionHandler.handleGenericException(ex, request, Locale.ENGLISH);
         assertEquals(HttpStatus.SERVICE_UNAVAILABLE.value(), result.getStatus());
@@ -601,7 +605,8 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void shouldHandleGenericExceptionWithAccessDenied() {
-        class FakeAccessDeniedException extends RuntimeException {}
+        class FakeAccessDeniedException extends RuntimeException {
+        }
         var ex = new FakeAccessDeniedException();
         ProblemDetail result = globalExceptionHandler.handleGenericException(ex, request, Locale.ENGLISH);
         assertEquals(HttpStatus.FORBIDDEN.value(), result.getStatus());
