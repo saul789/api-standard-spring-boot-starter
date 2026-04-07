@@ -12,16 +12,12 @@
     </suppress>
     <suppress>
         <notes>
-            Suppress all XSS and parsing vulnerabilities reported within swagger-ui bundles.
-            Since Swagger UI is primarily used in dev or internal environments to render our own specs,
-            the XSS risk from malicious definitions is negligible.
+            Suppress all vulnerabilities reported within swagger-ui bundles.
         </notes>
         <filePath regex="true">.*swagger-ui.*</filePath>
-        <vulnerabilityName regex="true">.*</vulnerabilityName>
     </suppress>
     <suppress>
         <notes>Fallback URL matcher for DOMPurify within Swagger UI</notes>
         <packageUrl regex="true">^pkg:javascript/DOMPurify.*$</packageUrl>
-        <vulnerabilityName regex="true">.*</vulnerabilityName>
     </suppress>
 </suppressions>
