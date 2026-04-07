@@ -14,7 +14,7 @@
 
     <groupId>io.github.saul789</groupId>
     <artifactId>spring-boot-starter-api-standard</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <packaging>pom</packaging>
 
     <licenses>
