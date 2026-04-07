@@ -17,11 +17,11 @@
             the XSS risk from malicious definitions is negligible.
         </notes>
         <filePath regex="true">.*swagger-ui.*</filePath>
-        <cve regex="true">.*</cve>
+        <vulnerabilityName regex="true">.*</vulnerabilityName>
     </suppress>
     <suppress>
         <notes>Fallback URL matcher for DOMPurify within Swagger UI</notes>
         <packageUrl regex="true">^pkg:javascript/DOMPurify.*$</packageUrl>
-        <cve regex="true">.*</cve>
+        <vulnerabilityName regex="true">.*</vulnerabilityName>
     </suppress>
 </suppressions>
