@@ -194,6 +194,20 @@ public class GlobalExceptionHandler {
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         String codeName = ErrorCode.INTERNAL_ERROR.name();
 
+        // Check Resilience4j exceptions FIRST (they may implement ErrorResponse in integration builds)
+        String exceptionClassName = ex.getClass().getName();
+        if (exceptionClassName.contains("resilience4j.circuitbreaker.CallNotPermittedException")) {
+            return problemDetailService.createProblem(
+                    HttpStatus.SERVICE_UNAVAILABLE, request, "error.circuit_breaker_open",
+                    ErrorCode.SERVICE_UNAVAILABLE.name(), ex, locale);
+        }
+        if (exceptionClassName.contains("resilience4j.ratelimiter.RequestNotPermitted")
+                || exceptionClassName.contains("resilience4j.bulkhead.BulkheadFullException")) {
+            return problemDetailService.createProblem(
+                    HttpStatus.TOO_MANY_REQUESTS, request, "error.too_many_requests",
+                    ErrorCode.TOO_MANY_REQUESTS.name(), ex, locale);
+        }
+
         if (ex instanceof ErrorResponse errorResponse) {
             ProblemDetail problem = errorResponse.updateAndGetBody(messageSource, locale);
             return problemDetailService.createProblem(
@@ -215,6 +229,11 @@ public class GlobalExceptionHandler {
                 status = HttpStatus.FORBIDDEN;
                 codeName = ErrorCode.FORBIDDEN.name();
                 message = "error.forbidden";
+            } else if (ex instanceof java.util.concurrent.TimeoutException
+                    || exceptionName.contains("TimeoutException")) {
+                status = HttpStatus.GATEWAY_TIMEOUT;
+                codeName = ErrorCode.GATEWAY_TIMEOUT.name();
+                message = "error.gateway_timeout";
             } else {
                 log.error("Unhandled exception caught: {}", ex.getMessage(), ex);
                 message = "error.internal_error";

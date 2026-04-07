@@ -559,6 +559,55 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.CONFLICT.value(), result.getStatus());
     }
 
+    @Test
+    void shouldHandleTimeoutExceptionAs504() {
+        var ex = new java.util.concurrent.TimeoutException("upstream timeout");
+        ProblemDetail result = globalExceptionHandler.handleGenericException(ex, request, Locale.ENGLISH);
+        assertEquals(HttpStatus.GATEWAY_TIMEOUT.value(), result.getStatus());
+        assertEquals("GATEWAY_TIMEOUT", result.getProperties().get("code"));
+    }
+
+    @Test
+    void shouldHandleResilience4jCircuitBreakerAs503() {
+        // Mock actual Resilience4j exception so that the class name contains the package name
+        var ex = mock(io.github.resilience4j.circuitbreaker.CallNotPermittedException.class);
+        ProblemDetail result = globalExceptionHandler.handleGenericException(ex, request, Locale.ENGLISH);
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE.value(), result.getStatus());
+        assertEquals("SERVICE_UNAVAILABLE", result.getProperties().get("code"));
+    }
+
+    @Test
+    void shouldHandleResilience4jRateLimiterAs429() {
+        var ex = mock(io.github.resilience4j.ratelimiter.RequestNotPermitted.class);
+        ProblemDetail result = globalExceptionHandler.handleGenericException(ex, request, Locale.ENGLISH);
+        assertEquals(HttpStatus.TOO_MANY_REQUESTS.value(), result.getStatus());
+        assertEquals("TOO_MANY_REQUESTS", result.getProperties().get("code"));
+    }
+
+    @Test
+    void shouldHandleResilience4jBulkheadAs429() {
+        var ex = mock(io.github.resilience4j.bulkhead.BulkheadFullException.class);
+        ProblemDetail result = globalExceptionHandler.handleGenericException(ex, request, Locale.ENGLISH);
+        assertEquals(HttpStatus.TOO_MANY_REQUESTS.value(), result.getStatus());
+        assertEquals("TOO_MANY_REQUESTS", result.getProperties().get("code"));
+    }
+
+    @Test
+    void shouldCoverSetTypeOverridesNull() {
+        ApiStandardProperties props = new ApiStandardProperties();
+        props.getErrors().setTypeOverrides(null);
+        assertTrue(props.getErrors().getTypeOverrides().isEmpty());
+    }
+
+    @Test
+    void shouldHandleGenericExceptionWithAccessDenied() {
+        class FakeAccessDeniedException extends RuntimeException {}
+        var ex = new FakeAccessDeniedException();
+        ProblemDetail result = globalExceptionHandler.handleGenericException(ex, request, Locale.ENGLISH);
+        assertEquals(HttpStatus.FORBIDDEN.value(), result.getStatus());
+        assertEquals("FORBIDDEN", result.getProperties().get("code"));
+    }
+
     @org.springframework.web.bind.annotation.ResponseStatus(HttpStatus.CONFLICT)
     static class CustomAnnotatedException extends RuntimeException {
     }
