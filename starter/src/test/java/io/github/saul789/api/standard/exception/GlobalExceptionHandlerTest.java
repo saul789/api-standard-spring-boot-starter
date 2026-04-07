@@ -495,7 +495,8 @@ class GlobalExceptionHandlerTest {
         Object resultBlank = resolveType.invoke(problemDetailService, "  ", null);
         assertEquals("urn:problem-type:unknown-error", resultBlank.toString());
 
-        // Case 2: Ends with a closing brace but does not start with an opening bracekebab)
+        // Case 2: Ends with a closing brace but does not start with an opening
+        // bracekebab)
         Object resultInvalid = resolveType.invoke(problemDetailService, "CUSTOM_ERROR", null);
         assertEquals("urn:problem-type:custom-error", resultInvalid.toString());
     }
@@ -509,7 +510,8 @@ class GlobalExceptionHandlerTest {
         // Case: null exception
         assertNull(extractType.invoke(problemDetailService, (Object) null));
 
-        // Case 1: Starts with an opening brace but does not end with a closing braceout annotation
+        // Case 1: Starts with an opening brace but does not end with a closing braceout
+        // annotation
         assertNull(extractType.invoke(problemDetailService, new RuntimeException()));
 
         // Case: annotated with invalid URI
