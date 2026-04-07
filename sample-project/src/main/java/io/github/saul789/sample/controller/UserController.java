@@ -18,15 +18,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     /**
-     * Simula la creación de un usuario.
-     * Demuestra:
-     * 1. Validación automática (@Valid) -> VALIDATION_ERROR.
-     * 2. Regla de negocio (Usuario duplicado) -> CONFLICT.
-     * 3. i18n con claves dinámicas.
+     * Simulates the creation of a user.
+     * Demonstrates:
+     * 1. Automatic validation (@Valid) -> VALIDATION_ERROR.
+     * 2. Business rule (Duplicate user) -> CONFLICT.
+     * 3. i18n with dynamic keys.
      */
     @PostMapping
     public String createUser(@Valid @RequestBody UserRequest request) {
-        // Simulación: Si el email es test@example.com, lanzamos excepción de negocio
+        // Simulation: If email is test@example.com, throw a business exception
         if ("test@example.com".equalsIgnoreCase(request.email())) {
             throw new BusinessException(
                 ErrorCode.CONFLICT, 
@@ -36,6 +36,6 @@ public class UserController {
             );
         }
         
-        return "Usuario " + request.name() + " creado correctamente.";
+        return "User " + request.name() + " successfully created.";
     }
 }

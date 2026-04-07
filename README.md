@@ -57,7 +57,7 @@ public class UserController {
   "timestamp": "2023-10-25T10:00:00Z"
 }
 ```
-*(The wrapper schema may vary slightly based on your `ApiResponse` model)*
+*(Note: `String`, `byte[]`, and Spring `Resource` types are intentionally ignored by the wrapper to allow file downloads and plain-text endpoints natively)*
 
 ### 2. Global Exception Handling (`GlobalExceptionHandler`)
 
@@ -125,22 +125,79 @@ public class UserAlreadyExistsException extends RuntimeException {
 
 ### 4. Custom documentation URLs
 
-You can override the default URN by providing a custom documentation URL:
+The RFC 9457 standard expects a URI reference in the `type` field so developers can look up documentation for the error. You can override the default library URN in three different ways:
 
+#### Option 1: Inline via Exception Constructors
+If the error documentation URI is dynamic or highly specific to a single endpoint, simply pass it when throwing the exception.
+**Code:**
 ```java
-// Option 1: Using BusinessException / ProblemException constructor
-throw new BusinessException("No funds", HttpStatus.BAD_REQUEST, "https://docs.myapi.com/errors/insufficient-funds");
+@GetMapping("/payment")
+public void processPayment() {
+    throw new BusinessException(
+        ErrorCode.PAYMENT_REQUIRED, 
+        "Insufficient funds in account", 
+        HttpStatus.PAYMENT_REQUIRED, 
+        "https://docs.myapi.com/errors/insufficient-funds"
+    );
+}
+```
+**Resulting JSON:**
+```json
+{
+    "type": "https://docs.myapi.com/errors/insufficient-funds",
+    "title": "Payment Required",
+    "status": 402,
+    ...
+}
+```
 
-// Option 2: Using @ProblemType annotation on your custom exception
-@ProblemType("https://docs.myapi.com/errors/custom-error")
-public class MySpecificException extends RuntimeException { ... }
+#### Option 2: Using the `@ProblemType` Annotation
+For your own declarative custom exceptions, you can attach the documentation URL directly to the class.
+**Code:**
+```java
+@ResponseStatus(HttpStatus.CONFLICT)
+@ProblemType("https://docs.myapi.com/errors/inventory-conflict")
+public class OutOfStockException extends RuntimeException {
+    public OutOfStockException(String message) {
+        super(message);
+    }
+}
+```
+**Resulting JSON:**
+```json
+{
+    "type": "https://docs.myapi.com/errors/inventory-conflict",
+    "title": "Conflict",
+    "status": 409,
+    ...
+}
+```
 
-// Option 3: Global configuration in application.yml
+#### Option 3: Global `application.yml` Configuration
+Ideal for overriding standard Spring Errors or defining base paths, so you don't repeat URLs across your codebase.
+**Configuration:**
+```yaml
 api:
   standard:
     errors:
+      # Optional: Replaces the auto-generated 'urn:problem-type:' prefix natively for ALL exceptions
+      type-base-uri: "https://my-company.com/docs/errors/" 
+      
+      # Optional: Explicitly override the URL for a specific ErrorCode
       type-overrides:
         BAD_REQUEST: "https://docs.myapi.com/errors/general-bad-request"
+```
+**Code:**
+```java
+// A simple BusinessException with no explicit URL passed
+throw new BusinessException(ErrorCode.BAD_REQUEST, "Invalid schema", HttpStatus.BAD_REQUEST);
+```
+**Resulting JSON (using the override):**
+```json
+{
+    "type": "https://docs.myapi.com/errors/general-bad-request",
+    ...
+}
 ```
 
 ### 5. ResponseStatusException
@@ -173,7 +230,18 @@ If you use annotation-based validation for your request payloads, the library au
 
 The library automatically handles exceptions thrown by Feign clients. If a downstream service returns a `ProblemDetail` or a generic error, the starter intercepts it and translates it to the standardized format, preserving the HTTP status and providing a `BAD_GATEWAY` or `GATEWAY_TIMEOUT` code if appropriate.
 
-### 8. i18n Support & Message Personalization
+### 8. Resilience4j Support (Optional)
+
+The library seamlessly integrates with **Resilience4j**. If your project uses Resilience4j's circuit breakers, rate limiters, or bulkheads, the starter automatically registers a dedicated `ResilienceExceptionHandler`. 
+This guarantees that dropped or restricted calls directly translate into rigorous RFC 9457 errors without extra boilerplate:
+
+- **Circuit Breaker Open:** Responds with `503 Service Unavailable` (`urn:problem-type:service-unavailable`)
+- **Rate Limit / Bulkhead Exceeded:** Responds with `429 Too Many Requests` (`urn:problem-type:too-many-requests`)
+- **Time Limiter Exceeded:** Responds with `504 Gateway Timeout` (`urn:problem-type:gateway-timeout`)
+
+*Architectural note: This behavior triggers strictly via `@ConditionalOnClass`, meaning it adds literally **zero overhead** and forces no transitive compilation dependencies if your specific microservice doesn't use Resilience4j.*
+
+### 9. i18n Support & Message Personalization
 
 The library intelligently resolves the `detail` and `title` fields using Spring's `MessageSource` and the current `Locale` (automatically extracted from the `Accept-Language` header).
 
@@ -201,7 +269,7 @@ throw new BusinessException(ErrorCode.BAD_REQUEST, "El usuario Saul ya tiene un 
 // Result -> detail: "El usuario Saul ya tiene un plan activo" (No translation attempted as it's not a key)
 ```
 
-### 9. Trace Context & Logging
+### 10. Trace Context & Logging
 
 The included filters (`TraceContextFilter` and `RequestLoggingFilter`) automatically:
 1. Extract an incoming `traceId` header or generate a new UUID.
@@ -221,37 +289,69 @@ Contributions are welcome! Please open an issue or submit a Pull Request if you 
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
 ## 📮 Postman Collection
 
-Para facilitar las pruebas, se incluye una colección de Postman en:
+To facilitate testing, a Postman collection is included here:
 `sample-project/postman/spring-boot-starter-api-standard.postman_collection.json`
 
 ---
 
-### 10. UserController Example (Audited & Standardized)
+### 11. UserController Example (Audited & Standardized)
 
 To see everything in action, the `sample-project` includes a `UserController` that demonstrates the full power of the library:
 
 **Model Validation + Business Logic:**
 ```java
-@PostMapping
-public String createUser(@Valid @RequestBody UserRequest request) {
-    if ("test@example.com".equals(request.email())) {
-        throw new BusinessException(
-            ErrorCode.CONFLICT, 
-            "error.user.already_exists", 
-            HttpStatus.CONFLICT,
-            "https://api.saul.dev/docs/errors/user-limits"
-        );
+@RestController
+@RequestMapping("/api/demo/users")
+public class UserController {
+
+    @PostMapping
+    public String createUser(@Valid @RequestBody UserRequest request) {
+        // Simulation: If email is test@example.com, throw a business exception
+        if ("test@example.com".equalsIgnoreCase(request.email())) {
+            throw new BusinessException(
+                ErrorCode.CONFLICT, 
+                "error.user.already_exists", 
+                HttpStatus.CONFLICT,
+                "https://api.saul.dev/docs/errors/user-limits"
+            );
+        }
+        
+        return "User " + request.name() + " successfully created.";
     }
-    return "User created!";
 }
 ```
 
-**Scenario 1: Validation Error (Empty Name)**
-Returns HTTP 400 with `code: VALIDATION_ERROR` and a list of field-specific messages from your `messages.properties`.
+**Scenario 1: Validation Error (Empty Name or Email)**
+If you send an invalid payload without a name or email, the library automatically translates the JSR-303 error into a standard format:
+```bash
+curl -X POST https://api.yourdomain.com/api/demo/users \
+-H "Content-Type: application/json" \
+-d '{}'
+```
+*Returns HTTP 400 with `code: VALIDATION_ERROR` and a list of field-specific messages from your `messages.properties`.*
 
 **Scenario 2: Business Logic Error (Duplicate Email)**
-Returns HTTP 409 with `code: CONFLICT`, the translated message from `error.user.already_exists`, and the custom documentation URL in the `type` field.
+If you trigger the business rule, the library gracefully intercepts the exception and builds a Problem Detail RFC 9457 JSON:
+```bash
+curl -X POST https://api.yourdomain.com/api/demo/users \
+-H "Content-Type: application/json" \
+-H "Accept-Language: es" \
+-d '{"name": "Test", "email": "test@example.com"}'
+```
+*Returns HTTP 409 with `code: CONFLICT`, the translated message from `error.user.already_exists` (i18n aware), and the custom documentation URL in the `type` field.*
+
+**Scenario 3: Success Response (Plain Text)**
+When the request is successful, the controller returns a `String`. The library intelligently ignores `String` returns to allow raw responses without corrupting plain-text.
+```bash
+curl -X POST https://api.yourdomain.com/api/demo/users \
+-H "Content-Type: application/json" \
+-d '{"name": "John", "email": "john@example.com"}'
+```
+*Returns HTTP 200 with the pure text string `User John successfully created.`*
+
+*(Note: If the controller returned a DTO, List, or Map instead, it would be automatically wrapped in an `ApiResponse` envelope with `success: true` and the object in the `data` field.)*
+                                                                                                                            

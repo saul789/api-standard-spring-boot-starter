@@ -545,6 +545,91 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "8. Resilience4j Patterns (Optional)",
+			"item": [
+				{
+					"name": "Simulate Closed Circuit (503)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/demo/resilience/circuit-breaker",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"resilience",
+								"circuit-breaker"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Simulate Rate Limit Exceeded (429)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/demo/resilience/rate-limiter",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"resilience",
+								"rate-limiter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Simulate Timeout Exception (504)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/demo/resilience/timeout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"resilience",
+								"timeout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Simulate Bulkhead Full (429)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/demo/resilience/bulkhead",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"resilience",
+								"bulkhead"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"event": [
