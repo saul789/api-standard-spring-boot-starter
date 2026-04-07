@@ -278,6 +278,25 @@ The included filters (`TraceContextFilter` and `RequestLoggingFilter`) automatic
 
 Because the library integrates with MDC out of the box, all your application logs will automatically share the same `traceId`, which is essential for distributed monitoring tools like ELK, Splunk, Datadog or Zipkin.
 
+### 11. Automatic OpenAPI / Swagger Formatting (Zero-Config)
+
+The library features **Conditional OpenAPI Integration**. You no longer need to manually annotate every controller with over-engineered `@ApiResponse` tags to explain your custom response envelopes or errors.
+
+If your project is utilizing `springdoc-openapi` (Swagger UI), the underlying starter will instantly detect it and auto-configure an `OpenApiCustomizer` that:
+1. **Wraps Success Responses:** Transparently updates your documented `200 OK` endpoint schemas to reflect the global `ApiResponse` wrapper (`{"success": true, "data": { ... }}`).
+2. **Documents RFC 9457 Errors:** Automatically registers the rigorous `ProblemDetail` schema for typical HTTP 400, 401, 403, 404, and 500 status codes across all your REST endpoints.
+
+**How to activate it:**
+Simply add the Springdoc OpenAPI dependency to your core application's `pom.xml`. The integration acts invisibly behind the scenes.
+```xml
+<dependency>
+    <groupId>org.springdoc</groupId>
+    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+    <version>2.8.5</version> <!-- Use the version compatible with your project -->
+</dependency>
+```
+*(Note: If you choose not to use Swagger/OpenAPI, the starter remains completely un-opinionated and gracefully drops the feature at boot-time without throwing `ClassNotFoundException`s).*
+
 ## ⚙️ Requirements
 
 - **Java:** 25 or higher
@@ -298,7 +317,7 @@ To facilitate testing, a Postman collection is included here:
 
 ---
 
-### 11. UserController Example (Audited & Standardized)
+### 12. UserController Example (Audited & Standardized)
 
 To see everything in action, the `sample-project` includes a `UserController` that demonstrates the full power of the library:
 

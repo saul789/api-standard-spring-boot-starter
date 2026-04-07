@@ -10,4 +10,16 @@
         <packageUrl regex="true">^pkg:maven/tools\.jackson\.core/jackson-.*@.*$</packageUrl>
         <cve>CVE-2026-29062</cve>
     </suppress>
+    <suppress>
+        <notes>
+            Suppress DOMPurify mXSS vulnerabilities reported within swagger-ui-bundle.js.
+            This is an upstream issue in springdoc-openapi's embedded swagger-ui distribution.
+            Since Swagger UI is primarily used in dev or internal environments to render our own specs,
+            the XSS risk from malicious definitions is negligible.
+        </notes>
+        <packageUrl regex="true">^pkg:javascript/DOMPurify@.*$</packageUrl>
+        <cve>CVE-2025-26791</cve>
+        <cve>CVE-2026-0540</cve>
+        <cve>CVE-2025-15599</cve>
+    </suppress>
 </suppressions>
