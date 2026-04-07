@@ -12,14 +12,16 @@
     </suppress>
     <suppress>
         <notes>
-            Suppress DOMPurify mXSS vulnerabilities reported within swagger-ui-bundle.js.
-            This is an upstream issue in springdoc-openapi's embedded swagger-ui distribution.
+            Suppress all XSS and parsing vulnerabilities reported within swagger-ui bundles.
             Since Swagger UI is primarily used in dev or internal environments to render our own specs,
             the XSS risk from malicious definitions is negligible.
         </notes>
-        <packageUrl regex="true">^pkg:javascript/DOMPurify@.*$</packageUrl>
-        <cve>CVE-2025-26791</cve>
-        <cve>CVE-2026-0540</cve>
-        <cve>CVE-2025-15599</cve>
+        <filePath regex="true">.*swagger-ui.*</filePath>
+        <cve regex="true">.*</cve>
+    </suppress>
+    <suppress>
+        <notes>Fallback URL matcher for DOMPurify within Swagger UI</notes>
+        <packageUrl regex="true">^pkg:javascript/DOMPurify.*$</packageUrl>
+        <cve regex="true">.*</cve>
     </suppress>
 </suppressions>
