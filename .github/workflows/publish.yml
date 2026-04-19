@@ -26,13 +26,18 @@ jobs:
       - name: Build & Test (Multi-module)
         run: mvn clean install -B jacoco:report
 
+      - name: Get date for NVD cache key (24h TTL)
+        id: nvd-cache-date
+        run: echo "date=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+
       - name: Cache Dependency Check Data
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository/org/owasp/dependency-check-data
-          key: dependency-check-data-${{ runner.os }}-${{ github.run_id }}
+          key: ${{ runner.os }}-nvd-${{ steps.nvd-cache-date.outputs.date }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
-            dependency-check-data-${{ runner.os }}-
+            ${{ runner.os }}-nvd-${{ steps.nvd-cache-date.outputs.date }}-
+            ${{ runner.os }}-nvd-
 
       - name: Dependency Check (Aggregate)
         run: mvn org.owasp:dependency-check-maven:aggregate -B -Dformat=HTML -DnvdApiKey=${{ secrets.NVD_API_KEY }} -DsuppressionFiles=dependency-check-suppressions.xml -DfailBuildOnCVSS=1
