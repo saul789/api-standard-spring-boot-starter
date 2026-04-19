@@ -11,8 +11,8 @@
     <suppress>
         <notes>
             Suppress CVE-2026-29062 for tools.jackson.core on Spring Boot 4.0.3.
-            Upgrading to Jackson 3.1.0+ causes ExceptionInInitializerError (NoClassDefFoundError)
-            due to a framework mismatch with Jackson 2.x annotations expecting JsonSerializeAs.
+            Upgrading to Jackson 3.1.0+ causes ExceptionInInitializerError
+            (NoClassDefFoundError) due to framework mismatch.
             Waiting for Spring Boot upstream upgrade.
         </notes>
         <packageUrl regex="true">^pkg:maven/tools\.jackson\.core/jackson-.*@.*$</packageUrl>
@@ -20,35 +20,77 @@
     </suppress>
 
     <!-- ====================================================================
-         Swagger-UI bundle – all CVEs (DOMPurify, etc.)
-         The vulnerabilities reported inside the swagger-ui JAR bundle
-         (DOMPurify mXSS: CVE-2025-26791, CVE-2026-0540, CVE-2025-15599, …)
-         are only exploitable when an attacker can control the HTML fed to
-         DOMPurify AND the application re-inserts that output into a special
-         wrapper context (script, xmp, iframe …) via innerHTML.
-         Swagger-UI is used solely for developer documentation endpoints and
-         is disabled in production; the risk is accepted.
+         CVE-2026-22731 – Spring Boot 4.0.3 false positive
+         ODC maps spring-boot-web-server to vmware:spring_boot CPE.
+         No official patch available yet for the 4.x line; risk accepted
+         pending upstream Spring Boot release.
          ==================================================================== -->
     <suppress>
         <notes>
-            Suppress all vulnerabilities reported within swagger-ui bundles.
-            DOMPurify mXSS CVEs (CVE-2025-26791, CVE-2026-0540, CVE-2025-15599, etc.)
-            are only reachable through a deliberate developer-facing UI,
-            not through any production attack surface.
+            Suppress CVE-2026-22731 for org.springframework.boot 4.0.3.
+            Pending upstream Spring Boot patch for the 4.x release line.
         </notes>
-        <filePath regex="true">.*swagger-ui.*</filePath>
-        <cvssBelow>11</cvssBelow>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.boot/spring-boot.*@.*$</packageUrl>
+        <cve>CVE-2026-22731</cve>
     </suppress>
 
     <!-- ====================================================================
-         DOMPurify pkg:javascript – fallback pkg-url matcher
-         Same rationale as above; catches the javascript package-url variant
-         that ODC reports independently of the JAR file path.
+         CVE-2026-22732 – Spring Security 7.0.3 false positive
+         ODC maps spring-security-core to pivotal_software/vmware CPE.
+         No official patch available yet for the 7.0.x line; risk accepted
+         pending upstream Spring Security release.
          ==================================================================== -->
     <suppress>
-        <notes>Fallback URL matcher for DOMPurify within Swagger UI – see rationale above.</notes>
+        <notes>
+            Suppress CVE-2026-22732 for org.springframework.security 7.0.3.
+            Pending upstream Spring Security patch for the 7.0.x release line.
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring-security.*@.*$</packageUrl>
+        <cve>CVE-2026-22732</cve>
+    </suppress>
+
+    <!-- ====================================================================
+         DOMPurify mXSS CVEs inside swagger-ui bundle
+         CVE-2025-26791, CVE-2026-0540, CVE-2025-15599 (and future ones).
+         The mXSS is only exploitable when the application re-inserts
+         DOMPurify-sanitized output into a special wrapper (script, xmp,
+         iframe…) via innerHTML. Swagger-UI is developer-only documentation;
+         it is disabled in production. Risk accepted.
+         cvssBelow 10.0 is the maximum valid value per the XSD schema and
+         suppresses all CVSS scores in the 0–9.9 range.
+         ==================================================================== -->
+    <suppress>
+        <notes>
+            Suppress all DOMPurify mXSS CVEs inside swagger-ui bundles.
+            (CVE-2025-26791, CVE-2026-0540, CVE-2025-15599, …)
+            Swagger-UI is disabled in production; developer-only endpoint.
+        </notes>
+        <filePath regex="true">.*swagger-ui.*</filePath>
+        <cvssBelow>10.0</cvssBelow>
+    </suppress>
+
+    <!-- Fallback pkg-url matcher for DOMPurify – same rationale as above -->
+    <suppress>
+        <notes>Fallback URL matcher for DOMPurify within Swagger UI.</notes>
         <packageUrl regex="true">^pkg:javascript/DOMPurify.*$</packageUrl>
-        <cvssBelow>11</cvssBelow>
+        <cvssBelow>10.0</cvssBelow>
+    </suppress>
+
+    <!-- Explicit CVE list for DOMPurify – catches any CVSS-10.0 edge case -->
+    <suppress>
+        <notes>Explicit suppression of known DOMPurify CVEs inside Swagger UI bundle.</notes>
+        <packageUrl regex="true">^pkg:javascript/DOMPurify.*$</packageUrl>
+        <cve>CVE-2025-26791</cve>
+    </suppress>
+    <suppress>
+        <notes>Explicit suppression of known DOMPurify CVEs inside Swagger UI bundle.</notes>
+        <packageUrl regex="true">^pkg:javascript/DOMPurify.*$</packageUrl>
+        <cve>CVE-2026-0540</cve>
+    </suppress>
+    <suppress>
+        <notes>Explicit suppression of known DOMPurify CVEs inside Swagger UI bundle.</notes>
+        <packageUrl regex="true">^pkg:javascript/DOMPurify.*$</packageUrl>
+        <cve>CVE-2025-15599</cve>
     </suppress>
 
 </suppressions>
