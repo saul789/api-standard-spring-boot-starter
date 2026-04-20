@@ -17,6 +17,25 @@
     <version>1.2.0</version>
     <packaging>pom</packaging>
 
+    <name>spring-boot-starter-api-standard</name>
+    <description>A plug-and-play Spring Boot starter that standardizes API responses, implements RFC 9457 global exception handling, and provides distributed tracing via Trace Context propagation.</description>
+    <url>https://github.com/saul789/spring-boot-starter-api-standard</url>
+
+    <developers>
+        <developer>
+            <id>saul789</id>
+            <name>Saul</name>
+            <url>https://github.com/saul789</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/saul789/spring-boot-starter-api-standard.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/saul789/spring-boot-starter-api-standard.git</developerConnection>
+        <url>https://github.com/saul789/spring-boot-starter-api-standard</url>
+        <tag>HEAD</tag>
+    </scm>
+
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -26,7 +45,7 @@
     </licenses>
 
     <properties>
-        <java.version>25</java.version>
+        <java.version>21</java.version>
     </properties>
 
     <modules>

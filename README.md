@@ -1,6 +1,87 @@
 # Spring Boot Starter API Standard
 
-A comprehensive, "plug and play" Spring Boot starter library designed to standardize API responses, implement global exception handling using RFC 9457 (`ProblemDetail`), and provide deep observability via structured logging and Trace Context propagation.
+> **A Spring Boot starter for:** API Standardization · RFC 9457 Errors · Trace Context · OpenAPI Auto-Integration
+
+[![CI](https://github.com/saul789/spring-boot-starter-api-standard/actions/workflows/publish.yml/badge.svg)](https://github.com/saul789/spring-boot-starter-api-standard/actions/workflows/publish.yml)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/saul789/spring-boot-starter-api-standard/releases)
+[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://adoptium.net/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.x-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+
+---
+
+**Stop writing boilerplate for API responses, error handling and tracing in every Spring Boot service.**
+
+This starter gives you:
+- ✅ Consistent API contracts across all your microservices — **zero effort**
+- ✅ RFC 9457 compliant errors (successor of RFC 7807 Problem Details) — **out of the box**
+- ✅ Built-in `traceId` propagation via MDC — **every request, automatically**
+- ✅ Auto-documented OpenAPI / Swagger — **zero `@ApiResponse` annotations needed**
+
+**All with zero configuration.**
+
+---
+
+## ⚡ Quick Start (30 seconds)
+
+**1. Add the dependency:**
+```xml
+<dependency>
+    <groupId>io.github.saul789</groupId>
+    <artifactId>api-standard-spring-boot-starter</artifactId>
+    <version>1.2.0</version>
+</dependency>
+```
+
+**2. Run your app.**
+
+**3. Done.** Your API is now:
+- Wrapped in a standard response envelope
+- RFC 9457 compliant on every error
+- Trace-enabled on every request
+- Auto-documented in Swagger (if springdoc is present)
+
+> Try any endpoint and see the difference immediately.
+
+---
+
+## 🔄 Before vs After
+
+| | Without this starter | With this starter |
+|---|---|---|
+| **Response format** | Varies per team/service | Unified envelope everywhere |
+| **Error responses** | Custom, inconsistent | RFC 9457 `ProblemDetail` always |
+| **Debugging** | Grep logs blindly | Follow `traceId` instantly |
+| **OpenAPI docs** | Manual `@ApiResponse` on every method | Auto-generated, zero annotations |
+| **Feign errors** | Swallowed or re-thrown raw | Mapped to standard RFC 9457 |
+| **Microservice consistency** | Each service does it differently | One starter, same contract everywhere |
+
+---
+
+## ❓ Why this?
+
+| | |
+|---|---|
+| 🤝 **Contract Consistency** | Every endpoint — in every service — returns the exact same JSON envelope and error shape. No surprises for consumers, no custom wrappers per team. |
+| 🔍 **Fast Debugging (Tracing)** | A `traceId` is automatically generated and propagated on every request, injected into logs via MDC. You go from alert → root cause in seconds, not hours. |
+| 🧱 **No More Boilerplate** | Stop rewriting exception handlers, response wrappers, and tracing logic in every service. Write it once — or rather, never write it at all. |
+| 🧩 **Drop-in Integration** | Add one dependency. Your API becomes consistent instantly. No `@Configuration`, no custom beans, no extra setup. |
+
+---
+
+## 🔍 Why not just use Spring Boot's defaults?
+
+| Feature | Spring Boot default | This Starter |
+|---|---|---|
+| Consistent response envelope | ❌ You write it | ✅ Auto |
+| RFC 9457 errors out of the box | ⚠️ Partial | ✅ Full |
+| `traceId` on every request | ❌ | ✅ Via MDC |
+| OpenAPI auto-wrapping of responses | ❌ | ✅ Zero annotations |
+| Feign exception handling | ❌ | ✅ Maps to RFC 9457 |
+| Resilience4j error mapping | ❌ | ✅ Conditional auto-config |
+| i18n error messages | ❌ | ✅ Via MessageSource |
+
+---
 
 ## 🚀 Features
 
@@ -9,6 +90,7 @@ A comprehensive, "plug and play" Spring Boot starter library designed to standar
 - **Intelligent Exception Mapping:** Automatically respects `@ResponseStatus` annotations and `ResponseStatusException`. Resolves appropriate machine-readable `ErrorCode` based on HTTP status (e.g., 404 -> `NOT_FOUND`).
 - **OpenFeign Integration:** Seamlessly handles Feign client exceptions, propagating error details correctly across microservices.
 - **Trace Context Propagation:** Automatically generates and propagates a `traceId` for every incoming request. Intercepts logs using MDC (Mapped Diagnostic Context) to facilitate distributed tracing.
+- **Automatic OpenAPI / Swagger Formatting (Zero-Config):** If `springdoc-openapi` is present, auto-configures schemas for all your response envelopes and RFC 9457 errors — no `@ApiResponse` annotations needed.
 - **i18n Support:** Fully compatible with Spring's `MessageSource` for localizing error messages.
 
 ## 📦 Installation
@@ -18,8 +100,8 @@ Add the following dependency to your `pom.xml`:
 ```xml
 <dependency>
     <groupId>io.github.saul789</groupId>
-    <artifactId>starter</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <artifactId>api-standard-spring-boot-starter</artifactId>
+    <version>1.2.0</version>
 </dependency>
 ```
 
@@ -299,7 +381,7 @@ Simply add the Springdoc OpenAPI dependency to your core application's `pom.xml`
 
 ## ⚙️ Requirements
 
-- **Java:** 25 or higher
+- **Java:** 21 or higher
 - **Spring Boot:** 4.0.x or higher
 
 ## 🤝 Contributing

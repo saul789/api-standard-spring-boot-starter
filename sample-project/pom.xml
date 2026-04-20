@@ -18,7 +18,7 @@
     <dependencies>
         <dependency>
             <groupId>io.github.saul789</groupId>
-            <artifactId>starter</artifactId>
+            <artifactId>api-standard-spring-boot-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
