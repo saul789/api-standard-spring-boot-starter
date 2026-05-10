@@ -28,7 +28,7 @@ class CoverageSweepTest {
             field.setAccessible(true);
             field.set(props.getErrors(), null);
             assertNull(props.getErrors().getTypeOverrides());
-        } catch (Exception _) {
+        } catch (Exception ignored) {
             // Ignore
         }
     }

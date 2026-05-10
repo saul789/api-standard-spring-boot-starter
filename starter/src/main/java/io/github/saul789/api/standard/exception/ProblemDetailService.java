@@ -58,7 +58,7 @@ public class ProblemDetailService {
         String defaultTitle;
         try {
             defaultTitle = status.getReasonPhrase();
-        } catch (Exception _) {
+        } catch (Exception ignored) {
             defaultTitle = "Error";
         }
         problem.setTitle(messageSource.getMessage("error." + code, null, defaultTitle, locale));

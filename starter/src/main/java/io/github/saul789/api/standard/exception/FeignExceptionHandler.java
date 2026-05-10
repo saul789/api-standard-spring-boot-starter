@@ -132,7 +132,7 @@ public class FeignExceptionHandler {
         String typeSuffix;
         try {
             typeSuffix = ErrorCode.valueOf(code).toKebabCase();
-        } catch (Exception _) {
+        } catch (Exception ignored) {
             typeSuffix = code.toLowerCase(java.util.Locale.ROOT).replace('_', '-');
         }
         return URI.create(baseUri + typeSuffix);
