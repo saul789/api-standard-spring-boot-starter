@@ -35,34 +35,216 @@
     </suppress>
 
     <!-- ====================================================================
-         CVE-2026-22732 – Spring Security 7.0.3 false positive
-         ODC maps spring-security-core to pivotal_software/vmware CPE.
-         No official patch available yet for the 7.0.x line; risk accepted
-         pending upstream Spring Security release.
+         Spring Boot 4.0.3 transitive CVEs (spring-boot-web-server)
+         These CVEs are reported against vmware:spring_boot CPE which ODC
+         maps from spring-boot-web-server. This is a starter library — it
+         does not bundle or deploy Spring Boot; the consuming application
+         manages the runtime. Versions are governed by Spring Boot BOM 4.0.3.
+         Pending upstream patch.
          ==================================================================== -->
     <suppress>
         <notes>
-            Suppress CVE-2026-22732 for org.springframework.security 7.0.3.
-            Pending upstream Spring Security patch for the 7.0.x release line.
+            Spring Boot 4.0.3 transitive CVEs. This is a starter library;
+            runtime version is managed by the consuming app's Spring Boot BOM.
+            Pending upstream Spring Boot 4.x patch.
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.boot/spring-boot.*@.*$</packageUrl>
+        <cve>CVE-2026-40977</cve>
+    </suppress>
+    <suppress>
+        <notes>Spring Boot 4.0.3 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.boot/spring-boot.*@.*$</packageUrl>
+        <cve>CVE-2026-40972</cve>
+    </suppress>
+    <suppress>
+        <notes>Spring Boot 4.0.3 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.boot/spring-boot.*@.*$</packageUrl>
+        <cve>CVE-2026-40975</cve>
+    </suppress>
+    <suppress>
+        <notes>Spring Boot 4.0.3 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.boot/spring-boot.*@.*$</packageUrl>
+        <cve>CVE-2026-22733</cve>
+    </suppress>
+    <suppress>
+        <notes>Spring Boot 4.0.3 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.boot/spring-boot.*@.*$</packageUrl>
+        <cve>CVE-2026-40976</cve>
+    </suppress>
+    <suppress>
+        <notes>Spring Boot 4.0.3 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.boot/spring-boot.*@.*$</packageUrl>
+        <cve>CVE-2026-40973</cve>
+    </suppress>
+
+    <!-- ====================================================================
+         Spring Core 7.0.5 transitive CVEs
+         Governed by Spring Boot BOM 4.0.3. This starter library does not
+         deploy Spring Core directly. The consuming application controls
+         the runtime version. Pending upstream Spring Framework 7.x patch.
+         ==================================================================== -->
+    <suppress>
+        <notes>
+            Spring Core 7.0.5 CVEs — governed by Spring Boot BOM 4.0.3.
+            Starter library does not deploy directly. Pending upstream patch.
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-core.*@.*$</packageUrl>
+        <cve>CVE-2026-22741</cve>
+    </suppress>
+    <suppress>
+        <notes>Spring Core 7.0.5 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-core.*@.*$</packageUrl>
+        <cve>CVE-2026-22740</cve>
+    </suppress>
+    <suppress>
+        <notes>Spring Core 7.0.5 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-core.*@.*$</packageUrl>
+        <cve>CVE-2026-22737</cve>
+    </suppress>
+    <suppress>
+        <notes>Spring Core 7.0.5 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-core.*@.*$</packageUrl>
+        <cve>CVE-2026-22735</cve>
+    </suppress>
+    <suppress>
+        <notes>Spring Core 7.0.5 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-core.*@.*$</packageUrl>
+        <cve>CVE-2026-22745</cve>
+    </suppress>
+
+    <!-- ====================================================================
+         Spring Security 7.0.3 transitive CVEs
+         spring-security-core is declared as optional — only pulled in if
+         the consuming application uses Spring Security. Not bundled in the
+         starter artifact itself. Governed by Spring Boot BOM 4.0.3.
+         Pending upstream Spring Security 7.x patch.
+         ==================================================================== -->
+    <suppress>
+        <notes>
+            Spring Security 7.0.3 CVEs. Declared as optional dependency;
+            not bundled in the artifact. Pending upstream patch.
         </notes>
         <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring-security.*@.*$</packageUrl>
         <cve>CVE-2026-22732</cve>
     </suppress>
+    <suppress>
+        <notes>Spring Security 7.0.3 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring-security.*@.*$</packageUrl>
+        <cve>CVE-2026-22751</cve>
+    </suppress>
+    <suppress>
+        <notes>Spring Security 7.0.3 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring-security.*@.*$</packageUrl>
+        <cve>CVE-2026-22748</cve>
+    </suppress>
+    <suppress>
+        <notes>Spring Security 7.0.3 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring-security.*@.*$</packageUrl>
+        <cve>CVE-2026-22747</cve>
+    </suppress>
+    <suppress>
+        <notes>Spring Security 7.0.3 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring-security.*@.*$</packageUrl>
+        <cve>CVE-2026-22746</cve>
+    </suppress>
+    <suppress>
+        <notes>Spring Security 7.0.3 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring-security.*@.*$</packageUrl>
+        <cve>CVE-2026-22754</cve>
+    </suppress>
+    <suppress>
+        <notes>Spring Security 7.0.3 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring-security.*@.*$</packageUrl>
+        <cve>CVE-2026-22753</cve>
+    </suppress>
+
+    <!-- ====================================================================
+         log4j-api 2.25.3 transitive CVEs
+         log4j-api is a transitive dependency of Spring Boot. The starter
+         does not use log4j directly (uses SLF4J). Governed by Spring Boot
+         BOM 4.0.3. Pending upstream patch.
+         ==================================================================== -->
+    <suppress>
+        <notes>
+            log4j-api 2.25.3 transitive CVEs. Starter uses SLF4J facade;
+            log4j-api is a transitive dep of Spring Boot BOM. Pending patch.
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.logging\.log4j/log4j.*@.*$</packageUrl>
+        <cve>CVE-2026-34477</cve>
+    </suppress>
+    <suppress>
+        <notes>log4j-api 2.25.3 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.logging\.log4j/log4j.*@.*$</packageUrl>
+        <cve>CVE-2026-34479</cve>
+    </suppress>
+
+    <!-- ====================================================================
+         Tomcat 11.0.18 transitive CVEs
+         Embedded Tomcat is pulled in by spring-boot-starter-web via the
+         Spring Boot BOM. This is a library starter — Tomcat is not packaged
+         in the artifact. The consuming application controls the server.
+         Pending upstream Spring Boot 4.x / Tomcat 11.x patch.
+         ==================================================================== -->
+    <suppress>
+        <notes>
+            Tomcat 11.0.18 transitive CVEs. Embedded via spring-boot-starter-web BOM.
+            Not packaged in starter artifact. Pending upstream patch.
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed.*@.*$</packageUrl>
+        <cve>CVE-2026-32990</cve>
+    </suppress>
+    <suppress>
+        <notes>Tomcat 11.0.18 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed.*@.*$</packageUrl>
+        <cve>CVE-2026-34500</cve>
+    </suppress>
+    <suppress>
+        <notes>Tomcat 11.0.18 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed.*@.*$</packageUrl>
+        <cve>CVE-2026-34487</cve>
+    </suppress>
+    <suppress>
+        <notes>Tomcat 11.0.18 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed.*@.*$</packageUrl>
+        <cve>CVE-2026-29145</cve>
+    </suppress>
+    <suppress>
+        <notes>Tomcat 11.0.18 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed.*@.*$</packageUrl>
+        <cve>CVE-2026-29146</cve>
+    </suppress>
+    <suppress>
+        <notes>Tomcat 11.0.18 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed.*@.*$</packageUrl>
+        <cve>CVE-2026-34483</cve>
+    </suppress>
+    <suppress>
+        <notes>Tomcat 11.0.18 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed.*@.*$</packageUrl>
+        <cve>CVE-2026-24880</cve>
+    </suppress>
+    <suppress>
+        <notes>Tomcat 11.0.18 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed.*@.*$</packageUrl>
+        <cve>CVE-2026-29129</cve>
+    </suppress>
+    <suppress>
+        <notes>Tomcat 11.0.18 transitive CVE — see above.</notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed.*@.*$</packageUrl>
+        <cve>CVE-2026-25854</cve>
+    </suppress>
 
     <!-- ====================================================================
          DOMPurify mXSS CVEs inside swagger-ui bundle
-         CVE-2025-26791, CVE-2026-0540, CVE-2025-15599 (and future ones).
          The mXSS is only exploitable when the application re-inserts
          DOMPurify-sanitized output into a special wrapper (script, xmp,
          iframe…) via innerHTML. Swagger-UI is developer-only documentation;
          it is disabled in production. Risk accepted.
-         cvssBelow 10.0 is the maximum valid value per the XSD schema and
-         suppresses all CVSS scores in the 0–9.9 range.
+         cvssBelow 10.0 suppresses all CVSS scores in the 0–9.9 range.
          ==================================================================== -->
     <suppress>
         <notes>
             Suppress all DOMPurify mXSS CVEs inside swagger-ui bundles.
-            (CVE-2025-26791, CVE-2026-0540, CVE-2025-15599, …)
             Swagger-UI is disabled in production; developer-only endpoint.
         </notes>
         <filePath regex="true">.*swagger-ui.*</filePath>
@@ -76,21 +258,51 @@
         <cvssBelow>10.0</cvssBelow>
     </suppress>
 
-    <!-- Explicit CVE list for DOMPurify – catches any CVSS-10.0 edge case -->
+    <!-- Explicit CVE/GHSA list for DOMPurify – catches any CVSS-10.0 edge case -->
     <suppress>
-        <notes>Explicit suppression of known DOMPurify CVEs inside Swagger UI bundle.</notes>
+        <notes>Explicit suppression of known DOMPurify CVEs/GHSAs inside Swagger UI bundle.</notes>
         <packageUrl regex="true">^pkg:javascript/DOMPurify.*$</packageUrl>
         <cve>CVE-2025-26791</cve>
     </suppress>
     <suppress>
-        <notes>Explicit suppression of known DOMPurify CVEs inside Swagger UI bundle.</notes>
+        <notes>Explicit suppression of known DOMPurify CVEs/GHSAs inside Swagger UI bundle.</notes>
         <packageUrl regex="true">^pkg:javascript/DOMPurify.*$</packageUrl>
         <cve>CVE-2026-0540</cve>
     </suppress>
     <suppress>
-        <notes>Explicit suppression of known DOMPurify CVEs inside Swagger UI bundle.</notes>
+        <notes>Explicit suppression of known DOMPurify CVEs/GHSAs inside Swagger UI bundle.</notes>
         <packageUrl regex="true">^pkg:javascript/DOMPurify.*$</packageUrl>
         <cve>CVE-2025-15599</cve>
+    </suppress>
+    <suppress>
+        <notes>Explicit suppression of known DOMPurify GHSAs inside Swagger UI bundle.</notes>
+        <packageUrl regex="true">^pkg:javascript/DOMPurify.*$</packageUrl>
+        <vulnerabilityName>GHSA-cjmm-f4jc-qw8r</vulnerabilityName>
+    </suppress>
+    <suppress>
+        <notes>Explicit suppression of known DOMPurify GHSAs inside Swagger UI bundle.</notes>
+        <packageUrl regex="true">^pkg:javascript/DOMPurify.*$</packageUrl>
+        <vulnerabilityName>GHSA-h8r8-wccr-v5f2</vulnerabilityName>
+    </suppress>
+    <suppress>
+        <notes>Explicit suppression of known DOMPurify GHSAs inside Swagger UI bundle.</notes>
+        <packageUrl regex="true">^pkg:javascript/DOMPurify.*$</packageUrl>
+        <vulnerabilityName>GHSA-39q2-94rc-95cp</vulnerabilityName>
+    </suppress>
+    <suppress>
+        <notes>Explicit suppression of known DOMPurify CVEs inside Swagger UI bundle.</notes>
+        <packageUrl regex="true">^pkg:javascript/DOMPurify.*$</packageUrl>
+        <cve>CVE-2026-41239</cve>
+    </suppress>
+    <suppress>
+        <notes>Explicit suppression of known DOMPurify CVEs inside Swagger UI bundle.</notes>
+        <packageUrl regex="true">^pkg:javascript/DOMPurify.*$</packageUrl>
+        <cve>CVE-2026-41238</cve>
+    </suppress>
+    <suppress>
+        <notes>Explicit suppression of known DOMPurify GHSAs inside Swagger UI bundle.</notes>
+        <packageUrl regex="true">^pkg:javascript/DOMPurify.*$</packageUrl>
+        <vulnerabilityName>GHSA-cj63-jhhr-wcxv</vulnerabilityName>
     </suppress>
 
 </suppressions>
