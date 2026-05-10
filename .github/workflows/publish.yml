@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+      - develop
+      - 'feature/**'
+      - 'hotfix/**'
   pull_request:
     branches:
       - main
@@ -15,7 +18,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -25,6 +28,35 @@ jobs:
 
       - name: Build & Test (Multi-module)
         run: mvn clean install -B jacoco:report
+
+      - name: Quality Checks (SpotBugs & PMD)
+        run: |
+          mvn com.github.spotbugs:spotbugs-maven-plugin:4.9.8.2:check -B -Dspotbugs.failOnError=true -DskipTests
+          mvn pmd:check -B -DskipTests
+
+      - name: Upload JaCoCo report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: "**/target/site/jacoco/**"
+
+  dependency-check:
+    runs-on: ubuntu-latest
+    if: |
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/develop' ||
+      github.base_ref == 'main' ||
+      github.base_ref == 'develop'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
 
       - name: Get date for NVD cache key (24h TTL)
         id: nvd-cache-date
@@ -41,17 +73,6 @@ jobs:
 
       - name: Dependency Check (Aggregate)
         run: mvn org.owasp:dependency-check-maven:aggregate -B -Dformat=HTML -DnvdApiKey=${{ secrets.NVD_API_KEY }} -DsuppressionFiles=dependency-check-suppressions.xml -DfailBuildOnCVSS=1
-
-      - name: Quality Checks (SpotBugs & PMD)
-        run: |
-          mvn com.github.spotbugs:spotbugs-maven-plugin:4.9.8.2:check -B -Dspotbugs.failOnError=true -DskipTests
-          mvn pmd:check -B -DskipTests
-
-      - name: Upload JaCoCo report
-        uses: actions/upload-artifact@v4
-        with:
-          name: jacoco-report
-          path: "**/target/site/jacoco/**"
 
       - name: Upload Dependency Check report
         uses: actions/upload-artifact@v4
