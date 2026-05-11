@@ -1,28 +1,31 @@
-# Spring Boot Starter API Standard
-
-> **A Spring Boot starter for:** API Standardization · RFC 9457 Errors · Trace Context · OpenAPI Auto-Integration
-
-[![CI](https://github.com/saul789/spring-boot-starter-api-standard/actions/workflows/publish.yml/badge.svg)](https://github.com/saul789/spring-boot-starter-api-standard/actions/workflows/publish.yml)
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/saul789/spring-boot-starter-api-standard/releases)
-[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://adoptium.net/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.x-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-
----
-
-**Stop writing boilerplate for API responses, error handling and tracing in every Spring Boot service.**
-
-This starter gives you:
-- ✅ Consistent API contracts across all your microservices — **zero effort**
-- ✅ RFC 9457 compliant errors (successor of RFC 7807 Problem Details) — **out of the box**
-- ✅ Built-in `traceId` propagation via MDC — **every request, automatically**
-- ✅ Auto-documented OpenAPI / Swagger — **zero `@ApiResponse` annotations needed**
-
-**All with zero configuration.**
+<div align="center">
+  <h1>🚀 Spring Boot Starter: API Standard</h1>
+  <p><b>Enterprise-grade API Standardization, RFC 9457 Errors, Trace Context & OpenAPI Auto-Integration</b></p>
+  
+  [![CI](https://github.com/saul789/spring-boot-starter-api-standard/actions/workflows/publish.yml/badge.svg)](https://github.com/saul789/spring-boot-starter-api-standard/actions/workflows/publish.yml)
+  [![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/saul789/spring-boot-starter-api-standard/releases)
+  [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://adoptium.net/)
+  [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.x-brightgreen.svg)](https://spring.io/projects/spring-boot)
+  [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+  <br/>
+  <i>Stop writing boilerplate for API responses, error handling, and tracing in every Spring Boot service.</i>
+</div>
 
 ---
 
-## ⚡ Quick Start (30 seconds)
+## ✨ The Problem vs The Solution
+
+| ❌ Without this Starter | ✅ With API Standard Starter |
+|---|---|
+| **Response Format** varies per team/service | **Unified Envelope** (`data`, `success`, `timestamp`) |
+| **Error Responses** are custom and inconsistent | **RFC 9457 `ProblemDetail`** enforced globally |
+| **Debugging** requires grep-ing logs blindly | **`traceId` MDC propagation** instantly tracks requests |
+| **OpenAPI Docs** need manual `@ApiResponse` on everything | **Zero Annotations** auto-generated schemas |
+| **Microservice Errors** (Feign) swallowed | **Mapped** transparently to standard RFC 9457 |
+
+---
+
+## ⚡ Quick Start (30 Seconds)
 
 **1. Add the dependency:**
 ```xml
@@ -33,136 +36,16 @@ This starter gives you:
 </dependency>
 ```
 
-**2. Run your app.**
-
-**3. Done.** Your API is now:
-- Wrapped in a standard response envelope
-- RFC 9457 compliant on every error
-- Trace-enabled on every request
-- Auto-documented in Swagger (if springdoc is present)
-
-> Try any endpoint and see the difference immediately.
+**2. Run your app. You're done.**
+Your API is now wrapped in a standard response envelope, RFC 9457 compliant, trace-enabled, and auto-documented in Swagger!
 
 ---
 
-## 🔄 Before vs After
+## 🛠️ Core Features
 
-| | Without this starter | With this starter |
-|---|---|---|
-| **Response format** | Varies per team/service | Unified envelope everywhere |
-| **Error responses** | Custom, inconsistent | RFC 9457 `ProblemDetail` always |
-| **Debugging** | Grep logs blindly | Follow `traceId` instantly |
-| **OpenAPI docs** | Manual `@ApiResponse` on every method | Auto-generated, zero annotations |
-| **Feign errors** | Swallowed or re-thrown raw | Mapped to standard RFC 9457 |
-| **Microservice consistency** | Each service does it differently | One starter, same contract everywhere |
+### 🛡️ 1. Global Exception Handling (RFC 9457)
+Intercepts all exceptions (Validation, Business, Spring Security, Feign, Resilience4j) and translates them into the rigorous `ProblemDetail` specification.
 
----
-
-## ❓ Why this?
-
-| | |
-|---|---|
-| 🤝 **Contract Consistency** | Every endpoint — in every service — returns the exact same JSON envelope and error shape. No surprises for consumers, no custom wrappers per team. |
-| 🔍 **Fast Debugging (Tracing)** | A `traceId` is automatically generated and propagated on every request, injected into logs via MDC. You go from alert → root cause in seconds, not hours. |
-| 🧱 **No More Boilerplate** | Stop rewriting exception handlers, response wrappers, and tracing logic in every service. Write it once — or rather, never write it at all. |
-| 🧩 **Drop-in Integration** | Add one dependency. Your API becomes consistent instantly. No `@Configuration`, no custom beans, no extra setup. |
-
----
-
-## 🔍 Why not just use Spring Boot's defaults?
-
-| Feature | Spring Boot default | This Starter |
-|---|---|---|
-| Consistent response envelope | ❌ You write it | ✅ Auto |
-| RFC 9457 errors out of the box | ⚠️ Partial | ✅ Full |
-| `traceId` on every request | ❌ | ✅ Via MDC |
-| OpenAPI auto-wrapping of responses | ❌ | ✅ Zero annotations |
-| Feign exception handling | ❌ | ✅ Maps to RFC 9457 |
-| Resilience4j error mapping | ❌ | ✅ Conditional auto-config |
-| i18n error messages | ❌ | ✅ Via MessageSource |
-
----
-
-## 🚀 Features
-
-- **Standardized API Responses:** Automatically wraps all controller responses in a consistent JSON envelope, maintaining a clean and uniform API contract.
-- **Robust Error Handling (RFC 9457):** Out-of-the-box global exception handling implementing Spring Boot 3+ `ProblemDetail` specification. Includes built-in support for validation errors, business exceptions, and generic server errors.
-- **Intelligent Exception Mapping:** Automatically respects `@ResponseStatus` annotations and `ResponseStatusException`. Resolves appropriate machine-readable `ErrorCode` based on HTTP status (e.g., 404 -> `NOT_FOUND`).
-- **OpenFeign Integration:** Seamlessly handles Feign client exceptions, propagating error details correctly across microservices.
-- **Trace Context Propagation:** Automatically generates and propagates a `traceId` for every incoming request. Intercepts logs using MDC (Mapped Diagnostic Context) to facilitate distributed tracing.
-- **Automatic OpenAPI / Swagger Formatting (Zero-Config):** If `springdoc-openapi` is present, auto-configures schemas for all your response envelopes and RFC 9457 errors — no `@ApiResponse` annotations needed.
-- **i18n Support:** Fully compatible with Spring's `MessageSource` for localizing error messages.
-
-## 📦 Installation
-
-Add the following dependency to your `pom.xml`:
-
-```xml
-<dependency>
-    <groupId>io.github.saul789</groupId>
-    <artifactId>api-standard-spring-boot-starter</artifactId>
-    <version>1.2.0</version>
-</dependency>
-```
-
-*(Note: Ensure you have your Nexus/Maven repository configured correctly to fetch this artifact once published)*.
-
-## 🛠️ How it Works
-
-Once the dependency is added, **no additional configuration is required**. The starter will auto-configure several beans to intercept and standardize traffic.
-
-### 1. Standardized API Responses (`ApiResponseAdvice`)
-
-You simply return your DTOs or primitive values from your controllers, and the library automatically wraps them in a standard structure.
-
-**Your Controller:**
-```java
-@RestController
-@RequestMapping("/api/users")
-public class UserController {
-
-    @GetMapping("/{id}")
-    public User getUser(@PathVariable String id) {
-        return new User(id, "John Doe");
-    }
-}
-```
-
-**What the Client Receives:**
-```json
-{
-  "success": true,
-  "data": {
-    "id": "123",
-    "name": "John Doe"
-  },
-  "timestamp": "2023-10-25T10:00:00Z"
-}
-```
-*(Note: `String`, `byte[]`, and Spring `Resource` types are intentionally ignored by the wrapper to allow file downloads and plain-text endpoints natively)*
-
-### 2. Global Exception Handling (`GlobalExceptionHandler`)
-
-The library gracefully intercepts exceptions and translates them into standard RFC 9457 Problem Details.
-
-**Throwing a Business Exception:**
-```java
-import io.github.saul789.api.standard.exception.BusinessException;
-import io.github.saul789.api.standard.exception.ErrorCode;
-
-@Service
-public class UserService {
-    public void validateUser(String email) {
-        // Option 1: Full control with explicit ErrorCode
-        throw new BusinessException(ErrorCode.BAD_REQUEST, "error.user_exists", HttpStatus.BAD_REQUEST);
-
-        // Option 2: Simple usage (ErrorCode resolved from status 400 -> BAD_REQUEST)
-        // throw new BusinessException("Email already exists", HttpStatus.BAD_REQUEST);
-    }
-}
-```
-
-**Client Error Response (HTTP 400):**
 ```json
 {
     "type": "urn:problem-type:bad-request",
@@ -174,285 +57,45 @@ public class UserService {
     "timestamp": "2023-10-25T10:05:00Z",
     "traceId": "5f9b3b8c-1234-4a56-b789-abcdef123456"
 }
- ```
+```
 
-_Notice the inclusion of the `traceId` which helps with debugging and log tracing!_
-
-### 3. Annotation-based Exceptions (`@ResponseStatus`)
-
-The library is intelligent enough to respect your own custom exceptions decorated with `@ResponseStatus`. It will even map the correct `code` based on the status provided.
-
-**Custom Exception:**
+### 📦 2. Fluent Business Exceptions
+Throw domain-specific errors gracefully using our fluent builder API:
 ```java
-@ResponseStatus(HttpStatus.CONFLICT)
-public class UserAlreadyExistsException extends RuntimeException {
-    public UserAlreadyExistsException(String message) {
-        super(message);
-    }
-}
+throw BusinessException.builder("error.user.not_found")
+    .status(HttpStatus.NOT_FOUND)
+    .code(ErrorCode.NOT_FOUND)
+    .build();
 ```
 
-**Resulting JSON:**
-```json
-{
-    "type": "urn:problem-type:conflict",
-    "title": "Conflict",
-    "status": 409,
-    "detail": "User with email john@doe.com already exists",
-    "code": "CONFLICT",
-    "timestamp": "...",
-    "traceId": "..."
-}
-```
+### 🌍 3. Built-in i18n & Actuator Endpoint
+- **i18n:** Resolves `detail` and `title` using Spring's `MessageSource` via the `Accept-Language` header automatically.
+- **Actuator:** Check all registered error codes via `GET /actuator/api-errors`.
 
-### 4. Custom documentation URLs
+### 🔄 4. Zero-Config OpenAPI / Swagger
+If `springdoc-openapi` is present, it auto-configures your Swagger UI. It wraps `200 OK` schemas in the ApiResponse envelope and registers `ProblemDetail` schemas for 400/500 errors—without a single `@ApiResponse` annotation.
 
-The RFC 9457 standard expects a URI reference in the `type` field so developers can look up documentation for the error. You can override the default library URN in three different ways:
-
-#### Option 1: Inline via Exception Constructors
-If the error documentation URI is dynamic or highly specific to a single endpoint, simply pass it when throwing the exception.
-**Code:**
-```java
-@GetMapping("/payment")
-public void processPayment() {
-    throw new BusinessException(
-        ErrorCode.PAYMENT_REQUIRED, 
-        "Insufficient funds in account", 
-        HttpStatus.PAYMENT_REQUIRED, 
-        "https://docs.myapi.com/errors/insufficient-funds"
-    );
-}
-```
-**Resulting JSON:**
-```json
-{
-    "type": "https://docs.myapi.com/errors/insufficient-funds",
-    "title": "Payment Required",
-    "status": 402,
-    ...
-}
-```
-
-#### Option 2: Using the `@ProblemType` Annotation
-For your own declarative custom exceptions, you can attach the documentation URL directly to the class.
-**Code:**
-```java
-@ResponseStatus(HttpStatus.CONFLICT)
-@ProblemType("https://docs.myapi.com/errors/inventory-conflict")
-public class OutOfStockException extends RuntimeException {
-    public OutOfStockException(String message) {
-        super(message);
-    }
-}
-```
-**Resulting JSON:**
-```json
-{
-    "type": "https://docs.myapi.com/errors/inventory-conflict",
-    "title": "Conflict",
-    "status": 409,
-    ...
-}
-```
-
-#### Option 3: Global `application.yml` Configuration
-Ideal for overriding standard Spring Errors or defining base paths, so you don't repeat URLs across your codebase.
-**Configuration:**
-```yaml
-api:
-  standard:
-    errors:
-      # Optional: Replaces the auto-generated 'urn:problem-type:' prefix natively for ALL exceptions
-      type-base-uri: "https://my-company.com/docs/errors/" 
-      
-      # Optional: Explicitly override the URL for a specific ErrorCode
-      type-overrides:
-        BAD_REQUEST: "https://docs.myapi.com/errors/general-bad-request"
-```
-**Code:**
-```java
-// A simple BusinessException with no explicit URL passed
-throw new BusinessException(ErrorCode.BAD_REQUEST, "Invalid schema", HttpStatus.BAD_REQUEST);
-```
-**Resulting JSON (using the override):**
-```json
-{
-    "type": "https://docs.myapi.com/errors/general-bad-request",
-    ...
-}
-```
-
-### 5. ResponseStatusException
-
-Direct use of `ResponseStatusException` is also fully supported and localized.
-
-### 6. Validation Errors (`@Valid` / `@Validated`)
-
-If you use annotation-based validation for your request payloads, the library automatically formats the field errors in a standardized way:
-```json
-{
-    "type": "urn:problem-type:validation-error",
-    "title": "Validation Error",
-    "status": 400,
-    "detail": "error.validation.body",
-    "instance": "/api/users",
-    "code": "VALIDATION_ERROR",
-    "errors": [
-        {
-            "field": "email",
-            "message": "must be a well-formed email address"
-        }
-    ],
-    "timestamp": "2023-10-25T10:10:00Z",
-    "traceId": "6a8c4d9e-..."
-}
-```
-
-### 7. OpenFeign Integration
-
-The library automatically handles exceptions thrown by Feign clients. If a downstream service returns a `ProblemDetail` or a generic error, the starter intercepts it and translates it to the standardized format, preserving the HTTP status and providing a `BAD_GATEWAY` or `GATEWAY_TIMEOUT` code if appropriate.
-
-### 8. Resilience4j Support (Optional)
-
-The library seamlessly integrates with **Resilience4j**. If your project uses Resilience4j's circuit breakers, rate limiters, or bulkheads, the starter automatically registers a dedicated `ResilienceExceptionHandler`. 
-This guarantees that dropped or restricted calls directly translate into rigorous RFC 9457 errors without extra boilerplate:
-
-- **Circuit Breaker Open:** Responds with `503 Service Unavailable` (`urn:problem-type:service-unavailable`)
-- **Rate Limit / Bulkhead Exceeded:** Responds with `429 Too Many Requests` (`urn:problem-type:too-many-requests`)
-- **Time Limiter Exceeded:** Responds with `504 Gateway Timeout` (`urn:problem-type:gateway-timeout`)
-
-*Architectural note: This behavior triggers strictly via `@ConditionalOnClass`, meaning it adds literally **zero overhead** and forces no transitive compilation dependencies if your specific microservice doesn't use Resilience4j.*
-
-### 9. i18n Support & Message Personalization
-
-The library intelligently resolves the `detail` and `title` fields using Spring's `MessageSource` and the current `Locale` (automatically extracted from the `Accept-Language` header).
-
-#### How it works:
-1. **Title Translation:** The library always attempts to translate the title using the key `error.<CODE_NAME>`. If no translation is found, it falls back to the standard HTTP Reason Phrase.
-2. **Detail Personalization:**
-   - **Using a Key:** If the message passed to `BusinessException` is a key in your `messages.properties` (e.g., `error.low_balance`), it will be translated to the user's language.
-   - **Using Fixed Text:** If the message is NOT a key (e.g., "User 'saul' not found"), the library detects this and returns the text exactly as provided. This allows for dynamic, personalized error messages.
-
-**Example `messages_es.properties`:**
-```properties
-error.BAD_REQUEST=Petición Incorrecta
-error.business.default=Se ha violado una regla de negocio.
-```
-
-**Scenario: Throwing a key**
-```java
-throw new BusinessException(ErrorCode.BAD_REQUEST, "error.business.default", HttpStatus.BAD_REQUEST);
-// Result (Accept-Language: es) -> detail: "Se ha violado una regla de negocio."
-```
-
-**Scenario: Throwing custom text**
-```java
-throw new BusinessException(ErrorCode.BAD_REQUEST, "El usuario Saul ya tiene un plan activo", HttpStatus.BAD_REQUEST);
-// Result -> detail: "El usuario Saul ya tiene un plan activo" (No translation attempted as it's not a key)
-```
-
-### 10. Trace Context & Logging
-
-The included filters (`TraceContextFilter` and `RequestLoggingFilter`) automatically:
-1. Extract an incoming `traceId` header or generate a new UUID.
-2. Inject it into the SLF4J MDC (`MDC.put("traceId", ...)`).
-3. Log incoming requests processing and completion transparently.
-
-Because the library integrates with MDC out of the box, all your application logs will automatically share the same `traceId`, which is essential for distributed monitoring tools like ELK, Splunk, Datadog or Zipkin.
-
-### 11. Automatic OpenAPI / Swagger Formatting (Zero-Config)
-
-The library features **Conditional OpenAPI Integration**. You no longer need to manually annotate every controller with over-engineered `@ApiResponse` tags to explain your custom response envelopes or errors.
-
-If your project is utilizing `springdoc-openapi` (Swagger UI), the underlying starter will instantly detect it and auto-configure an `OpenApiCustomizer` that:
-1. **Wraps Success Responses:** Transparently updates your documented `200 OK` endpoint schemas to reflect the global `ApiResponse` wrapper (`{"success": true, "data": { ... }}`).
-2. **Documents RFC 9457 Errors:** Automatically registers the rigorous `ProblemDetail` schema for typical HTTP 400, 401, 403, 404, and 500 status codes across all your REST endpoints.
-
-**How to activate it:**
-Simply add the Springdoc OpenAPI dependency to your core application's `pom.xml`. The integration acts invisibly behind the scenes.
-```xml
-<dependency>
-    <groupId>org.springdoc</groupId>
-    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-    <version>2.8.5</version> <!-- Use the version compatible with your project -->
-</dependency>
-```
-*(Note: If you choose not to use Swagger/OpenAPI, the starter remains completely un-opinionated and gracefully drops the feature at boot-time without throwing `ClassNotFoundException`s).*
-
-## ⚙️ Requirements
-
-- **Java:** 21 or higher
-- **Spring Boot:** 4.0.x or higher
-
-## 🤝 Contributing
-
-Contributions are welcome! Please open an issue or submit a Pull Request if you find any bugs or want to propose new features.
-
-## 📄 License
-
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
-
-## 📮 Postman Collection
-
-To facilitate testing, a Postman collection is included here:
-`sample-project/postman/spring-boot-starter-api-standard.postman_collection.json`
+### 🔗 5. Dynamic Documentation URIs
+Easily override the default `urn:problem-type:` with real URLs pointing to your company's Developer Portal via `application.yml` or the `@ProblemType` annotation.
 
 ---
 
-### 12. UserController Example (Audited & Standardized)
+## 🔮 Coming in V2.0 (Enterprise Extensibility)
+We are currently building the next generation of this starter, focusing on enterprise scale:
+- 🔌 **Plugin SPI:** Inject custom metadata (like `UserId` or `TenantId`) into your errors via `spring.factories`.
+- 📊 **Micrometer Metrics:** Auto-generated Grafana-ready metrics for every `ErrorCode`.
+- 🔐 **Spring Security Native Integration:** Map `AccessDeniedException` effortlessly.
+- 📜 **Strict Checkstyle & Javadoc Enforcement.**
 
-To see everything in action, the `sample-project` includes a `UserController` that demonstrates the full power of the library:
+---
 
-**Model Validation + Business Logic:**
-```java
-@RestController
-@RequestMapping("/api/demo/users")
-public class UserController {
+## 🤝 Contributing & Testing
+- **Postman Collection:** Available in `sample-project/postman/spring-boot-starter-api-standard.postman_collection.json`. *(Must be kept updated with every PR!)*
+- **Documentation:** Interactive Docs generated via Redocly on GitHub Pages.
 
-    @PostMapping
-    public String createUser(@Valid @RequestBody UserRequest request) {
-        // Simulation: If email is test@example.com, throw a business exception
-        if ("test@example.com".equalsIgnoreCase(request.email())) {
-            throw new BusinessException(
-                ErrorCode.CONFLICT, 
-                "error.user.already_exists", 
-                HttpStatus.CONFLICT,
-                "https://api.saul.dev/docs/errors/user-limits"
-            );
-        }
-        
-        return "User " + request.name() + " successfully created.";
-    }
-}
-```
+## 📄 License
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
-**Scenario 1: Validation Error (Empty Name or Email)**
-If you send an invalid payload without a name or email, the library automatically translates the JSR-303 error into a standard format:
-```bash
-curl -X POST https://api.yourdomain.com/api/demo/users \
--H "Content-Type: application/json" \
--d '{}'
-```
-*Returns HTTP 400 with `code: VALIDATION_ERROR` and a list of field-specific messages from your `messages.properties`.*
-
-**Scenario 2: Business Logic Error (Duplicate Email)**
-If you trigger the business rule, the library gracefully intercepts the exception and builds a Problem Detail RFC 9457 JSON:
-```bash
-curl -X POST https://api.yourdomain.com/api/demo/users \
--H "Content-Type: application/json" \
--H "Accept-Language: es" \
--d '{"name": "Test", "email": "test@example.com"}'
-```
-*Returns HTTP 409 with `code: CONFLICT`, the translated message from `error.user.already_exists` (i18n aware), and the custom documentation URL in the `type` field.*
-
-**Scenario 3: Success Response (Plain Text)**
-When the request is successful, the controller returns a `String`. The library intelligently ignores `String` returns to allow raw responses without corrupting plain-text.
-```bash
-curl -X POST https://api.yourdomain.com/api/demo/users \
--H "Content-Type: application/json" \
--d '{"name": "John", "email": "john@example.com"}'
-```
-*Returns HTTP 200 with the pure text string `User John successfully created.`*
-
-*(Note: If the controller returned a DTO, List, or Map instead, it would be automatically wrapped in an `ApiResponse` envelope with `success: true` and the object in the `data` field.)*
-                                                                                                                            
+<div align="center">
+  <i>Built with ❤️ for a better Spring Boot ecosystem.</i>
+</div>
