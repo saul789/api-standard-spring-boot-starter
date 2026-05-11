@@ -23,6 +23,50 @@
 | **OpenAPI Docs** need manual `@ApiResponse` on everything | **Zero Annotations** auto-generated schemas |
 | **Microservice Errors** (Feign) swallowed | **Mapped** transparently to standard RFC 9457 |
 
+### 🔍 Code & JSON Before vs After
+
+**The Controller Code:**
+```diff
+- @PostMapping
+- @ApiResponses({
+-     @ApiResponse(responseCode = "200", description = "Success"),
+-     @ApiResponse(responseCode = "400", description = "Bad Request")
+- })
+- public ResponseEntity<ApiResponse<User>> createUser(@RequestBody UserRequest request) {
+-    try {
+-        return ResponseEntity.ok(new ApiResponse<>(true, userService.create(request)));
+-    } catch (Exception e) {
+-        return ResponseEntity.status(400).body(new ApiResponse<>(false, e.getMessage()));
+-    }
+- }
+
++ @PostMapping
++ @ResponseStatus(HttpStatus.CREATED)
++ public User createUser(@Valid @RequestBody UserRequest request) {
++     return userService.create(request);
++ }
+```
+
+**The Error Response (RFC 9457):**
+```diff
+- {
+-   "success": false,
+-   "error": "Bad request",
+-   "message": "Email already exists"
+- }
+
++ {
++   "type": "urn:problem-type:conflict",
++   "title": "Conflict",
++   "status": 409,
++   "detail": "Email already exists",
++   "instance": "/api/demo/users",
++   "code": "CONFLICT",
++   "timestamp": "2023-10-25T10:05:00Z",
++   "traceId": "5f9b3b8c-1234-4a56-b789-abcdef123456"
++ }
+```
+
 ---
 
 ## ⚡ Quick Start (30 Seconds)
@@ -75,8 +119,42 @@ throw BusinessException.builder("error.user.not_found")
 ### 🔄 4. Zero-Config OpenAPI / Swagger
 If `springdoc-openapi` is present, it auto-configures your Swagger UI. It wraps `200 OK` schemas in the ApiResponse envelope and registers `ProblemDetail` schemas for 400/500 errors—without a single `@ApiResponse` annotation.
 
+> 📸 **Preview:**
+> 
+> *<p align="center"><img src="https://via.placeholder.com/800x400.png?text=Take+a+screenshot+of+your+Swagger+UI+and+place+it+here" alt="Swagger UI Auto-generated" width="800"></p>*
+> *(Para agregar tu propia foto: toma un screenshot de tu Swagger local, guárdalo en la carpeta `docs/assets/swagger.png` y cambia este enlace en el README).*
+
 ### 🔗 5. Dynamic Documentation URIs
 Easily override the default `urn:problem-type:` with real URLs pointing to your company's Developer Portal via `application.yml` or the `@ProblemType` annotation.
+
+---
+
+## 🏗️ Architecture
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant TraceFilter
+    participant Controller
+    participant ExceptionHandler
+    
+    Client->>TraceFilter: GET /api/users
+    activate TraceFilter
+    TraceFilter->>TraceFilter: Generate UUID (traceId)
+    TraceFilter->>Controller: MDC Injected Request
+    
+    activate Controller
+    Controller-->>ExceptionHandler: throw BusinessException
+    deactivate Controller
+    
+    activate ExceptionHandler
+    ExceptionHandler->>ExceptionHandler: Map to RFC 9457 & i18n
+    ExceptionHandler-->>TraceFilter: ProblemDetail JSON
+    deactivate ExceptionHandler
+    
+    TraceFilter-->>Client: HTTP 400 + JSON
+    deactivate TraceFilter
+```
 
 ---
 
