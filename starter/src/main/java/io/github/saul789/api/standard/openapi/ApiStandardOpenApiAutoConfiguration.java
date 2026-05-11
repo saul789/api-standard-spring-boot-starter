@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnClass({OpenAPI.class, OpenApiCustomizer.class})
 public class ApiStandardOpenApiAutoConfiguration {
 
-    @Bean
-    public OpenApiCustomizer apiStandardOpenApiCustomizer() {
-        return new ApiStandardOpenApiCustomizer();
-    }
+  @Bean
+  public OpenApiCustomizer apiStandardOpenApiCustomizer() {
+    return new ApiStandardOpenApiCustomizer();
+  }
 }

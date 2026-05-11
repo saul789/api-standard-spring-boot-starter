@@ -25,6 +25,13 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
+        <!-- Optional Actuator dependency for custom endpoint -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
