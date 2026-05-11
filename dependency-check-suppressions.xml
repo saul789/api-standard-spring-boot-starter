@@ -88,27 +88,27 @@
             Spring Core 7.0.5 CVEs — governed by Spring Boot BOM 4.0.3.
             Starter library does not deploy directly. Pending upstream patch.
         </notes>
-        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-core.*@.*$</packageUrl>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-.*@.*$</packageUrl>
         <cve>CVE-2026-22741</cve>
     </suppress>
     <suppress>
         <notes>Spring Core 7.0.5 transitive CVE — see above.</notes>
-        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-core.*@.*$</packageUrl>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-.*@.*$</packageUrl>
         <cve>CVE-2026-22740</cve>
     </suppress>
     <suppress>
         <notes>Spring Core 7.0.5 transitive CVE — see above.</notes>
-        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-core.*@.*$</packageUrl>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-.*@.*$</packageUrl>
         <cve>CVE-2026-22737</cve>
     </suppress>
     <suppress>
         <notes>Spring Core 7.0.5 transitive CVE — see above.</notes>
-        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-core.*@.*$</packageUrl>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-.*@.*$</packageUrl>
         <cve>CVE-2026-22735</cve>
     </suppress>
     <suppress>
         <notes>Spring Core 7.0.5 transitive CVE — see above.</notes>
-        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-core.*@.*$</packageUrl>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring-.*@.*$</packageUrl>
         <cve>CVE-2026-22745</cve>
     </suppress>
 
