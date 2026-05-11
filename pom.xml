@@ -13,33 +13,32 @@
     </parent>
 
     <groupId>io.github.saul789</groupId>
-    <artifactId>spring-boot-starter-api-standard</artifactId>
-    <version>1.2.0</version>
+    <artifactId>api-standard-parent</artifactId>
+    <version>2.0.0</version>
     <packaging>pom</packaging>
 
-    <name>spring-boot-starter-api-standard</name>
+    <name>api-standard-spring-boot-starter</name>
     <description>A plug-and-play Spring Boot starter that standardizes API responses, implements RFC 9457 global exception handling, and provides distributed tracing via Trace Context propagation.</description>
-    <url>https://github.com/saul789/spring-boot-starter-api-standard</url>
+    <url>https://github.com/saul789/api-standard-spring-boot-starter</url>
 
     <developers>
         <developer>
-            <id>saul789</id>
             <name>Saul</name>
-            <url>https://github.com/saul789</url>
+            <email>saul@example.com</email>
+            <organization>Saul789</organization>
+            <organizationUrl>https://github.com/saul789</organizationUrl>
         </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/saul789/spring-boot-starter-api-standard.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/saul789/spring-boot-starter-api-standard.git</developerConnection>
-        <url>https://github.com/saul789/spring-boot-starter-api-standard</url>
+        <connection>scm:git:git://github.com/saul789/api-standard-spring-boot-starter.git</connection>
+        <developerConnection>scm:git:ssh://github.com:saul789/api-standard-spring-boot-starter.git</developerConnection>
+        <url>https://github.com/saul789/api-standard-spring-boot-starter/tree/main</url>
         <tag>HEAD</tag>
     </scm>
 
     <licenses>
         <license>
-            <name>Apache License, Version 2.0</name>
-            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
             <distribution>repo</distribution>
         </license>
     </licenses>

@@ -1,6 +1,6 @@
 # Sample Project Controllers
 
-Este paquete contiene ejemplos de cómo utilizar y probar las características del `spring-boot-starter-api-standard`.
+Este paquete contiene ejemplos de cómo utilizar y probar las características del `api-standard-spring-boot-starter`.
 
 ## 📁 Estructura de Ejemplos
 

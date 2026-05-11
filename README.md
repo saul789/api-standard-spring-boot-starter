@@ -1,16 +1,19 @@
 <div align="center">
-  <h1>🚀 API Standard for Spring Boot</h1>
+  <h1>🚀 api-standard-spring-boot-starter</h1>
   <p><b>Bring organization-wide API consistency to every Spring Boot service.</b></p>
   <p><i>Turn Spring Boot into a governed API platform with one dependency. Standardize responses, errors, tracing, and OpenAPI documentation automatically.</i></p>
   
-  [![CI](https://github.com/saul789/spring-boot-starter-api-standard/actions/workflows/publish.yml/badge.svg)](https://github.com/saul789/spring-boot-starter-api-standard/actions/workflows/publish.yml)
-  [![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/saul789/spring-boot-starter-api-standard/releases)
-  [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://adoptium.net/)
-  [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3%2B-brightgreen.svg)](https://spring.io/projects/spring-boot)
-  [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+  [![Spring Boot 4.0.6](https://img.shields.io/badge/Spring%20Boot-4.0.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
+  [![Java 21](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/technologies/downloads/#java21)
+  [![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/saul789/api-standard-spring-boot-starter/releases)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+  [![Docs](https://img.shields.io/badge/docs-Redoc-blue.svg)](https://saul789.github.io/api-standard-spring-boot-starter/)
   
   <br/>
-  
+</div>
+
+A plug-and-play Spring Boot starter that standardizes API responses, implements **RFC 9457** (Problem Details for HTTP APIs), and provides distributed tracing via Trace Context propagation.
+
   <p align="center">
     <!-- Replace this with a real screenshot of Swagger UI showing Success Response, RFC 9457 Error and traceId
     <img src="./docs/assets/hero-swagger-preview.png" width="900" alt="Swagger UI showing Success Response, RFC 9457 Error and traceId"/>
@@ -50,6 +53,28 @@ Add the dependency and keep building your API. We handle the rest.
 
 ---
 
+## 🏗️ Architecture Flow
+
+```mermaid
+graph TD
+    A[Client Request] --> B[TraceContextFilter]
+    B --> C[Spring Controller]
+    C -- "Throws Exception" --> D[GlobalExceptionHandler]
+    D --> E[ProblemDetailService]
+    E -- "1. Map ErrorCode" --> F[i18n Messages]
+    E -- "2. Enrich metadata" --> G[Enricher SPI]
+    F --> H[ProblemDetail JSON]
+    G --> H
+    H --> I[Client Response RFC 9457]
+    
+    subgraph "api-standard-starter"
+    D
+    E
+    F
+    G
+    end
+```
+
 ## 🚀 Quick Start
 
 ### 1. Add the dependency
@@ -58,7 +83,7 @@ Add the dependency and keep building your API. We handle the rest.
 <dependency>
     <groupId>io.github.saul789</groupId>
     <artifactId>api-standard-spring-boot-starter</artifactId>
-    <version>1.2.0</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
@@ -228,7 +253,7 @@ sequenceDiagram
 
 ## 🤝 Contributing & Testing
 
-- **API Client Collection:** Available in `sample-project/postman/spring-boot-starter-api-standard.postman_collection.json`. *(Importable in Postman, Insomnia, Bruno, Hoppscotch, etc.)*
+- **API Client Collection:** Available in `sample-project/postman/api-standard-spring-boot-starter.postman_collection.json`. *(Importable in Postman, Insomnia, Bruno, Hoppscotch, etc.)*
 - **Interactive Documentation:** Check the GitHub Pages branch for the Redocly auto-generated site.
 
 ## 📄 License
