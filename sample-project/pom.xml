@@ -8,8 +8,8 @@
 
     <parent>
         <groupId>io.github.saul789</groupId>
-        <artifactId>spring-boot-starter-api-standard</artifactId>
-        <version>1.2.0</version>
+        <artifactId>api-standard-parent</artifactId>
+        <version>2.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 

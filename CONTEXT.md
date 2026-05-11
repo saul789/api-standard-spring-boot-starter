@@ -1,4 +1,4 @@
-# 📋 CONTEXT.md — spring-boot-starter-api-standard
+# 📋 CONTEXT.md — api-standard-spring-boot-starter
 
 > **Propósito:** Este archivo le da contexto instantáneo al agente de IA para trabajar con máxima autonomía.
 > Actualízalo cuando cambies versiones, tomes decisiones de arquitectura, o completes hitos del roadmap.
@@ -10,12 +10,12 @@
 | Campo | Valor |
 |---|---|
 | **GroupId** | `io.github.saul789` |
-| **ArtifactId** | `spring-boot-starter-api-standard` |
-| **Versión actual** | `1.2.0` |
+| **ArtifactId** | `api-standard-spring-boot-starter` |
+| **Versión actual** | `2.0.0` |
 | **Java** | 21 (LTS) |
-| **Spring Boot** | 4.0.3 |
+| **Spring Boot** | 4.0.6 |
 | **Licencia** | Apache 2.0 |
-| **GitHub** | https://github.com/saul789/spring-boot-starter-api-standard |
+| **GitHub** | https://github.com/saul789/api-standard-spring-boot-starter |
 
 ---
 
@@ -23,7 +23,7 @@
 
 ### Módulos del proyecto
 ```
-spring-boot-starter-api-standard/   ← root pom (parent)
+api-standard-spring-boot-starter/   ← root pom (parent)
 ├── starter/                         ← librería principal (publicada en Maven Central)
 └── sample-project/                  ← demo de uso de la librería
 ```
