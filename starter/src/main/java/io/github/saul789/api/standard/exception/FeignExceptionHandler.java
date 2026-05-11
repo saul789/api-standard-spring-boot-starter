@@ -59,30 +59,34 @@ public class FeignExceptionHandler {
     // Try to parse the remote error body if present
     RemoteErrorDetails remoteDetails = extractRemoteErrorDetails(ex);
     if (remoteDetails != null) {
-      if (remoteDetails.detail() != null) {
-        finalizedDetail = remoteDetails.detail();
-      }
-      if (remoteDetails.code() != null) {
-        codeName = remoteDetails.code();
-      }
+      finalizedDetail = remoteDetails.detail() != null ? remoteDetails.detail() : finalizedDetail;
+      codeName = remoteDetails.code() != null ? remoteDetails.code() : codeName;
     }
 
     problem.setDetail(finalizedDetail);
     problem.setProperty("code", codeName);
+    problem.setType(resolveFinalType(codeName));
 
-    if (properties.getErrors().getTypeOverrides().containsKey(codeName)) {
+    enrichMetadata(problem, request);
+
+    return problem;
+  }
+
+  private URI resolveFinalType(String codeName) {
+    String override = properties.getErrors().getTypeOverrides().get(codeName);
+    if (override != null) {
       try {
-        problem.setType(URI.create(properties.getErrors().getTypeOverrides().get(codeName)));
+        return URI.create(override);
       } catch (Exception e) {
         if (log.isDebugEnabled()) {
           log.debug("Invalid override URI for {}: {}", codeName, e.getMessage());
         }
-        problem.setType(generateDefaultType(codeName));
       }
-    } else {
-      problem.setType(generateDefaultType(codeName));
     }
+    return generateDefaultType(codeName);
+  }
 
+  private void enrichMetadata(ProblemDetail problem, HttpServletRequest request) {
     try {
       problem.setInstance(URI.create(request.getRequestURI()));
     } catch (Exception e) {
@@ -90,13 +94,12 @@ public class FeignExceptionHandler {
         log.trace("Failed to resolve request URI: {}", e.getMessage());
       }
     }
+
     problem.setProperty("timestamp", Instant.now());
     String traceId = MDC.get("traceId");
     if (traceId != null) {
       problem.setProperty("traceId", traceId);
     }
-
-    return problem;
   }
 
   private HttpStatus resolveHttpStatus(int externalStatus) {
