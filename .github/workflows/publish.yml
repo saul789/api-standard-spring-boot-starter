@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - develop
   pull_request:
     branches:
       - main
@@ -15,27 +16,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
-      - name: Set up JDK 25
+
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '25'
+          java-version: '21'
           distribution: 'temurin'
           cache: 'maven'
 
       - name: Build & Test (Multi-module)
         run: mvn clean install -B jacoco:report
-
-      - name: Cache Dependency Check Data
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository/org/owasp/dependency-check-data
-          key: dependency-check-data-${{ runner.os }}-${{ github.run_id }}
-          restore-keys: |
-            dependency-check-data-${{ runner.os }}-
-
-      - name: Dependency Check (Aggregate)
-        run: mvn org.owasp:dependency-check-maven:aggregate -B -Dformat=HTML -DnvdApiKey=${{ secrets.NVD_API_KEY }} -DsuppressionFiles=dependency-check-suppressions.xml -DfailBuildOnCVSS=1
 
       - name: Quality Checks (SpotBugs & PMD)
         run: |
@@ -47,6 +37,38 @@ jobs:
         with:
           name: jacoco-report
           path: "**/target/site/jacoco/**"
+
+  dependency-check:
+    runs-on: ubuntu-latest
+    if: |
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/develop' ||
+      github.base_ref == 'main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Get date for NVD cache key (24h TTL)
+        id: nvd-cache-date
+        run: echo "date=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+
+      - name: Cache Dependency Check Data
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/OWASP/dependency-check/data
+          key: ${{ runner.os }}-nvd-${{ steps.nvd-cache-date.outputs.date }}
+          restore-keys: |
+            ${{ runner.os }}-nvd-
+
+      - name: Dependency Check (Aggregate)
+        run: mvn org.owasp:dependency-check-maven:aggregate -B -Dformat=HTML -DnvdApiKey=${{ secrets.NVD_API_KEY }} -DsuppressionFiles=dependency-check-suppressions.xml -DfailBuildOnCVSS=1
 
       - name: Upload Dependency Check report
         uses: actions/upload-artifact@v4

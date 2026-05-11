@@ -8,14 +8,33 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.3</version>
+        <version>4.0.6</version>
         <relativePath/>
     </parent>
 
     <groupId>io.github.saul789</groupId>
     <artifactId>spring-boot-starter-api-standard</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <packaging>pom</packaging>
+
+    <name>spring-boot-starter-api-standard</name>
+    <description>A plug-and-play Spring Boot starter that standardizes API responses, implements RFC 9457 global exception handling, and provides distributed tracing via Trace Context propagation.</description>
+    <url>https://github.com/saul789/spring-boot-starter-api-standard</url>
+
+    <developers>
+        <developer>
+            <id>saul789</id>
+            <name>Saul</name>
+            <url>https://github.com/saul789</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/saul789/spring-boot-starter-api-standard.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/saul789/spring-boot-starter-api-standard.git</developerConnection>
+        <url>https://github.com/saul789/spring-boot-starter-api-standard</url>
+        <tag>HEAD</tag>
+    </scm>
 
     <licenses>
         <license>
@@ -26,7 +45,7 @@
     </licenses>
 
     <properties>
-        <java.version>25</java.version>
+        <java.version>21</java.version>
     </properties>
 
     <modules>
@@ -73,6 +92,9 @@
                             <goal>check</goal>
                         </goals>
                         <configuration>
+                            <excludes>
+                                <exclude>io/github/saul789/api/standard/openapi/**</exclude>
+                            </excludes>
                             <rules>
                                 <rule>
                                     <element>BUNDLE</element>
@@ -99,6 +121,55 @@
                     <threshold>Low</threshold>
                     <failOnError>true</failOnError>
                     <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- ===================================================
+                 Google Java Format — Formatter determinístico
+                 Uso: mvn fmt:format  (aplica)
+                      mvn fmt:check   (solo verifica, usado en CI)
+                 =================================================== -->
+            <plugin>
+                <groupId>com.spotify.fmt</groupId>
+                <artifactId>fmt-maven-plugin</artifactId>
+                <version>2.25</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <filesNamePattern>^(?!.*CoverageSweepTest\.java).*\.java$</filesNamePattern>
+                </configuration>
+            </plugin>
+
+            <!-- ===================================================
+                 PMD — Análisis de calidad: código muerto,
+                 complejidad ciclomática, bad practices
+                 Uso: mvn pmd:check   (verifica)
+                      mvn pmd:pmd     (genera reporte HTML)
+                 =================================================== -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.26.0</version>
+                <configuration>
+                    <rulesets>
+                        <ruleset>/rulesets/java/quickstart.xml</ruleset>
+                    </rulesets>
+                    <targetJdk>21</targetJdk>
+                    <printFailingErrors>true</printFailingErrors>
+                    <!-- Fallar la build si hay violations -->
+                    <failOnViolation>true</failOnViolation>
                 </configuration>
                 <executions>
                     <execution>

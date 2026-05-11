@@ -1,0 +1,66 @@
+name: Deploy Interactive Documentation
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch: # Permite ejecución manual desde GitHub
+
+# Permisos necesarios para escribir en gh-pages
+permissions:
+  contents: write
+
+jobs:
+  deploy-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build project
+        run: mvn clean package -DskipTests -pl sample-project -am
+
+      - name: Extract OpenAPI JSON
+        run: |
+          # Levantar el Sample Project en background
+          java -jar sample-project/target/sample-project-*.jar &
+          APP_PID=$!
+          
+          echo "Waiting for Spring Boot application to start..."
+          # Esperar a que el endpoint de openapi esté disponible (hasta 60 segundos)
+          for i in {1..30}; do
+            if curl -s -f http://localhost:8080/v3/api-docs > /dev/null; then
+              echo "✅ Application is ready and serving API Docs!"
+              break
+            fi
+            sleep 2
+          done
+          
+          # Crear directorio temporal para el build
+          mkdir -p docs-build
+          
+          # Descargar el JSON de la especificación
+          curl -s http://localhost:8080/v3/api-docs -o docs-build/openapi.json
+          
+          # Detener la aplicación Spring Boot
+          kill $APP_PID
+
+      - name: Generate Static HTML with Redocly
+        run: |
+          npx @redocly/cli build-docs docs-build/openapi.json \
+            -o docs-build/index.html \
+            --title "API Standard Starter Documentation"
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs-build

@@ -1,1 +1,2 @@
 io.github.saul789.api.standard.ApiStandardAutoConfiguration
+io.github.saul789.api.standard.openapi.ApiStandardOpenApiAutoConfiguration
