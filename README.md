@@ -1,77 +1,43 @@
 <div align="center">
-  <h1>🚀 Spring Boot Starter: API Standard</h1>
-  <p><b>Enterprise-grade API Standardization, RFC 9457 Errors, Trace Context & OpenAPI Auto-Integration</b></p>
+  <h1>🚀 API Standard for Spring Boot</h1>
+  <p><b>The missing API governance layer for Spring Boot.</b></p>
+  <p><i>Zero-config API governance for Spring Boot microservices. One dependency to standardize responses, errors, tracing, and API documentation across all your services.</i></p>
   
   [![CI](https://github.com/saul789/spring-boot-starter-api-standard/actions/workflows/publish.yml/badge.svg)](https://github.com/saul789/spring-boot-starter-api-standard/actions/workflows/publish.yml)
   [![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/saul789/spring-boot-starter-api-standard/releases)
   [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://adoptium.net/)
   [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.x-brightgreen.svg)](https://spring.io/projects/spring-boot)
   [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-  <br/>
-  <i>Stop writing boilerplate for API responses, error handling, and tracing in every Spring Boot service.</i>
 </div>
 
 ---
 
-## ✨ The Problem vs The Solution
+## ❓ Why?
 
-| ❌ Without this Starter | ✅ With API Standard Starter |
-|---|---|
-| **Response Format** varies per team/service | **Unified Envelope** (`data`, `success`, `timestamp`) |
-| **Error Responses** are custom and inconsistent | **RFC 9457 `ProblemDetail`** enforced globally |
-| **Debugging** requires grep-ing logs blindly | **`traceId` MDC propagation** instantly tracks requests |
-| **OpenAPI Docs** need manual `@ApiResponse` on everything | **Zero Annotations** auto-generated schemas |
-| **Microservice Errors** (Feign) swallowed | **Mapped** transparently to standard RFC 9457 |
+Every Spring Boot team eventually reinvents the same wheel:
+- API response wrappers
+- Global exception handlers
+- Trace propagation via MDC
+- Boilerplate Swagger annotations
+- Feign/Resilience4j error mapping
 
-### 🔍 Code & JSON Before vs After
+**This starter turns those cross-cutting concerns into a reusable standard.** Stop rewriting boilerplate in every microservice. 
 
-**The Controller Code:**
-```diff
-- @PostMapping
-- @ApiResponses({
--     @ApiResponse(responseCode = "200", description = "Success"),
--     @ApiResponse(responseCode = "400", description = "Bad Request")
-- })
-- public ResponseEntity<ApiResponse<User>> createUser(@RequestBody UserRequest request) {
--    try {
--        return ResponseEntity.ok(new ApiResponse<>(true, userService.create(request)));
--    } catch (Exception e) {
--        return ResponseEntity.status(400).body(new ApiResponse<>(false, e.getMessage()));
--    }
-- }
+## ⚡ Zero-Configuration Philosophy
 
-+ @PostMapping
-+ @ResponseStatus(HttpStatus.CREATED)
-+ public User createUser(@Valid @RequestBody UserRequest request) {
-+     return userService.create(request);
-+ }
-```
+- **No annotations** on your controllers.
+- **No inheritance** of base classes.
+- **No custom exception handlers** to maintain.
+- **No duplicated response wrappers**.
 
-**The Error Response (RFC 9457):**
-```diff
-- {
--   "success": false,
--   "error": "Bad request",
--   "message": "Email already exists"
-- }
-
-+ {
-+   "type": "urn:problem-type:conflict",
-+   "title": "Conflict",
-+   "status": 409,
-+   "detail": "Email already exists",
-+   "instance": "/api/demo/users",
-+   "code": "CONFLICT",
-+   "timestamp": "2023-10-25T10:05:00Z",
-+   "traceId": "5f9b3b8c-1234-4a56-b789-abcdef123456"
-+ }
-```
+Add the dependency and keep building your API. We handle the rest.
 
 ---
 
-## ⚡ Quick Start (30 Seconds)
+## 🚀 Quick Start
 
-**1. Add the dependency:**
+### 1. Add the dependency
+
 ```xml
 <dependency>
     <groupId>io.github.saul789</groupId>
@@ -80,56 +46,52 @@
 </dependency>
 ```
 
-**2. Run your app. You're done.**
-Your API is now wrapped in a standard response envelope, RFC 9457 compliant, trace-enabled, and auto-documented in Swagger!
+### 2. Create a normal controller
 
----
+```java
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
 
-## 🛠️ Core Features
-
-### 🛡️ 1. Global Exception Handling (RFC 9457)
-Intercepts all exceptions (Validation, Business, Spring Security, Feign, Resilience4j) and translates them into the rigorous `ProblemDetail` specification.
-
-```json
-{
-    "type": "urn:problem-type:bad-request",
-    "title": "Bad Request",
-    "status": 400,
-    "detail": "Email already exists",
-    "instance": "/api/users",
-    "code": "BAD_REQUEST",
-    "timestamp": "2023-10-25T10:05:00Z",
-    "traceId": "5f9b3b8c-1234-4a56-b789-abcdef123456"
+    @GetMapping("/{id}")
+    public User get(@PathVariable String id) {
+        throw new BusinessException(ErrorCode.NOT_FOUND, "User not found", HttpStatus.NOT_FOUND);
+    }
 }
 ```
 
-### 📦 2. Fluent Business Exceptions
-Throw domain-specific errors gracefully using our fluent builder API:
-```java
-throw BusinessException.builder("error.user.not_found")
-    .status(HttpStatus.NOT_FOUND)
-    .code(ErrorCode.NOT_FOUND)
-    .build();
-```
+### 3. Done. The Magic happens.
 
-### 🌍 3. Built-in i18n & Actuator Endpoint
-- **i18n:** Resolves `detail` and `title` using Spring's `MessageSource` via the `Accept-Language` header automatically.
-- **Actuator:** Check all registered error codes via `GET /actuator/api-errors`.
+Without writing any boilerplate, your API now automatically returns:
+- ✅ **Standardized Responses:** Wrapped in a clean `{ success, data, timestamp }` envelope.
+- ✅ **RFC 9457 Errors:** Fully compliant `ProblemDetail` JSON on exceptions.
+- ✅ **Distributed Tracing:** `traceId` auto-generated and propagated to MDC logs.
+- ✅ **Translated Messages:** Multi-language support via Spring `MessageSource`.
+- ✅ **OpenAPI Schemas:** Swagger UI automatically documents the exact response and error structures.
 
-### 🔄 4. Zero-Config OpenAPI / Swagger
-If `springdoc-openapi` is present, it auto-configures your Swagger UI. It wraps `200 OK` schemas in the ApiResponse envelope and registers `ProblemDetail` schemas for 400/500 errors—without a single `@ApiResponse` annotation.
-
-> 📸 **Preview:**
-> 
-> *<p align="center"><img src="https://via.placeholder.com/800x400.png?text=Take+a+screenshot+of+your+Swagger+UI+and+place+it+here" alt="Swagger UI Auto-generated" width="800"></p>*
-> *(Para agregar tu propia foto: toma un screenshot de tu Swagger local, guárdalo en la carpeta `docs/assets/swagger.png` y cambia este enlace en el README).*
-
-### 🔗 5. Dynamic Documentation URIs
-Easily override the default `urn:problem-type:` with real URLs pointing to your company's Developer Portal via `application.yml` or the `@ProblemType` annotation.
+<!-- Sube un GIF animado aquí mostrando el resultado en Postman o el Swagger UI funcionando -->
 
 ---
 
-## 🏗️ Architecture
+## 🛡️ Production Ready
+
+Built for enterprise scale from day one:
+- ✅ Stateless & thread-safe
+- ✅ Native Spring Boot Auto-configuration
+- ✅ RFC 9457 (Problem Details) strictly compliant
+- ✅ OpenAPI v3 native auto-wrapping
+- ✅ MDC trace propagation included
+- ✅ Works flawlessly with OpenFeign & Resilience4j
+
+## ⚙️ Compatibility
+
+| Version | Spring Boot | Java |
+|---------|-------------|------|
+| **1.x** | 4.x         | 21+  |
+
+---
+
+## 🛠️ Architecture Overview
 
 ```mermaid
 sequenceDiagram
@@ -156,24 +118,48 @@ sequenceDiagram
     deactivate TraceFilter
 ```
 
+## 🔍 Before vs After (Zero-Config Magic)
+
+**Before (Manual & Boilerplate):**
+```diff
+- @PostMapping
+- @ApiResponses({
+-     @ApiResponse(responseCode = "200", description = "Success"),
+-     @ApiResponse(responseCode = "400", description = "Bad Request")
+- })
+- public ResponseEntity<ApiResponse<User>> createUser(@RequestBody UserRequest request) {
+-    try {
+-        return ResponseEntity.ok(new ApiResponse<>(true, userService.create(request)));
+-    } catch (Exception e) {
+-        return ResponseEntity.status(400).body(new ApiResponse<>(false, e.getMessage()));
+-    }
+- }
+```
+
+**After (Using this Starter):**
+```diff
++ @PostMapping
++ @ResponseStatus(HttpStatus.CREATED)
++ public User createUser(@Valid @RequestBody UserRequest request) {
++     return userService.create(request);
++ }
+```
+
 ---
 
-## 🔮 Coming in V2.0 (Enterprise Extensibility)
-We are currently building the next generation of this starter, focusing on enterprise scale:
-- 🔌 **Plugin SPI:** Inject custom metadata (like `UserId` or `TenantId`) into your errors via `spring.factories`.
-- 📊 **Micrometer Metrics:** Auto-generated Grafana-ready metrics for every `ErrorCode`.
-- 🔐 **Spring Security Native Integration:** Map `AccessDeniedException` effortlessly.
-- 📜 **Strict Checkstyle & Javadoc Enforcement.**
+## 🗺️ Roadmap (Coming in V2)
+
+- Plugin SPI (Custom ProblemDetail enrichers via `spring.factories`)
+- Micrometer Metrics integration for ErrorCodes
+- Native Spring Security Exception mapping
+- Observability support
 
 ---
 
 ## 🤝 Contributing & Testing
-- **Postman Collection:** Available in `sample-project/postman/spring-boot-starter-api-standard.postman_collection.json`. *(Must be kept updated with every PR!)*
-- **Documentation:** Interactive Docs generated via Redocly on GitHub Pages.
+
+- **Postman Collection:** Available in `sample-project/postman/spring-boot-starter-api-standard.postman_collection.json`. 
+- **Interactive Documentation:** Check the GitHub Pages branch for the Redocly auto-generated site.
 
 ## 📄 License
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
-
-<div align="center">
-  <i>Built with ❤️ for a better Spring Boot ecosystem.</i>
-</div>
