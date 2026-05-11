@@ -8,27 +8,34 @@
   [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://adoptium.net/)
   [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3%2B-brightgreen.svg)](https://spring.io/projects/spring-boot)
   [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+  
+  <br/>
+  
+  <p align="center">
+    <!-- Replace this with a real screenshot of Swagger UI showing Success Response, RFC 9457 Error and traceId
+    <img src="./docs/assets/hero-swagger-preview.png" width="900" alt="Swagger UI showing Success Response, RFC 9457 Error and traceId"/>
+    -->
+  </p>
 </div>
 
 ---
 
-## 🎯 Designed For
-- Platform Engineering Teams
-- Enterprise Microservice Architectures
-- Internal Developer Platforms (IDP)
-- API Governance Initiatives
+## 🚫 Stop Copy-Pasting API Infrastructure
 
-## ❓ Why Not Just Build It Yourself?
+Most organizations eventually create:
+- Duplicated `GlobalExceptionHandler`s in every project
+- Inconsistent `ApiResponse` wrappers
+- Incompatible error formats across teams
+- Fragmented Swagger contracts
 
-Because API standardization becomes exponentially harder at scale. What starts as a simple "response wrapper" eventually grows into:
-- Strict RFC 9457 (Problem Details) compliance
-- OpenAPI schema synchronization
-- Distributed tracing and MDC propagation
-- i18n support across all errors
-- Feign and Resilience4j exception translation
-- Organization-wide consistency
+**This starter centralizes those cross-cutting concerns into a single reusable standard.** Stop reinventing the wheel and eliminate boilerplate technical debt.
 
-**This starter consolidates those concerns into one reusable standard.** Stop reinventing the wheel in every new microservice.
+## 🏢 Ideal For
+- Multi-team microservice environments
+- Internal Platform Teams (Platform Engineering)
+- Enterprise API Governance Initiatives
+- Organizations adopting RFC 9457 (Problem Details)
+- Teams standardizing observability and tracing
 
 ---
 
@@ -39,7 +46,7 @@ Because API standardization becomes exponentially harder at scale. What starts a
 - **No custom exception handlers** to maintain.
 - **No duplicated response wrappers**.
 
-Add the dependency and keep building your API. We handle the governance.
+Add the dependency and keep building your API. We handle the rest.
 
 ---
 
@@ -111,18 +118,15 @@ By simply returning objects or throwing exceptions, the starter enforces a rigor
 
 ---
 
-## ✨ Core Features
+## ✨ The Organizational Savings
 
-| Feature | Included |
-|---|:---:|
-| **RFC 9457 Problem Details** | ✅ |
-| **OpenAPI Auto-Wrapping** | ✅ |
-| **TraceId MDC Propagation** | ✅ |
-| **Global Exception Handling** | ✅ |
-| **i18n Error Translation** | ✅ |
-| **Feign Error Mapping** | ✅ |
-| **Resilience4j Integration** | ✅ |
-| **Zero-Config Setup** | ✅ |
+| Capability | Traditional Setup | This Starter |
+|---|---|:---:|
+| **RFC 9457 Compliance** | Manual construction | ✅ Automatic |
+| **OpenAPI Response Wrapping** | Manual annotations on every method | ✅ Automatic |
+| **TraceId Propagation** | Custom Servlet filters | ✅ Built-in |
+| **Error Translation (i18n)** | Custom boilerplate | ✅ Built-in |
+| **Organization-wide Consistency**| Hard to enforce | ✅ Automatic |
 
 ---
 
@@ -130,18 +134,20 @@ By simply returning objects or throwing exceptions, the starter enforces a rigor
 
 **Before (Manual & Boilerplate):**
 ```diff
+- @RestControllerAdvice
+- public class GlobalExceptionHandler { ... }
+-
+- public class ApiResponse<T> { ... }
+-
+- @Component
+- public class TraceFilter extends OncePerRequestFilter { ... }
+-
 - @PostMapping
 - @ApiResponses({
 -     @ApiResponse(responseCode = "200", description = "Success"),
 -     @ApiResponse(responseCode = "400", description = "Bad Request")
 - })
-- public ResponseEntity<ApiResponse<User>> createUser(@RequestBody UserRequest request) {
--    try {
--        return ResponseEntity.ok(new ApiResponse<>(true, userService.create(request)));
--    } catch (Exception e) {
--        return ResponseEntity.status(400).body(new ApiResponse<>(false, e.getMessage()));
--    }
-- }
+- public ResponseEntity<ApiResponse<User>> createUser(@RequestBody UserRequest request) { ... }
 ```
 
 **After (Using this Starter):**
@@ -155,20 +161,25 @@ By simply returning objects or throwing exceptions, the starter enforces a rigor
 
 ---
 
-## 🛡️ Production Ready
+## 🛡️ Enterprise-Grade Foundations
 
-Built for enterprise scale from day one:
+Built for large-scale microservice platforms from day one:
 - ✅ **Stateless & thread-safe**
 - ✅ **Native Spring Boot Auto-configuration**
 - ✅ **RFC 9457** strictly compliant
 - ✅ **OpenAPI v3** native auto-wrapping
 - ✅ **Works with OpenFeign & Resilience4j**
 
-## ⚙️ Compatibility
+## ⚙️ How It Works (For the Skeptics)
 
-| Version | Spring Boot | Java |
-|---------|-------------|------|
-| **1.x** | 3.3+ / 4.x  | 21+  |
+The starter integrates deeply with Spring Boot auto-configuration:
+- `ResponseBodyAdvice` standardizes responses automatically.
+- `@RestControllerAdvice` maps exceptions into RFC 9457 format.
+- Servlet filters propagate `traceId` into the SLF4J MDC.
+- OpenAPI schemas are rewritten dynamically at runtime.
+- `MessageSource` enables transparent i18n translation.
+
+*No annotations required.*
 
 ---
 
@@ -217,8 +228,11 @@ sequenceDiagram
 
 ## 🤝 Contributing & Testing
 
-- **Postman Collection:** Available in `sample-project/postman/spring-boot-starter-api-standard.postman_collection.json`. 
+- **API Client Collection:** Available in `sample-project/postman/spring-boot-starter-api-standard.postman_collection.json`. *(Importable in Postman, Insomnia, Bruno, Hoppscotch, etc.)*
 - **Interactive Documentation:** Check the GitHub Pages branch for the Redocly auto-generated site.
 
 ## 📄 License
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+
+---
+**Do you find this useful?** Give us a ⭐ on GitHub to support the project!
