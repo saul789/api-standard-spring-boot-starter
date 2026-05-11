@@ -1,6 +1,6 @@
 # 🛡️ Security Governance & Patch Policy
 
-Este documento define la estrategia de gestión de vulnerabilidades para el `spring-boot-starter-api-standard`. El objetivo es mantener una postura de seguridad proactiva, priorizando la remediación técnica sobre la supresión de alertas.
+Este documento define la estrategia de gestión de vulnerabilidades para el `api-standard-spring-boot-starter`. El objetivo es mantener una postura de seguridad proactiva, priorizando la remediación técnica sobre la supresión de alertas.
 
 ## ⚖️ Principios de Seguridad
 

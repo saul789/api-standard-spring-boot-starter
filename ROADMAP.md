@@ -1,75 +1,97 @@
-# 🗺️ ROADMAP — spring-boot-starter-api-standard
+# 🗺️ ROADMAP — api-standard-spring-boot-starter
 
-> Actualiza este archivo cuando completes una tarea o planifiques una nueva.
-> El agente de IA lo usa para ser proactivo y anticipar lo que sigue.
+> **Nota Crítica:** Todas las versiones mantienen cumplimiento estricto con **RFC 9457 (Problem Details)** y **RFC 9110 (HTTP Semantics)**.
 
----
+## ✅ V1.0 — Cimientos (Completado)
+- [x] Soporte para RFC 9457 (`ProblemDetail`).
+- [x] `GlobalExceptionHandler` con soporte i18n.
+- [x] Filtro de `traceId` (W3C Trace Context).
+- [x] Wrapper de respuestas exitosas (`ApiResponse`).
 
-## ✅ V1.0 — Fundamentos (Completado)
+## ✅ V1.1 — Resiliencia y Feign (Completado)
+- [x] Integración con Resilience4j (Circuit Breaker, Rate Limiter).
+- [x] Manejo de excepciones de OpenFeign.
+- [x] Customización de URLs de documentación vía `@ProblemType`.
 
-- [x] Manejo global de excepciones con RFC 9457 (`GlobalExceptionHandler`)
-- [x] Wrapping automático de respuestas exitosas (`ApiResponseAdvice`)
-- [x] Propagación de `traceId` via MDC (`TraceContextFilter`)
-- [x] i18n para mensajes de error (inglés y español)
-- [x] `BusinessException` para errores de dominio
-- [x] `ErrorCode` enum con mapeo automático desde HTTP status
-- [x] Logging de requests (`RequestLoggingFilter`)
-- [x] Publicación en Maven Central
-
----
-
-## ✅ V1.1 — Enriquecimiento de Errores (Completado)
-
-- [x] Soporte para `@ProblemType("https://...")` en excepciones custom
-- [x] Soporte para `ProblemTypeProvider` (interfaz)
-- [x] `type` configurable via `api.standard.errors.type-overrides.<CODE>=url`
-- [x] Field `code` añadido al `ProblemDetail` (machine-readable)
-- [x] `FeignExceptionHandler` para errores de clientes Feign
-- [x] Auto-configuración Spring Boot (`@AutoConfiguration`)
+## ✅ V1.2 — OpenAPI y Estabilidad (Completado)
+- [x] Integración automática con SpringDoc OpenAPI (auto-wrapping).
+- [x] CI/CD Pipeline estable con calidad de código (Sonar/SpotBugs).
+- [x] **Upgrade a Spring Boot 4.0.6 (Security Patching)**.
+- [x] Documentación Actuator (`/actuator/api-errors`).
 
 ---
 
-## ✅ V1.2 — Integración con Ecosistema (Completado)
+## 🏗️ Vision Architecture (Modular V2.0)
 
-- [x] Soporte para Resilience4j (Circuit Breaker → 503, Rate Limiter → 429, Bulkhead → 429, Timeout → 504)
-- [x] Integración condicional con springdoc-openapi / Swagger UI
-- [x] Migración a Java 21 (LTS)
-- [x] Migración a Spring Boot 4.x
-- [x] Cobertura de tests al 95%+ con JaCoCo enforced
-- [x] SpotBugs con política "Low threshold / Max effort"
-- [x] GitHub Actions CI/CD pipeline
+```mermaid
+graph TD
+    S[Main Starter] --> C[api-standard-core]
+    S --> W[api-standard-web]
+    S --> O[api-standard-observability]
+    S -.-> SEC[api-standard-security]
+    S -.-> AI[api-standard-ai]
+    
+    subgraph "Core Logic"
+    C -- "i18n & Models" --> RFC[RFC 9457]
+    end
+    
+    subgraph "Specialized Modules"
+    W -- "MVC Advice" --> RFC
+    O -- "Actuator & OTel" --> RFC
+    SEC -- "Auth Errors" --> RFC
+    AI -- "Diagnosis" --> RFC
+    end
+    
+    style S fill:#f9f,stroke:#333,stroke-width:4px
+```
+
+## 🚀 V2.0 — Modularización & Enterprise (En Planificación)
+
+### 📦 Arquitectura Modular (Anti Scope Creep)
+- [ ] **Split by Modules**: Dividir el starter en: `core`, `security`, `observability`, `ai`, `webflux` y `governance`.
+- [ ] **Mesh-Awareness Mode**: Detección de headers de Service Mesh (Envoy/Istio) para evitar conflictos de reintentos y telemetría duplicada.
+- [ ] **Degraded Mode**: Sistema de autoprotección que desactiva funciones costosas (IA, Snapshots) bajo alta carga de CPU/Memoria.
+
+### 🛡️ Seguridad & Gobernanza (Governance-as-Code)
+- [ ] **Build-Time Enforcement**: Fallar el build si hay ErrorCodes sin traducción, sin owner o sin documentación OpenAPI.
+- [ ] **Redaction Engine**: Ofuscación de PII (Emails, Tarjetas) en logs y JSON mediante reglas eficientes (no solo Regex).
+- [ ] **Spring Security Integration**: Unificación de errores de seguridad al formato ProblemDetail.
+
+### 📊 Observabilidad & DX
+- [ ] **OpenTelemetry Alignment**: Mapear atributos de error a las convenciones semánticas oficiales de OpenTelemetry.
+- [ ] **Contract Safety Tests**: Detección de breaking changes en el esquema JSON durante el build.
+- [ ] **SBA Integration (Optional)**: Módulo opcional para visualización en Spring Boot Admin.
 
 ---
 
-## 🚧 V1.3 — Hardening y DX (En progreso)
+## 🔭 V3.0 — Error Intelligence Platform (Visionario)
 
-- [x] **Mejorar DX de `BusinessException`** → Agregar builder fluido para simplificar su construcción
-- [x] **Soporte para `@Validated` en nivel de clase** (no solo parámetros de método) - Ya manejado vía `ConstraintViolationException`
-- [x] **Actuator endpoint** para listar todos los `ErrorCode` registrados y sus configuraciones
-- [x] **Documentación interactiva en GitHub Pages** generada desde el `sample-project` (Workflow `docs.yml` usando Redocly)
-- [x] **Google Java Format** — Formato aplicado (`mvn fmt:format` ejecutado y plugins restaurados para Java 21)
-- [x] **PMD** — Resolver las violations iniciales del ruleset `quickstart.xml` en el módulo `starter/` (19 rules corregidas)
+### 🤖 Inteligencia & Diagnóstico Seguro
+- [ ] **Sanitized API Black Box**: Captura de estado (hilos, conexiones, MDC) EXCLUYENDO el heap dump para evitar fugas de secretos en memoria.
+- [ ] **AI-Assisted Support (Internal)**: Herramientas de diagnóstico para el equipo de soporte (sin exposición pública).
+- [ ] **Error Fingerprinting**: Hashes determinísticos para agrupar incidentes en herramientas de monitoreo.
+- [ ] **JSON Schema Export**: Generación de esquemas dinámicos para validación agnóstica de contratos (Node.js/Go/TS).
 
----
+### 🚀 Performance & Self-Healing
+- [ ] **Error Quarantine**: Degradación automática de respuestas y fallback ante fallos masivos en endpoints específicos.
+- [ ] **GraalVM Native Support**: Crucial para arquitecturas Serverless con cold starts mínimos.
+- [ ] **Zero-Allocation Hot Path**: Optimización extrema de memoria para sistemas de alta frecuencia.
+- [ ] **Exception Throttling**: Protección de infraestructura de logs ante ataques.
+- [ ] **Retry-After Header**: Inyección automática del header HTTP basado en la carga o el tipo de error.
+- [ ] **Actuator Health Integration**: Cambio de estado a `OUT_OF_SERVICE` basado en tasa de errores críticos.
 
-## 🔮 V2.0 — Extensibilidad y Enterprise (Planificado)
+### 🛡️ Seguridad Avanzada (Gobernanza)
+- [ ] **Anti-Reconnaissance Mode**: Ofuscación de infraestructura (nombres de tablas, vendors de DB).
+- [ ] **Redaction Engine**: Ofuscación de PII (Emails, Tarjetas) en logs y JSON.
+- [ ] **Validation PII Masking**: Enmascaramiento automático de valores sensibles en errores de Bean Validation.
+- [ ] **TypeScript SDK Generator**: Sincronización total del contrato de errores con el Frontend.
 
-- [ ] **Plugin SPI (Service Provider Interface):** Permitir a los usuarios registrar `ProblemDetailEnricher` propios via `spring.factories` o AutoConfiguración para inyectar metadatos customizados (ej. User ID) en los errores.
-- [ ] **Módulo de métricas:** Integración automática con Micrometer para contar excepciones por `ErrorCode`, HTTP method y path (preparado para Grafana/Prometheus).
-- [ ] **Integración Nativa con Spring Security:** Mapeo automático de `AccessDeniedException` y `AuthenticationException` al estándar RFC 9457 desde los filtros de seguridad.
-- [ ] **Checkstyle Integration:** Imposición de convenciones de nombrado, orden de imports y Javadocs **obligatorios en inglés** para todo el código público del starter (todo Javadoc existente en español se migrará a inglés).
-- [ ] **Soporte para WebFlux** (reactive stack, no solo Servlet)
-- [ ] **Rate Limiting nativo** sin depender de Resilience4j
-- [ ] **Modo estricto:** Fail-fast en startup si hay `ErrorCode` sin entrada i18n
-
----
-
-## 💡 Ideas / Backlog (Sin comprometer)
-
-- [ ] Integración con OpenTelemetry para `traceId` automático (en lugar de MDC manual)
-- [ ] Soporte para `application/problem+json` como Content-Type en la respuesta
-- [ ] Exportar esquema JSON de todos los errores posibles (para documentación automática)
-- [ ] Anotación `@StandardResponse` para marcar controladores que deben envolverse
+### 🛠️ Herramientas Pro
+- [ ] **Temporal Error Graph**: Visualización tipo DAG del viaje de un error en la red.
+- [ ] **IntelliJ Plugin**: Soporte nativo en el IDE para la librería.
+- [ ] **SBA Integration (Optional Module)**: Vista personalizada para Spring Boot Admin consumiendo el Actuator.
+- [ ] **SLA Monitoring & Alerting**: Métricas basadas en la prioridad de negocio (P1, P2, P3).
+- [ ] **Dashboard UI**: Panel visual de salud y gobernanza de APIs organizacional.
 
 ---
 
@@ -95,13 +117,3 @@
 - [ ] **RFC 7807:** No hay referencias a RFC 7807 en la documentación pública (usar siempre RFC 9457)
 
 ---
-
-## 📊 Estado actual
-
-| Métrica | Valor |
-|---|---|
-| Cobertura de tests (JaCoCo) | ≥ 95% (enforced) |
-| Java | 21 LTS |
-| Spring Boot | 4.0.3 |
-| Versión publicada | 1.2.0 |
-| Tests en GlobalExceptionHandlerTest | 621 líneas / ~30 casos |
