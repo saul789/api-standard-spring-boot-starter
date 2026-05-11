@@ -52,10 +52,12 @@
 
 ---
 
-## 🔮 V2.0 — Extensibilidad (Planificado)
+## 🔮 V2.0 — Extensibilidad y Enterprise (Planificado)
 
-- [ ] **Plugin SPI:** Permitir a los usuarios registrar `ProblemDetailEnricher` propios via `spring.factories`
-- [ ] **Módulo de métricas:** Contadores Micrometer por `ErrorCode` para integración con Prometheus/Grafana
+- [ ] **Plugin SPI (Service Provider Interface):** Permitir a los usuarios registrar `ProblemDetailEnricher` propios via `spring.factories` o AutoConfiguración para inyectar metadatos customizados (ej. User ID) en los errores.
+- [ ] **Módulo de métricas:** Integración automática con Micrometer para contar excepciones por `ErrorCode`, HTTP method y path (preparado para Grafana/Prometheus).
+- [ ] **Integración Nativa con Spring Security:** Mapeo automático de `AccessDeniedException` y `AuthenticationException` al estándar RFC 9457 desde los filtros de seguridad.
+- [ ] **Checkstyle Integration:** Imposición de convenciones de nombrado, orden de imports y Javadocs **obligatorios en inglés** para todo el código público del starter (todo Javadoc existente en español se migrará a inglés).
 - [ ] **Soporte para WebFlux** (reactive stack, no solo Servlet)
 - [ ] **Rate Limiting nativo** sin depender de Resilience4j
 - [ ] **Modo estricto:** Fail-fast en startup si hay `ErrorCode` sin entrada i18n
