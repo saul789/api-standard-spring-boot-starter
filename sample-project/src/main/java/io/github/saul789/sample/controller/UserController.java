@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /** Controlador de Usuarios auditado que cumple con el estándar RFC 9457. */
@@ -20,6 +21,7 @@ public class UserController {
    * VALIDATION_ERROR. 2. Business rule (Duplicate user) -> CONFLICT. 3. i18n with dynamic keys.
    */
   @PostMapping
+  @ResponseStatus(HttpStatus.CREATED)
   public String createUser(@Valid @RequestBody UserRequest request) {
     // Simulation: If email is test@example.com, throw a business exception
     if ("test@example.com".equalsIgnoreCase(request.email())) {
