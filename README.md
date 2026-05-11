@@ -73,8 +73,6 @@ public class UserController {
 
 Without writing any boilerplate, your API now automatically returns standardized responses, RFC 9457 errors, traceIds, auto-generated OpenAPI schemas, and translated messages.
 
-<!-- GIF 1 PLACEHOLDER: Zero Config. Muestra a un dev añadiendo el pom.xml, levantando la app y viendo todo el Swagger auto-documentado. -->
-
 ---
 
 ## 📦 The Standard Contract
@@ -106,12 +104,10 @@ By simply returning objects or throwing exceptions, the starter enforces a rigor
   "traceId": "5f9b3b8c-1234-4a56-b789-abcdef123456"
 }
 ```
-<!-- GIF 2 PLACEHOLDER: Error Mapping. Muestra un request fallido en Postman escupiendo un JSON RFC 9457 perfecto. -->
 
 > 💡 **Bonus: Transparent MDC Logging**
 > Every request gets a `traceId` injected into SLF4J MDC instantly. Watch your logs become 10x easier to debug:
 > `INFO [traceId: 5f9b3b8c-1234...] c.s.UserController: Fetching user 123`
-<!-- GIF 3 PLACEHOLDER: Console logs. Muestra la consola imprimiendo logs con el traceId ya inyectado. -->
 
 ---
 
