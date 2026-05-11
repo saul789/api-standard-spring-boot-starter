@@ -147,6 +147,9 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <filesNamePattern>^(?!.*CoverageSweepTest\.java).*\.java$</filesNamePattern>
+                </configuration>
             </plugin>
 
             <!-- ===================================================
