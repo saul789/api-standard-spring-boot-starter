@@ -65,10 +65,9 @@ jobs:
       - name: Cache Dependency Check Data
         uses: actions/cache@v4
         with:
-          path: ~/.m2/repository/org/owasp/dependency-check-data
-          key: ${{ runner.os }}-nvd-${{ steps.nvd-cache-date.outputs.date }}-${{ hashFiles('**/pom.xml') }}
+          path: ~/.local/share/OWASP/dependency-check/data
+          key: ${{ runner.os }}-nvd-${{ steps.nvd-cache-date.outputs.date }}
           restore-keys: |
-            ${{ runner.os }}-nvd-${{ steps.nvd-cache-date.outputs.date }}-
             ${{ runner.os }}-nvd-
 
       - name: Dependency Check (Aggregate)
