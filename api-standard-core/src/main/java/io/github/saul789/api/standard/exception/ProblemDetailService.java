@@ -58,14 +58,7 @@ public class ProblemDetailService {
     ProblemDetail problem = ProblemDetail.forStatus(status);
 
     // 1. Core Translations (Title & Detail)
-    String defaultTitle;
-    try {
-      defaultTitle = status.getReasonPhrase();
-    } catch (Exception ignored) {
-      defaultTitle = "Error";
-    }
-    problem.setTitle(messageSource.getMessage("error." + code, null, defaultTitle, locale));
-    problem.setDetail(messageSource.getMessage(detailKey, null, detailKey, locale));
+    resolveTitleAndDetail(problem, status, detailKey, code, locale);
 
     // 2. Core Attributes
     problem.setProperty("code", code);
@@ -117,16 +110,29 @@ public class ProblemDetailService {
 
     // Default URN generation
     String baseUri = properties.getErrors().getTypeBaseUri();
-    String typeSuffix;
-    if (code == null || code.isBlank()) {
-      typeSuffix = "unknown-error";
-    } else {
-      try {
-        typeSuffix = ErrorCode.valueOf(code).toKebabCase();
-      } catch (Exception ignored) {
-        typeSuffix = code.toLowerCase(Locale.ROOT).replace('_', '-');
-      }
-    }
+    String typeSuffix = resolveTypeSuffix(code);
     return URI.create(baseUri + typeSuffix);
+  }
+
+  private void resolveTitleAndDetail(ProblemDetail problem, HttpStatus status, String detailKey, String code, Locale locale) {
+    String defaultTitle;
+    try {
+      defaultTitle = status.getReasonPhrase();
+    } catch (Exception ignored) {
+      defaultTitle = "Error";
+    }
+    problem.setTitle(messageSource.getMessage("error." + code, null, defaultTitle, locale));
+    problem.setDetail(messageSource.getMessage(detailKey, null, detailKey, locale));
+  }
+
+  private String resolveTypeSuffix(String code) {
+    if (code == null || code.isBlank()) {
+      return "unknown-error";
+    }
+    try {
+      return ErrorCode.valueOf(code).toKebabCase();
+    } catch (Exception ignored) {
+      return code.toLowerCase(Locale.ROOT).replace('_', '-');
+    }
   }
 }

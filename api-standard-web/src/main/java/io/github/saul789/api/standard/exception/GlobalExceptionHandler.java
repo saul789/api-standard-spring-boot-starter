@@ -62,30 +62,7 @@ public class GlobalExceptionHandler {
             ex,
             locale);
 
-    List<ValidationError> errors =
-        ex.getBindingResult().getFieldErrors().stream()
-            .map(
-                f -> {
-                  String message = f.getDefaultMessage();
-                  for (String code : f.getCodes()) {
-                    String msg = messageSource.getMessage(code, f.getArguments(), null, locale);
-                    if (msg != null && !msg.equals(code)) {
-                      message = msg;
-                      break;
-                    }
-                  }
-
-                  if (message != null && message.equals(f.getDefaultMessage())) {
-                    message = messageSource.getMessage(message, f.getArguments(), message, locale);
-                  }
-
-                  return new ValidationError(f.getField(), message);
-                })
-            .sorted(
-                java.util.Comparator.comparing(ValidationError::getField)
-                    .thenComparing(ValidationError::getMessage))
-            .toList();
-
+    List<ValidationError> errors = mapFieldErrors(ex.getBindingResult().getFieldErrors(), locale);
     problem.setProperty("errors", errors);
     return problem;
   }
@@ -105,28 +82,7 @@ public class GlobalExceptionHandler {
             ex,
             locale);
 
-    List<ValidationError> errors =
-        ex.getConstraintViolations().stream()
-            .map(
-                v -> {
-                  String field = "";
-                  for (var node : v.getPropertyPath()) {
-                    field = node.getName();
-                  }
-                  String template = v.getMessageTemplate();
-                  String message =
-                      (template != null && template.startsWith("{") && template.endsWith("}"))
-                          ? messageSource.getMessage(
-                              template.substring(1, template.length() - 1),
-                              null,
-                              v.getMessage(),
-                              locale)
-                          : v.getMessage();
-                  return new ValidationError(field, message);
-                })
-            .sorted(java.util.Comparator.comparing(ValidationError::getField))
-            .toList();
-
+    List<ValidationError> errors = mapConstraintViolations(ex.getConstraintViolations(), locale);
     problem.setProperty("errors", errors);
     return problem;
   }
@@ -182,67 +138,104 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(Exception.class)
   public ProblemDetail handleGenericException(
       Exception ex, HttpServletRequest request, Locale locale) {
-    String message = ex.getMessage();
-    HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-    String codeName = ErrorCode.INTERNAL_ERROR.name();
-
-    // Check Resilience4j exceptions FIRST (they may implement ErrorResponse in integration builds)
-    String exceptionClassName = ex.getClass().getName();
-    if (exceptionClassName.contains("resilience4j.circuitbreaker.CallNotPermittedException")) {
-      return problemDetailService.createProblem(
-          HttpStatus.SERVICE_UNAVAILABLE,
-          request,
-          "error.circuit_breaker_open",
-          ErrorCode.SERVICE_UNAVAILABLE.name(),
-          ex,
-          locale);
+    
+    ProblemDetail specialProblem = tryHandleSpecialExceptions(ex, request, locale);
+    if (specialProblem != null) {
+      return specialProblem;
     }
-    if (exceptionClassName.contains("resilience4j.ratelimiter.RequestNotPermitted")
-        || exceptionClassName.contains("resilience4j.bulkhead.BulkheadFullException")) {
+
+    ExceptionMapping mapping = mapException(ex);
+
+    return problemDetailService.createProblem(
+        mapping.status(), request, mapping.message(), mapping.codeName(), ex, locale);
+  }
+
+  private record ExceptionMapping(HttpStatus status, String codeName, String message) {}
+
+  private ProblemDetail tryHandleSpecialExceptions(Exception ex, HttpServletRequest request, Locale locale) {
+    String className = ex.getClass().getName();
+    
+    if (className.contains("resilience4j.circuitbreaker.CallNotPermittedException")) {
       return problemDetailService.createProblem(
-          HttpStatus.TOO_MANY_REQUESTS,
-          request,
-          "error.too_many_requests",
-          ErrorCode.TOO_MANY_REQUESTS.name(),
-          ex,
-          locale);
+          HttpStatus.SERVICE_UNAVAILABLE, request, "error.circuit_breaker_open", 
+          ErrorCode.SERVICE_UNAVAILABLE.name(), ex, locale);
+    }
+    
+    if (className.contains("resilience4j.ratelimiter.RequestNotPermitted")
+        || className.contains("resilience4j.bulkhead.BulkheadFullException")) {
+      return problemDetailService.createProblem(
+          HttpStatus.TOO_MANY_REQUESTS, request, "error.too_many_requests", 
+          ErrorCode.TOO_MANY_REQUESTS.name(), ex, locale);
     }
 
     if (ex instanceof ErrorResponse errorResponse) {
       ProblemDetail problem = errorResponse.updateAndGetBody(messageSource, locale);
       return problemDetailService.createProblem(
-          HttpStatus.valueOf(problem.getStatus()),
-          request,
-          problem.getDetail(),
-          ErrorCode.fromStatus(problem.getStatus()).name(),
-          ex,
-          locale);
+          HttpStatus.valueOf(problem.getStatus()), request, problem.getDetail(), 
+          ErrorCode.fromStatus(problem.getStatus()).name(), ex, locale);
     }
+    
+    return null;
+  }
 
-    ResponseStatus responseStatus =
-        AnnotatedElementUtils.findMergedAnnotation(ex.getClass(), ResponseStatus.class);
+  private ExceptionMapping mapException(Exception ex) {
+    ResponseStatus responseStatus = AnnotatedElementUtils.findMergedAnnotation(ex.getClass(), ResponseStatus.class);
     if (responseStatus != null) {
-      status = responseStatus.code();
-      codeName = ErrorCode.fromStatus(status.value()).name();
-    } else {
-      String exceptionName = ex.getClass().getSimpleName();
-      if (exceptionName.contains("AccessDeniedException")) {
-        status = HttpStatus.FORBIDDEN;
-        codeName = ErrorCode.FORBIDDEN.name();
-        message = "error.forbidden";
-      } else if (ex instanceof java.util.concurrent.TimeoutException
-          || exceptionName.contains("TimeoutException")) {
-        status = HttpStatus.GATEWAY_TIMEOUT;
-        codeName = ErrorCode.GATEWAY_TIMEOUT.name();
-        message = "error.gateway_timeout";
-      } else {
-        if (log.isErrorEnabled()) {
-          log.error("Unhandled exception caught: {}", ex.getMessage(), ex);
-        }
-        message = "error.internal_error";
-      }
+      HttpStatus status = responseStatus.code();
+      return new ExceptionMapping(status, ErrorCode.fromStatus(status.value()).name(), ex.getMessage());
     }
 
-    return problemDetailService.createProblem(status, request, message, codeName, ex, locale);
+    String exceptionName = ex.getClass().getSimpleName();
+    if (exceptionName.contains("AccessDeniedException")) {
+      return new ExceptionMapping(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN.name(), "error.forbidden");
+    }
+    if (ex instanceof java.util.concurrent.TimeoutException || exceptionName.contains("TimeoutException")) {
+      return new ExceptionMapping(HttpStatus.GATEWAY_TIMEOUT, ErrorCode.GATEWAY_TIMEOUT.name(), "error.gateway_timeout");
+    }
+
+    if (log.isErrorEnabled()) {
+      log.error("Unhandled exception caught: {}", ex.getMessage(), ex);
+    }
+    return new ExceptionMapping(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_ERROR.name(), "error.internal_error");
+  }
+
+  private List<ValidationError> mapFieldErrors(List<org.springframework.validation.FieldError> fieldErrors, Locale locale) {
+    return fieldErrors.stream()
+        .map(fieldError -> {
+          String message = fieldError.getDefaultMessage();
+          for (String code : fieldError.getCodes()) {
+            String msg = messageSource.getMessage(code, fieldError.getArguments(), null, locale);
+            if (msg != null && !msg.equals(code)) {
+              message = msg;
+              break;
+            }
+          }
+
+          if (message != null && message.equals(fieldError.getDefaultMessage())) {
+            message = messageSource.getMessage(message, fieldError.getArguments(), message, locale);
+          }
+
+          return new ValidationError(fieldError.getField(), message);
+        })
+        .sorted(java.util.Comparator.comparing(ValidationError::getField)
+            .thenComparing(ValidationError::getMessage))
+        .toList();
+  }
+
+  private List<ValidationError> mapConstraintViolations(java.util.Set<jakarta.validation.ConstraintViolation<?>> violations, Locale locale) {
+    return violations.stream()
+        .map(violation -> {
+          String field = "";
+          for (var node : violation.getPropertyPath()) {
+            field = node.getName();
+          }
+          String template = violation.getMessageTemplate();
+          String message = (template != null && template.startsWith("{") && template.endsWith("}"))
+              ? messageSource.getMessage(template.substring(1, template.length() - 1), null, violation.getMessage(), locale)
+              : violation.getMessage();
+          return new ValidationError(field, message);
+        })
+        .sorted(java.util.Comparator.comparing(ValidationError::getField))
+        .toList();
   }
 }
