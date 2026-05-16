@@ -32,7 +32,7 @@ public class ApiStandardProperties {
     }
 
     public Map<String, String> getTypeOverrides() {
-      return typeOverrides != null ? Collections.unmodifiableMap(typeOverrides) : null;
+      return Collections.unmodifiableMap(typeOverrides);
     }
 
     public void setTypeOverrides(Map<String, String> typeOverrides) {

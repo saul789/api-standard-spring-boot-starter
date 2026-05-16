@@ -37,13 +37,16 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 class GlobalExceptionHandlerTest {
+  private static final String ERRORS = "errors";
+  private static final String GENERIC_PATH = "/generic";
+  private static final String USERNAME = "username";
+  private static final String DEFAULT_MSG = "default";
 
   private MockMvc mockMvc;
   private GlobalExceptionHandler globalExceptionHandler;
   private MessageSource messageSource;
   private ProblemDetailService problemDetailService;
   private HttpServletRequest request;
-  private ApiStandardProperties properties;
 
   @BeforeEach
   void setUp() {
@@ -51,7 +54,7 @@ class GlobalExceptionHandlerTest {
     when(messageSource.getMessage(anyString(), any(), anyString(), any()))
         .thenAnswer(invocation -> invocation.getArgument(2));
 
-    this.properties = new ApiStandardProperties();
+    ApiStandardProperties properties = new ApiStandardProperties();
     java.util.List<ProblemDetailEnricher> enrichers =
         java.util.List.of(new StandardMetadataEnricher(), new TraceIdEnricher());
     this.problemDetailService = new ProblemDetailService(messageSource, properties, enrichers);
@@ -71,7 +74,7 @@ class GlobalExceptionHandlerTest {
 
   @RestController
   static class TestController {
-    @GetMapping("/generic")
+    @GetMapping(GENERIC_PATH)
     public void generic() {
       throw new RuntimeException("Unexpected error");
     }
@@ -115,7 +118,7 @@ class GlobalExceptionHandlerTest {
   @Test
   void shouldHandleGenericException() throws Exception {
     mockMvc
-        .perform(MockMvcRequestBuilders.get("/generic"))
+        .perform(MockMvcRequestBuilders.get(GENERIC_PATH))
         .andExpect(MockMvcResultMatchers.status().isInternalServerError())
         .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("INTERNAL_ERROR"));
   }
@@ -135,7 +138,7 @@ class GlobalExceptionHandlerTest {
     MDC.put("traceId", traceIdValue);
     try {
       mockMvc
-          .perform(MockMvcRequestBuilders.get("/generic"))
+          .perform(MockMvcRequestBuilders.get(GENERIC_PATH))
           .andExpect(MockMvcResultMatchers.status().isInternalServerError())
           .andExpect(MockMvcResultMatchers.jsonPath("$.traceId").value(traceIdValue));
     } finally {
@@ -170,7 +173,7 @@ class GlobalExceptionHandlerTest {
 
     when(ex.getBindingResult()).thenReturn(bindingResult);
     when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
-    when(fieldError.getField()).thenReturn("username");
+    when(fieldError.getField()).thenReturn(USERNAME);
     when(fieldError.getDefaultMessage()).thenReturn("default message");
     when(fieldError.getCodes()).thenReturn(new String[] {"abc", "def"});
     when(fieldError.getArguments()).thenReturn(new Object[] {});
@@ -188,10 +191,10 @@ class GlobalExceptionHandlerTest {
     assertEquals(400, detail.getStatus());
 
     @SuppressWarnings("unchecked")
-    List<ValidationError> errors = (List<ValidationError>) detail.getProperties().get("errors");
+    List<ValidationError> errors = (List<ValidationError>) detail.getProperties().get(ERRORS);
     assertNotNull(errors);
     assertEquals(1, errors.size());
-    assertEquals("username", errors.get(0).getField());
+    assertEquals(USERNAME, errors.get(0).getField());
     assertEquals("translated message", errors.get(0).getMessage());
   }
 
@@ -203,7 +206,7 @@ class GlobalExceptionHandlerTest {
 
     when(ex.getBindingResult()).thenReturn(bindingResult);
     when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
-    when(fieldError.getField()).thenReturn("username");
+    when(fieldError.getField()).thenReturn(USERNAME);
     when(fieldError.getDefaultMessage()).thenReturn("error.key");
     when(fieldError.getCodes()).thenReturn(new String[] {"invalid.code"});
     when(fieldError.getArguments()).thenReturn(new Object[] {});
@@ -224,7 +227,7 @@ class GlobalExceptionHandlerTest {
 
     assertNotNull(detail);
     @SuppressWarnings("unchecked")
-    List<ValidationError> errors = (List<ValidationError>) detail.getProperties().get("errors");
+    List<ValidationError> errors = (List<ValidationError>) detail.getProperties().get(ERRORS);
     assertEquals("translated default message", errors.get(0).getMessage());
   }
 
@@ -237,14 +240,14 @@ class GlobalExceptionHandlerTest {
 
     when(ex.getBindingResult()).thenReturn(bindingResult);
     when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
-    when(fieldError.getField()).thenReturn("username");
-    when(fieldError.getDefaultMessage()).thenReturn("default");
+    when(fieldError.getField()).thenReturn(USERNAME);
+    when(fieldError.getDefaultMessage()).thenReturn(DEFAULT_MSG);
     when(fieldError.getCodes()).thenReturn(new String[] {}); // Empty codes
 
     ProblemDetail detail =
         globalExceptionHandler.handleValidationException(ex, request, Locale.ENGLISH);
-    List<ValidationError> errors = (List<ValidationError>) detail.getProperties().get("errors");
-    assertEquals("default", errors.get(0).getMessage());
+    List<ValidationError> errors = (List<ValidationError>) detail.getProperties().get(ERRORS);
+    assertEquals(DEFAULT_MSG, errors.get(0).getMessage());
   }
 
   @Test
@@ -256,16 +259,16 @@ class GlobalExceptionHandlerTest {
 
     when(ex.getBindingResult()).thenReturn(bindingResult);
     when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
-    when(fieldError.getField()).thenReturn("username");
-    when(fieldError.getDefaultMessage()).thenReturn("default");
+    when(fieldError.getField()).thenReturn(USERNAME);
+    when(fieldError.getDefaultMessage()).thenReturn(DEFAULT_MSG);
     when(fieldError.getCodes()).thenReturn(new String[] {"code1"});
     // messageSource returns same as code
     when(messageSource.getMessage(eq("code1"), any(), any(), any())).thenReturn("code1");
 
     ProblemDetail detail =
         globalExceptionHandler.handleValidationException(ex, request, Locale.ENGLISH);
-    List<ValidationError> errors = (List<ValidationError>) detail.getProperties().get("errors");
-    assertEquals("default", errors.get(0).getMessage());
+    List<ValidationError> errors = (List<ValidationError>) detail.getProperties().get(ERRORS);
+    assertEquals(DEFAULT_MSG, errors.get(0).getMessage());
   }
 
   @Test
@@ -282,7 +285,7 @@ class GlobalExceptionHandlerTest {
 
     ProblemDetail result =
         globalExceptionHandler.handleConstraintViolation(ex, request, Locale.ENGLISH);
-    List<ValidationError> errors = (List<ValidationError>) result.getProperties().get("errors");
+    List<ValidationError> errors = (List<ValidationError>) result.getProperties().get(ERRORS);
     assertEquals("raw message", errors.get(0).getMessage());
   }
 
@@ -302,14 +305,14 @@ class GlobalExceptionHandlerTest {
         globalExceptionHandler.handleConstraintViolation(ex, request, Locale.ENGLISH);
     assertEquals(
         "raw message",
-        ((List<ValidationError>) result1.getProperties().get("errors")).get(0).getMessage());
+        ((List<ValidationError>) result1.getProperties().get(ERRORS)).get(0).getMessage());
 
     when(violation.getMessageTemplate()).thenReturn("missing-start}");
     ProblemDetail result2 =
         globalExceptionHandler.handleConstraintViolation(ex, request, Locale.ENGLISH);
     assertEquals(
         "raw message",
-        ((List<ValidationError>) result2.getProperties().get("errors")).get(0).getMessage());
+        ((List<ValidationError>) result2.getProperties().get(ERRORS)).get(0).getMessage());
   }
 
   @Test
@@ -321,13 +324,13 @@ class GlobalExceptionHandlerTest {
 
     when(ex.getBindingResult()).thenReturn(bindingResult);
     when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
-    when(fieldError.getField()).thenReturn("username");
+    when(fieldError.getField()).thenReturn(USERNAME);
     when(fieldError.getDefaultMessage()).thenReturn(null); // NULL default message
     when(fieldError.getCodes()).thenReturn(new String[] {});
 
     ProblemDetail detail =
         globalExceptionHandler.handleValidationException(ex, request, Locale.ENGLISH);
-    List<ValidationError> errors = (List<ValidationError>) detail.getProperties().get("errors");
+    List<ValidationError> errors = (List<ValidationError>) detail.getProperties().get(ERRORS);
     assertNull(errors.get(0).getMessage());
   }
 
@@ -340,13 +343,13 @@ class GlobalExceptionHandlerTest {
     when(ex.getConstraintViolations()).thenReturn(Set.of(violation));
     when(violation.getPropertyPath()).thenReturn(path);
     when(path.iterator()).thenReturn(java.util.Collections.emptyIterator());
-    when(violation.getMessage()).thenReturn("default");
+    when(violation.getMessage()).thenReturn(DEFAULT_MSG);
     when(violation.getMessageTemplate()).thenReturn("{error.test}");
     when(messageSource.getMessage(eq("error.test"), any(), any(), any())).thenReturn("translated");
 
     ProblemDetail result =
         globalExceptionHandler.handleConstraintViolation(ex, request, Locale.ENGLISH);
-    List<ValidationError> errors = (List<ValidationError>) result.getProperties().get("errors");
+    List<ValidationError> errors = (List<ValidationError>) result.getProperties().get(ERRORS);
     assertEquals("translated", errors.get(0).getMessage());
   }
 
@@ -361,13 +364,13 @@ class GlobalExceptionHandlerTest {
     when(ex.getConstraintViolations()).thenReturn(Set.of(violation));
     when(violation.getPropertyPath()).thenReturn(path);
     when(path.iterator()).thenReturn(List.of(node).iterator());
-    when(node.getName()).thenReturn("username");
+    when(node.getName()).thenReturn(USERNAME);
     when(violation.getMessage()).thenReturn("invalid");
 
     ProblemDetail result =
         globalExceptionHandler.handleConstraintViolation(ex, request, Locale.ENGLISH);
-    List<ValidationError> errors = (List<ValidationError>) result.getProperties().get("errors");
-    assertEquals("username", errors.get(0).getField());
+    List<ValidationError> errors = (List<ValidationError>) result.getProperties().get(ERRORS);
+    assertEquals(USERNAME, errors.get(0).getField());
   }
 
   @Test

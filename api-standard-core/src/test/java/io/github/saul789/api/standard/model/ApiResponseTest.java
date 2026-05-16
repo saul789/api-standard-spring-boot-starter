@@ -12,7 +12,7 @@ class ApiResponseTest {
     // Preparación
     String data = "Test Data";
     String message = "Success Message";
-    String path = "/api/test";
+    String path = "test-path";
 
     // Ejecución
     ApiResponse<String> response = ApiResponse.success(data, message, path);
@@ -23,6 +23,7 @@ class ApiResponseTest {
     assertEquals(message, response.getMessage());
     assertEquals(path, response.getPath());
     assertNotNull(response.getTimestamp());
+    assertNull(response.getTraceId());
     // Verificamos que el timestamp sea reciente
     assertTrue(response.getTimestamp().isBefore(Instant.now().plusSeconds(1)));
   }
@@ -31,7 +32,7 @@ class ApiResponseTest {
   void shouldCreateErrorResponse() {
     // Preparación
     String message = "Error Message";
-    String path = "/api/error";
+    String path = "error-path";
 
     // Ejecución
     ApiResponse<Object> response = ApiResponse.error(message, path);

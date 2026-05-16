@@ -39,6 +39,17 @@ class ErrorCodeTest {
     assertThat(ErrorCode.fromStatus(400)).isEqualTo(ErrorCode.BAD_REQUEST);
     assertThat(ErrorCode.fromStatus(404)).isEqualTo(ErrorCode.NOT_FOUND);
     assertThat(ErrorCode.fromStatus(500)).isEqualTo(ErrorCode.INTERNAL_ERROR);
+    assertThat(ErrorCode.fromStatus(410)).isEqualTo(ErrorCode.GONE);
+    assertThat(ErrorCode.fromStatus(422)).isEqualTo(ErrorCode.VALIDATION_ERROR);
+    assertThat(ErrorCode.fromStatus(429)).isEqualTo(ErrorCode.TOO_MANY_REQUESTS);
+    assertThat(ErrorCode.fromStatus(401)).isEqualTo(ErrorCode.UNAUTHORIZED);
+    assertThat(ErrorCode.fromStatus(403)).isEqualTo(ErrorCode.FORBIDDEN);
+    assertThat(ErrorCode.fromStatus(405)).isEqualTo(ErrorCode.METHOD_NOT_ALLOWED);
+    assertThat(ErrorCode.fromStatus(409)).isEqualTo(ErrorCode.CONFLICT);
+    assertThat(ErrorCode.fromStatus(415)).isEqualTo(ErrorCode.UNSUPPORTED_MEDIA_TYPE);
+    assertThat(ErrorCode.fromStatus(502)).isEqualTo(ErrorCode.BAD_GATEWAY);
+    assertThat(ErrorCode.fromStatus(503)).isEqualTo(ErrorCode.SERVICE_UNAVAILABLE);
+    assertThat(ErrorCode.fromStatus(504)).isEqualTo(ErrorCode.GATEWAY_TIMEOUT);
 
     // Edge cases for branch coverage in default -> clause
     assertThat(ErrorCode.fromStatus(418)).isEqualTo(ErrorCode.BAD_REQUEST); // 4xx default
