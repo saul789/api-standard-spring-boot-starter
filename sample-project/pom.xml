@@ -16,6 +16,7 @@
     <artifactId>sample-project</artifactId>
 
     <dependencies>
+        <!-- V2.0 modular starter: aggregates api-standard-core + api-standard-web -->
         <dependency>
             <groupId>io.github.saul789</groupId>
             <artifactId>api-standard-spring-boot-starter</artifactId>

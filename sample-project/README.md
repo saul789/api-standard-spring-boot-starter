@@ -2,6 +2,8 @@
 
 Este paquete contiene ejemplos de cómo utilizar y probar las características del `api-standard-spring-boot-starter`.
 
+> 💡 **Nota sobre la Versión 2.0.0**: Este proyecto de ejemplo consume el starter refactorizado en arquitectura multi-módulo (`core`, `web`, `starter`). Demuestra cómo se integran todas las piezas de forma transparente para el desarrollador.
+
 ## 📁 Estructura de Ejemplos
 
 ### 1. [StandardResponseController.java](./StandardResponseController.java)

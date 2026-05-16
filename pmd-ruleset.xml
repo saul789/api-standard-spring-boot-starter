@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<ruleset name="Custom Rules"
+    xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+
+    <description>Custom PMD Ruleset for API Standard</description>
+
+    <!-- Inherit quickstart rules -->
+    <rule ref="rulesets/java/quickstart.xml">
+        <!-- Exclude CloseResourceRule because it crashes on JDK 25 with ASM error (Unsupported class file major version 69) -->
+        <exclude name="CloseResource"/>
+    </rule>
+
+    <!-- Customize specific rules -->
+    <rule ref="category/java/bestpractices.xml/LooseCoupling" />
+
+    <rule ref="category/java/design.xml/UseUtilityClass">
+        <properties>
+            <property name="violationSuppressRegex" value=".*SampleApplication.*"/>
+        </properties>
+    </rule>
+
+    <!-- Exclude classes with PMD bugs or required implementations -->
+    <exclude-pattern>.*/FeignExceptionHandler\.java</exclude-pattern>
+    <exclude-pattern>.*/ApiStandardProperties\.java</exclude-pattern>
+    <exclude-pattern>.*/ApiErrorsEndpoint\.java</exclude-pattern>
+    <exclude-pattern>.*/ApiStandardOpenApiCustomizer\.java</exclude-pattern>
+    <exclude-pattern>.*/sample-project/.*</exclude-pattern>
+
+</ruleset>

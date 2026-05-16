@@ -75,6 +75,13 @@ graph TD
     end
 ```
 
+## 📦 Modules
+
+The project is divided into a multi-module architecture for better separation of concerns:
+- **`api-standard-core`**: Core contracts, base exceptions (`BusinessException`, `ProblemException`), and models. No Spring Web dependencies.
+- **`api-standard-web`**: Spring MVC adapters, `GlobalExceptionHandler`, filters, and optional integrations (Feign, Resilience4j).
+- **`api-standard-starter`**: The auto-configuration module that brings everything together as a plug-and-play dependency.
+
 ## 🚀 Quick Start
 
 ### 1. Add the dependency
