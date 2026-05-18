@@ -48,6 +48,13 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
+        <!-- Optional: Micrometer for MetricsEnricher auto-configuration -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- ===== Test ===== -->
         <!-- Test Support for Conditional Beans -->
         <dependency>

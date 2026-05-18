@@ -211,4 +211,19 @@ public class ApiStandardAutoConfiguration {
   public ProblemDetailEnricher annotationEnricher() {
     return new io.github.saul789.api.standard.exception.AnnotationEnricher();
   }
+
+  /** Registers the metrics enricher. Only active if Micrometer is on the classpath. */
+  @Bean
+  @ConditionalOnMissingBean(io.github.saul789.api.standard.metrics.MetricsEnricher.class)
+  @org.springframework.boot.autoconfigure.condition.ConditionalOnClass(
+      name = "io.micrometer.core.instrument.MeterRegistry")
+  @org.springframework.boot.autoconfigure.condition.ConditionalOnBean(
+      type = "io.micrometer.core.instrument.MeterRegistry")
+  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
+      prefix = "api.standard.metrics", name = "enabled", havingValue = "true",
+      matchIfMissing = true)
+  public ProblemDetailEnricher metricsEnricher(
+      org.springframework.beans.factory.ObjectProvider<io.micrometer.core.instrument.MeterRegistry> registryProvider) {
+    return new io.github.saul789.api.standard.metrics.MetricsEnricher(registryProvider.getIfAvailable());
+  }
 }

@@ -10,4 +10,9 @@
         <Method name="doFilterInternal"/>
         <Bug pattern="HRS_REQUEST_PARAMETER_TO_HTTP_HEADER"/>
     </Match>
+
+    <Match>
+        <Class name="io.github.saul789.api.standard.metrics.MetricsEnricher" />
+        <Bug pattern="EI_EXPOSE_REP2" />
+    </Match>
 </FindBugsFilter>

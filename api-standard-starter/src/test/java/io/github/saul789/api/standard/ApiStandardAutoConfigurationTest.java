@@ -27,6 +27,23 @@ class ApiStandardAutoConfigurationTest {
           assertThat(context).hasSingleBean(io.github.saul789.api.standard.exception.FeignExceptionHandler.class);
           assertThat(context).hasSingleBean(io.github.saul789.api.standard.actuator.ApiErrorsEndpoint.class);
           assertThat(context).hasBean("apiStandardMessageSource");
+          
+          assertThat(context).hasSingleBean(io.github.saul789.api.standard.exception.DegradedModeEnricher.class);
+          assertThat(context).hasSingleBean(io.github.saul789.api.standard.exception.RedactionEnricher.class);
+          assertThat(context).hasSingleBean(io.github.saul789.api.standard.exception.AnnotationEnricher.class);
+          
+          // MetricsEnricher should NOT be present without MeterRegistry
+          assertThat(context).doesNotHaveBean(io.github.saul789.api.standard.metrics.MetricsEnricher.class);
         });
+  }
+
+  @Test
+  void shouldLoadMetricsEnricherWhenMeterRegistryIsPresent() {
+    contextRunner
+        .withBean(io.micrometer.core.instrument.MeterRegistry.class, () -> org.mockito.Mockito.mock(io.micrometer.core.instrument.MeterRegistry.class))
+        .run(
+            context -> {
+              assertThat(context).hasSingleBean(io.github.saul789.api.standard.metrics.MetricsEnricher.class);
+            });
   }
 }
