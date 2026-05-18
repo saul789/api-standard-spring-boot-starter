@@ -232,13 +232,37 @@ The starter integrates deeply with Spring Boot auto-configuration:
 
 ---
 
-## 🗺️ Platform Vision (V2 Roadmap)
+## 🚀 V2 Features (Error Intelligence Platform)
 
-Building the ultimate API governance platform for Spring Boot:
-- **Plugin SPI:** Custom ProblemDetail enrichers via `spring.factories`.
-- **Metrics Integration:** Micrometer auto-counters for ErrorCodes.
-- **Security Mapping:** Native Spring Security exception handling.
-- **Observability:** Deeper integration with OpenTelemetry and tracing ecosystems.
+This starter has evolved into a comprehensive **Error Intelligence Platform**:
+
+### 🔒 Redaction Engine (Secure by Default)
+Automatically masks sensitive fields (like `password`, `token`, `secret`) in your validation errors and API responses before they leave your system. Configurable via `application.yml`:
+```yaml
+api:
+  standard:
+    redaction:
+      enabled: true
+      fields: "password, token, secret, credit_card"
+      mask: "***"
+```
+
+### 🎯 Opt-in Field Exposure
+Exceptions hide internal states by default. Use `@ExposeToProblemDetail` to selectively expose safe diagnostic fields directly into the RFC 9457 `ProblemDetail`.
+
+```java
+public class InsufficientFundsException extends BusinessException {
+    @ExposeToProblemDetail("balance") // Optional alias
+    private final BigDecimal currentBalance;
+    // ...
+}
+```
+
+### 📊 Automated Metrics (Micrometer)
+Zero-code observability. If `micrometer-core` is on your classpath, the starter automatically registers an `api.errors.total` counter tagged by `code`, `status`, `method`, and `uri` (using safe Spring MVC patterns to prevent cardinality explosion).
+
+### 🩺 Diagnostic Actuator Endpoint
+Expose the internal state of the Error Intelligence platform. Access `/actuator/api-errors` to see live configuration of Degraded Mode, Redaction Engine, and current thresholds.
 
 ---
 
