@@ -6,8 +6,11 @@ import io.github.saul789.api.standard.exception.ProblemDetailEnricher;
 import io.github.saul789.api.standard.exception.ProblemDetailService;
 import io.github.saul789.api.standard.exception.StandardMetadataEnricher;
 import io.github.saul789.api.standard.exception.TraceIdEnricher;
+import io.github.saul789.api.standard.exception.DefaultRedactionPolicy;
 import io.github.saul789.api.standard.exception.DefaultSystemLoadMonitor;
 import io.github.saul789.api.standard.exception.DegradedModeEnricher;
+import io.github.saul789.api.standard.exception.RedactionEnricher;
+import io.github.saul789.api.standard.exception.RedactionPolicy;
 import io.github.saul789.api.standard.exception.SystemLoadMonitor;
 import io.github.saul789.api.standard.filter.DegradedModeFilter;
 import io.github.saul789.api.standard.filter.RequestLoggingFilter;
@@ -179,5 +182,23 @@ public class ApiStandardAutoConfiguration {
   public DegradedModeFilter degradedModeFilter(
       SystemLoadMonitor loadMonitor, ApiStandardProperties properties) {
     return new DegradedModeFilter(loadMonitor, properties);
+  }
+
+  /** Registers the default redaction policy (reads from YML). Provide your own bean to override. */
+  @Bean
+  @ConditionalOnMissingBean(RedactionPolicy.class)
+  public RedactionPolicy defaultRedactionPolicy(ApiStandardProperties properties) {
+    return new DefaultRedactionPolicy(properties);
+  }
+
+  /** Registers the redaction enricher. Disable with api.standard.enrichers.redaction.enabled=false */
+  @Bean
+  @ConditionalOnMissingBean(RedactionEnricher.class)
+  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
+      prefix = "api.standard.enrichers.redaction", name = "enabled", havingValue = "true",
+      matchIfMissing = true)
+  public ProblemDetailEnricher redactionEnricher(
+      RedactionPolicy redactionPolicy, ApiStandardProperties properties) {
+    return new RedactionEnricher(redactionPolicy, properties);
   }
 }

@@ -1,7 +1,9 @@
 package io.github.saul789.api.standard;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -11,6 +13,7 @@ public class ApiStandardProperties {
 
   private final Errors errors = new Errors();
   private final DegradedMode degradedMode = new DegradedMode();
+  private final Redaction redaction = new Redaction();
 
   public Errors getErrors() {
     return errors;
@@ -18,6 +21,10 @@ public class ApiStandardProperties {
 
   public DegradedMode getDegradedMode() {
     return degradedMode;
+  }
+
+  public Redaction getRedaction() {
+    return redaction;
   }
 
   public static class Errors {
@@ -88,6 +95,47 @@ public class ApiStandardProperties {
 
     public void setShowInHeader(boolean showInHeader) {
       this.showInHeader = showInHeader;
+    }
+  }
+
+  public static class Redaction {
+    /** Whether to enable the redaction engine. */
+    private boolean enabled = true;
+
+    /** The mask to replace sensitive field values with. */
+    private String mask = "[REDACTED]";
+
+    /**
+     * List of field names whose values should be redacted in error responses.
+     * Defaults include common sensitive fields: password, token, secret, creditCard, cvv, ssn,
+     * authorization.
+     */
+    private List<String> fields =
+        new ArrayList<>(
+            List.of("password", "token", "secret", "creditCard", "cvv", "ssn", "authorization"));
+
+    public boolean isEnabled() {
+      return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+      this.enabled = enabled;
+    }
+
+    public String getMask() {
+      return mask;
+    }
+
+    public void setMask(String mask) {
+      this.mask = mask;
+    }
+
+    public List<String> getFields() {
+      return Collections.unmodifiableList(fields);
+    }
+
+    public void setFields(List<String> fields) {
+      this.fields = fields != null ? new ArrayList<>(fields) : new ArrayList<>();
     }
   }
 }
