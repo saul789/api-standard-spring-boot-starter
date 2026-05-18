@@ -24,7 +24,10 @@
 ### Módulos del proyecto
 ```
 api-standard-spring-boot-starter/   ← root pom (parent)
-├── starter/                         ← librería principal (publicada en Maven Central)
+├── api-standard-core/              ← contratos, excepciones base y modelos
+├── api-standard-web/               ← adapters MVC, handlers y filtros
+├── api-standard-security/          ← integración con Spring Security
+├── api-standard-starter/          ← auto-configuración (plug-and-play)
 └── sample-project/                  ← demo de uso de la librería
 ```
 
@@ -92,14 +95,15 @@ Controller → throws Exception
 
 | Archivo | Propósito |
 |---|---|
-| `starter/src/main/java/.../exception/GlobalExceptionHandler.java` | Corazón del manejo de errores. Mapea excepciones → ProblemDetail |
-| `starter/src/main/java/.../exception/ProblemDetailService.java` | Construye y enriquece el ProblemDetail |
-| `starter/src/main/java/.../exception/ErrorCode.java` | Enum con todos los códigos de error + mapeo por HTTP status |
-| `starter/src/main/java/.../exception/BusinessException.java` | Excepción que los devs lanzan desde su código de negocio |
-| `starter/src/main/java/.../exception/FeignExceptionHandler.java` | Handler específico para errores de clientes Feign |
-| `starter/src/main/java/.../exception/ResilienceExceptionHandler.java` | Handler para Resilience4j (Circuit Breaker, Rate Limiter, etc.) |
-| `starter/src/main/resources/i18n/messages.properties` | Mensajes de error en inglés |
-| `starter/src/main/resources/i18n/messages_es.properties` | Mensajes de error en español |
+| `api-standard-web/src/main/java/.../exception/GlobalExceptionHandler.java` | Corazón del manejo de errores. Mapea excepciones → ProblemDetail |
+| `api-standard-core/src/main/java/.../exception/ProblemDetailService.java` | Construye y enriquece el ProblemDetail |
+| `api-standard-core/src/main/java/.../exception/ErrorCode.java` | Enum con todos los códigos de error + mapeo por HTTP status |
+| `api-standard-core/src/main/java/.../exception/BusinessException.java` | Excepción que los devs lanzan desde su código de negocio |
+| `api-standard-web/src/main/java/.../exception/FeignExceptionHandler.java` | Handler específico para errores de clientes Feign |
+| `api-standard-web/src/main/java/.../exception/ResilienceExceptionHandler.java` | Handler para Resilience4j (Circuit Breaker, Rate Limiter, etc.) |
+| `api-standard-security/src/main/java/.../security/SecurityProblemSupport.java` | Bridge para excepciones de Spring Security a RFC 9457 |
+| `api-standard-core/src/main/resources/i18n/messages.properties` | Mensajes de error en inglés |
+| `api-standard-core/src/main/resources/i18n/messages_es.properties` | Mensajes de error en español |
 | `starter/src/test/java/.../exception/GlobalExceptionHandlerTest.java` | Test principal (621 líneas). Sirve como referencia de patrones |
 | `ApiStandardAutoConfiguration.java` | Auto-configuración Spring Boot (beans registrados) |
 | `ApiStandardProperties.java` | Propiedades configurables via `application.properties` |

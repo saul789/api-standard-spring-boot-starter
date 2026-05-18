@@ -51,6 +51,7 @@
     <modules>
         <module>api-standard-core</module>
         <module>api-standard-web</module>
+        <module>api-standard-security</module>
         <module>api-standard-starter</module>
         <module>sample-project</module>
     </modules>
