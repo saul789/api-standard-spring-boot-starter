@@ -16,7 +16,13 @@ class ApiErrorsEndpointTest {
     Map<String, Object> response = endpoint.getApiErrors();
     
     assertNotNull(response);
-    assertTrue(response.containsKey("basePackage"));
+    assertTrue(response.containsKey("starter"));
+    assertTrue(response.containsKey("degradedMode"));
+    assertTrue(response.containsKey("redaction"));
     assertTrue(response.containsKey("errorCodes"));
+    
+    @SuppressWarnings("unchecked")
+    Map<String, Object> starter = (Map<String, Object>) response.get("starter");
+    assertEquals("io.github.saul789.api.standard", starter.get("basePackage"));
   }
 }

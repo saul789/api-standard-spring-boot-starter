@@ -39,6 +39,20 @@ public class ApiErrorsEndpoint {
                 })
             .toList();
 
-    return Map.of("basePackage", "io.github.saul789.api.standard", "errorCodes", codes);
+    return Map.of(
+        "starter", Map.of("basePackage", "io.github.saul789.api.standard", "version", "2.0.0"),
+        "degradedMode", Map.of(
+            "enabled", properties.getDegradedMode().isEnabled(),
+            "cpuThreshold", properties.getDegradedMode().getCpuThreshold(),
+            "showInJson", properties.getDegradedMode().isShowInJson(),
+            "showInHeader", properties.getDegradedMode().isShowInHeader()
+        ),
+        "redaction", Map.of(
+            "enabled", properties.getRedaction().isEnabled(),
+            "mask", properties.getRedaction().getMask(),
+            "protectedFields", properties.getRedaction().getFields()
+        ),
+        "errorCodes", codes
+    );
   }
 }
