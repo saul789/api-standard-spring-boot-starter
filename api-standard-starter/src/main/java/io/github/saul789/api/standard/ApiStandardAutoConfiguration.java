@@ -6,6 +6,10 @@ import io.github.saul789.api.standard.exception.ProblemDetailEnricher;
 import io.github.saul789.api.standard.exception.ProblemDetailService;
 import io.github.saul789.api.standard.exception.StandardMetadataEnricher;
 import io.github.saul789.api.standard.exception.TraceIdEnricher;
+import io.github.saul789.api.standard.exception.DefaultSystemLoadMonitor;
+import io.github.saul789.api.standard.exception.DegradedModeEnricher;
+import io.github.saul789.api.standard.exception.SystemLoadMonitor;
+import io.github.saul789.api.standard.filter.DegradedModeFilter;
 import io.github.saul789.api.standard.filter.RequestLoggingFilter;
 import io.github.saul789.api.standard.filter.TraceContextFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -138,5 +142,27 @@ public class ApiStandardAutoConfiguration {
   public io.github.saul789.api.standard.actuator.ApiErrorsEndpoint apiErrorsEndpoint(
       ApiStandardProperties properties) {
     return new io.github.saul789.api.standard.actuator.ApiErrorsEndpoint(properties);
+  }
+
+  /** Registers the system load monitor. */
+  @Bean
+  @ConditionalOnMissingBean
+  public SystemLoadMonitor systemLoadMonitor(ApiStandardProperties properties) {
+    return new DefaultSystemLoadMonitor(properties);
+  }
+
+  /** Registers the degraded mode enricher. */
+  @Bean
+  public ProblemDetailEnricher degradedModeEnricher(
+      SystemLoadMonitor loadMonitor, ApiStandardProperties properties) {
+    return new DegradedModeEnricher(loadMonitor, properties);
+  }
+
+  /** Registers the degraded mode filter. */
+  @Bean
+  @ConditionalOnMissingBean
+  public DegradedModeFilter degradedModeFilter(
+      SystemLoadMonitor loadMonitor, ApiStandardProperties properties) {
+    return new DegradedModeFilter(loadMonitor, properties);
   }
 }

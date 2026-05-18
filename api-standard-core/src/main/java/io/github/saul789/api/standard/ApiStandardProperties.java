@@ -10,9 +10,14 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class ApiStandardProperties {
 
   private final Errors errors = new Errors();
+  private final DegradedMode degradedMode = new DegradedMode();
 
   public Errors getErrors() {
     return errors;
+  }
+
+  public DegradedMode getDegradedMode() {
+    return degradedMode;
   }
 
   public static class Errors {
@@ -37,6 +42,52 @@ public class ApiStandardProperties {
 
     public void setTypeOverrides(Map<String, String> typeOverrides) {
       this.typeOverrides = typeOverrides != null ? new HashMap<>(typeOverrides) : new HashMap<>();
+    }
+  }
+
+  public static class DegradedMode {
+    /** Whether to enable degraded mode. */
+    private boolean enabled = true;
+
+    /** CPU usage threshold percentage to trigger degraded mode. */
+    private double cpuThreshold = 80.0;
+
+    /** Whether to show the 'degraded' flag in the JSON response. */
+    private boolean showInJson = false;
+
+    /** Whether to show the 'X-API-Degraded' header in the response. */
+    private boolean showInHeader = true;
+
+    public boolean isEnabled() {
+      return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+      this.enabled = enabled;
+    }
+
+    public double getCpuThreshold() {
+      return cpuThreshold;
+    }
+
+    public void setCpuThreshold(double cpuThreshold) {
+      this.cpuThreshold = cpuThreshold;
+    }
+
+    public boolean isShowInJson() {
+      return showInJson;
+    }
+
+    public void setShowInJson(boolean showInJson) {
+      this.showInJson = showInJson;
+    }
+
+    public boolean isShowInHeader() {
+      return showInHeader;
+    }
+
+    public void setShowInHeader(boolean showInHeader) {
+      this.showInHeader = showInHeader;
     }
   }
 }

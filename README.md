@@ -80,6 +80,7 @@ graph TD
 The project is divided into a multi-module architecture for better separation of concerns:
 - **`api-standard-core`**: Core contracts, base exceptions (`BusinessException`, `ProblemException`), and models. No Spring Web dependencies.
 - **`api-standard-web`**: Spring MVC adapters, `GlobalExceptionHandler`, filters, and optional integrations (Feign, Resilience4j).
+- **`api-standard-security`**: Native Spring Security exception handling mapped to RFC 9457 Problem Details.
 - **`api-standard-starter`**: The auto-configuration module that brings everything together as a plug-and-play dependency.
 
 ## 🚀 Quick Start
@@ -142,6 +143,22 @@ By simply returning objects or throwing exceptions, the starter enforces a rigor
   "timestamp": "2026-05-10T18:34:46Z",
   "traceId": "5f9b3b8c-1234-4a56-b789-abcdef123456"
 }
+```
+
+### 📉 Degraded Mode (New in V2)
+When the system is under high CPU load, the starter can run in degraded mode to protect the service and inform clients:
+- **JSON Flag**: Adds `"degraded": true` to the error response.
+- **HTTP Header**: Adds `X-API-Degraded: true` to the response headers.
+
+Configuration properties in `application.yml`:
+```yaml
+api:
+  standard:
+    degraded-mode:
+      enabled: true
+      cpu-threshold: 80.0
+      show-in-json: true
+      show-in-header: true
 ```
 
 > 💡 **Bonus: Transparent MDC Logging**

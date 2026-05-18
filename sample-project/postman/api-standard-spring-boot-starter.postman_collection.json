@@ -630,6 +630,48 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "9. Degraded Mode",
+			"item": [
+				{
+					"name": "Get Degraded Response (Simulated)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Verify Degraded Header or Body\", function () {",
+									"    var hasHeader = pm.response.headers.has(\"X-API-Degraded\");",
+									"    var jsonData = pm.response.json();",
+									"    var hasBodyFlag = jsonData.degraded === true;",
+									"    pm.expect(hasHeader || hasBodyFlag).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/demo/exceptions/business-logic",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"demo",
+								"exceptions",
+								"business-logic"
+							]
+						},
+						"description": "This request simulates a call to an endpoint that fails. If the system load is high, the response will contain the 'X-API-Degraded' header or 'degraded': true in the JSON body, depending on configuration."
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"event": [
