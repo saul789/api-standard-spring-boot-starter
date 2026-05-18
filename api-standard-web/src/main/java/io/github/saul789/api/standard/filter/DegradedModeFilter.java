@@ -10,7 +10,8 @@ import java.io.IOException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Filter that adds the 'X-API-Degraded' header to the response when the system is under high load.
+ * Filter that adds the 'X-API-Degraded' header to the response when the system
+ * is under high load.
  */
 public class DegradedModeFilter extends OncePerRequestFilter {
 
@@ -26,10 +27,9 @@ public class DegradedModeFilter extends OncePerRequestFilter {
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
 
-    if (properties.getDegradedMode().isEnabled() && loadMonitor.isHighLoad()) {
-      if (properties.getDegradedMode().isShowInHeader()) {
-        response.setHeader("X-API-Degraded", "true");
-      }
+    if (properties.getDegradedMode().isEnabled() && loadMonitor.isHighLoad()
+        && properties.getDegradedMode().isShowInHeader()) {
+      response.setHeader("X-API-Degraded", "true");
     }
 
     filterChain.doFilter(request, response);

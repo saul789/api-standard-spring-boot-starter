@@ -6,7 +6,8 @@ import java.util.Locale;
 import org.springframework.http.ProblemDetail;
 
 /**
- * Enriches the ProblemDetail with a 'degraded' flag when the system is under high load.
+ * Enriches the ProblemDetail with a 'degraded' flag when the system is under
+ * high load.
  */
 public class DegradedModeEnricher implements ProblemDetailEnricher {
 
@@ -20,11 +21,11 @@ public class DegradedModeEnricher implements ProblemDetailEnricher {
 
   @Override
   public void enrich(ProblemDetail problem, HttpServletRequest request, Locale locale) {
-    if (properties.getDegradedMode().isEnabled() && loadMonitor.isHighLoad()) {
-      if (properties.getDegradedMode().isShowInJson()) {
-        problem.setProperty("degraded", true);
-      }
+    if (properties.getDegradedMode().isEnabled() && loadMonitor.isHighLoad()
+        && properties.getDegradedMode().isShowInJson()) {
+      problem.setProperty("degraded", true);
     }
+
   }
 
   @Override

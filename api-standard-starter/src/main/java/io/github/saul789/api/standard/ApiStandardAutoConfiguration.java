@@ -201,4 +201,14 @@ public class ApiStandardAutoConfiguration {
       RedactionPolicy redactionPolicy, ApiStandardProperties properties) {
     return new RedactionEnricher(redactionPolicy, properties);
   }
+
+  /** Registers the annotation enricher. Disable with api.standard.enrichers.annotation.enabled=false */
+  @Bean
+  @ConditionalOnMissingBean(io.github.saul789.api.standard.exception.AnnotationEnricher.class)
+  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
+      prefix = "api.standard.enrichers.annotation", name = "enabled", havingValue = "true",
+      matchIfMissing = true)
+  public ProblemDetailEnricher annotationEnricher() {
+    return new io.github.saul789.api.standard.exception.AnnotationEnricher();
+  }
 }

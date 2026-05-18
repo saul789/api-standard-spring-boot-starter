@@ -66,7 +66,7 @@ public class ProblemDetailService {
 
     // 3. Extensible Metadata Enrichment (OCP)
     for (ProblemDetailEnricher enricher : enrichers) {
-      enricher.enrich(problem, request, locale);
+      enricher.enrich(problem, request, locale, ex);
     }
 
     return problem;
