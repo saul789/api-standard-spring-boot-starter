@@ -85,14 +85,22 @@ public class ApiStandardAutoConfiguration {
     return new ProblemDetailService(messageSource, properties, enrichers);
   }
 
-  /** Registers the traceId enricher. */
+  /** Registers the traceId enricher. Disable with api.standard.enrichers.trace-id.enabled=false */
   @Bean
+  @ConditionalOnMissingBean(TraceIdEnricher.class)
+  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
+      prefix = "api.standard.enrichers.trace-id", name = "enabled", havingValue = "true",
+      matchIfMissing = true)
   public ProblemDetailEnricher traceIdEnricher() {
     return new TraceIdEnricher();
   }
 
-  /** Registers the standard metadata enricher (timestamp, instance). */
+  /** Registers the standard metadata enricher. Disable with api.standard.enrichers.metadata.enabled=false */
   @Bean
+  @ConditionalOnMissingBean(StandardMetadataEnricher.class)
+  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
+      prefix = "api.standard.enrichers.metadata", name = "enabled", havingValue = "true",
+      matchIfMissing = true)
   public ProblemDetailEnricher standardMetadataEnricher() {
     return new StandardMetadataEnricher();
   }
@@ -151,16 +159,23 @@ public class ApiStandardAutoConfiguration {
     return new DefaultSystemLoadMonitor(properties);
   }
 
-  /** Registers the degraded mode enricher. */
+  /** Registers the degraded mode enricher. Disable with api.standard.enrichers.degraded-mode.enabled=false */
   @Bean
+  @ConditionalOnMissingBean(DegradedModeEnricher.class)
+  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
+      prefix = "api.standard.enrichers.degraded-mode", name = "enabled", havingValue = "true",
+      matchIfMissing = true)
   public ProblemDetailEnricher degradedModeEnricher(
       SystemLoadMonitor loadMonitor, ApiStandardProperties properties) {
     return new DegradedModeEnricher(loadMonitor, properties);
   }
 
-  /** Registers the degraded mode filter. */
+  /** Registers the degraded mode filter. Disable with api.standard.degraded-mode.show-in-header=false */
   @Bean
-  @ConditionalOnMissingBean
+  @ConditionalOnMissingBean(DegradedModeFilter.class)
+  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
+      prefix = "api.standard.degraded-mode", name = "show-in-header", havingValue = "true",
+      matchIfMissing = true)
   public DegradedModeFilter degradedModeFilter(
       SystemLoadMonitor loadMonitor, ApiStandardProperties properties) {
     return new DegradedModeFilter(loadMonitor, properties);
