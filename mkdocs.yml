@@ -1,0 +1,80 @@
+site_name: "API Standard Starter"
+site_description: "Enterprise Error Intelligence & API Standardization for Spring Boot"
+site_author: "Platform Engineering Team"
+site_url: "https://github.com/saul789/spring-boot-starter-api-standard"
+
+theme:
+  name: material
+  language: en
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - navigation.tracking
+    - toc.follow
+    - content.code.annotate
+    - content.code.copy
+    - content.tabs.link
+
+plugins:
+  - search
+  - i18n:
+      docs_structure: folder
+      languages:
+        - locale: en
+          name: English
+          default: true
+        - locale: es
+          name: Español
+  - minify:
+      minify_html: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:pymdownx.emoji.twemoji
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - toc:
+      permalink: true
+  - attr_list
+  - md_in_html
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Quick Start: quickstart.md
+  - Fundamental Concepts: concepts.md
+  - API Reference: api-reference.md
+  - Advanced Guides:
+      - Overview: advanced/index.md
+      - V2 Architecture: advanced/v2-architecture.md
+  - Cookbook: cookbook.md
+  - Troubleshooting: troubleshooting.md
+  - FAQ: faq.md
+  - Migration: migration.md
+  - Contributing: contributing.md

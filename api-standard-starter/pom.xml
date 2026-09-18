@@ -37,6 +37,11 @@
             <artifactId>api-standard-web</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.saul789</groupId>
+            <artifactId>api-standard-observability</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Spring Boot auto-configuration support -->
         <dependency>
@@ -76,6 +81,13 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-api</artifactId>
+            <version>1.47.0</version>
             <scope>test</scope>
         </dependency>
 

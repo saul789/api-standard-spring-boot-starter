@@ -29,11 +29,26 @@ public class ApiStandardProperties {
 
   public static class Errors {
     /**
-     * Base URI for the 'type' field in the ProblemDetail responses. Default is "urn:problem-type:".
+     * Base URI for the 'type' field in the ProblemDetail responses. Default is
+     * "urn:problem-type:".
      */
     private String typeBaseUri = "urn:problem-type:";
 
     private Map<String, String> typeOverrides = new HashMap<>();
+
+    /**
+     * Whether to strictly fail startup or log a warning if standard ErrorCodes are
+     * missing translations in i18n properties files.
+     */
+    private boolean strictTranslationCheck = false;
+
+    public boolean isStrictTranslationCheck() {
+      return strictTranslationCheck;
+    }
+
+    public void setStrictTranslationCheck(boolean strictTranslationCheck) {
+      this.strictTranslationCheck = strictTranslationCheck;
+    }
 
     public String getTypeBaseUri() {
       return typeBaseUri;
@@ -107,12 +122,12 @@ public class ApiStandardProperties {
 
     /**
      * List of field names whose values should be redacted in error responses.
-     * Defaults include common sensitive fields: password, token, secret, creditCard, cvv, ssn,
+     * Defaults include common sensitive fields: password, token, secret,
+     * creditCard, cvv, ssn,
      * authorization.
      */
-    private List<String> fields =
-        new ArrayList<>(
-            List.of("password", "token", "secret", "creditCard", "cvv", "ssn", "authorization"));
+    private List<String> fields = new ArrayList<>(
+        List.of("password", "token", "secret", "creditCard", "cvv", "ssn", "authorization"));
 
     public boolean isEnabled() {
       return enabled;

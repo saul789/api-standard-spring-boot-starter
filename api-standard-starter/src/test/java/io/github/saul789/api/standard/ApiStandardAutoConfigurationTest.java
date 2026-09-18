@@ -12,7 +12,10 @@ class ApiStandardAutoConfigurationTest {
 
   private final WebApplicationContextRunner contextRunner =
       new WebApplicationContextRunner()
-          .withConfiguration(AutoConfigurations.of(ApiStandardAutoConfiguration.class));
+          .withConfiguration(AutoConfigurations.of(
+              ApiStandardAutoConfiguration.class,
+              io.github.saul789.api.standard.observability.ApiStandardObservabilityAutoConfiguration.class
+          ));
 
   @Test
   void shouldLoadAutoConfiguration() {
@@ -32,8 +35,11 @@ class ApiStandardAutoConfigurationTest {
           assertThat(context).hasSingleBean(io.github.saul789.api.standard.exception.RedactionEnricher.class);
           assertThat(context).hasSingleBean(io.github.saul789.api.standard.exception.AnnotationEnricher.class);
           
+          // OpenTelemetryProblemEnricher is active because OTel API is on the test classpath
+          assertThat(context).hasSingleBean(io.github.saul789.api.standard.observability.OpenTelemetryProblemEnricher.class);
+          
           // MetricsEnricher should NOT be present without MeterRegistry
-          assertThat(context).doesNotHaveBean(io.github.saul789.api.standard.metrics.MetricsEnricher.class);
+          assertThat(context).doesNotHaveBean(io.github.saul789.api.standard.observability.MetricsEnricher.class);
         });
   }
 
@@ -43,7 +49,7 @@ class ApiStandardAutoConfigurationTest {
         .withBean(io.micrometer.core.instrument.MeterRegistry.class, () -> org.mockito.Mockito.mock(io.micrometer.core.instrument.MeterRegistry.class))
         .run(
             context -> {
-              assertThat(context).hasSingleBean(io.github.saul789.api.standard.metrics.MetricsEnricher.class);
+              assertThat(context).hasSingleBean(io.github.saul789.api.standard.observability.MetricsEnricher.class);
             });
   }
 }

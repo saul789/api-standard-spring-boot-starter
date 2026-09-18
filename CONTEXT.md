@@ -27,6 +27,7 @@ api-standard-spring-boot-starter/   ← root pom (parent)
 ├── api-standard-core/              ← contratos, excepciones base y modelos
 ├── api-standard-web/               ← adapters MVC, handlers y filtros
 ├── api-standard-security/          ← integración con Spring Security
+├── api-standard-observability/     ← instrumentación de métricas y OpenTelemetry (nuevo)
 ├── api-standard-starter/          ← auto-configuración (plug-and-play)
 └── sample-project/                  ← demo de uso de la librería
 ```
@@ -66,6 +67,34 @@ Controller → throws Exception
 6. **Resilience4j:** Manejado por nombre de clase (sin dependencia directa) para ser opcional. Ver `GlobalExceptionHandler.handleGenericException()`.
 7. **Cobertura mínima:** **95% instruction coverage** (configurado en JaCoCo del `pom.xml` raíz). ⚠️ No reducir.
 8. **`@Order(Ordered.LOWEST_PRECEDENCE)`:** El `GlobalExceptionHandler` tiene la menor prioridad para que handlers más específicos (como `FeignExceptionHandler`) tengan precedencia.
+9. **Telemetría y Observabilidad (OTel):**
+   - El starter debe integrarse de forma no invasiva con OpenTelemetry (OTel) para enriquecer el Span activo con datos estructurados de errores.
+   - Si la API de OTel está en el classpath, se deben inyectar obligatoriamente las siguientes convenciones oficiales:
+     - `exception.type` ──> Clase Java de la excepción.
+     - `exception.message` ──> El detalle de negocio del error.
+     - `error.type` ──> El `ErrorCode` canónico (ej: `VALIDATION_ERROR`).
+   - Se inyectarán metadatos extendidos del estándar RFC 9457 usando el prefijo:
+     - `rfc9457.title` y `rfc9457.status`.
+   - El Span activo de OTel debe marcarse explícitamente con estado `StatusCode.ERROR`.
+   - Las dependencias de OTel deben ser estrictamente `optional` en Maven, y la lógica se ejecutará de forma segura y tolerante a fallos si OTel no está presente.
+   - La lógica de enriquecimiento debe residir en un `ProblemDetailEnricher` independiente.
+
+10. **Detección Dinámica de Trace ID (Ecosistema de APMs y Logging):**
+    - El starter detecta y adopta de forma no invasiva los IDs de rastreo generados por la infraestructura del contenedor (agentes APM).
+    - Se consultan en orden de prioridad las siguientes llaves del `MDC` antes de autogenerar un ID:
+      1. `traceId` / `trace_id` ──> Estándar de Spring Boot (Micrometer), OpenTelemetry y W3C.
+      2. `dd.trace_id` ──> Agente de Datadog.
+      3. `trace.id` ──> Agente de New Relic.
+      4. `dt.trace_id` ──> Agente de Dynatrace.
+      5. Fallback ──> UUIDv4 de 32 caracteres hexadecimales sin guiones.
+    - Esto elimina la necesidad de acoplar dependencias de APMs en el starter y garantiza la correlación absoluta de trazas en entornos productivos.
+    - Referencias Oficiales:
+      - [W3C Trace Context Specification](https://www.w3.org/TR/trace-context/)
+      - [Spring Micrometer Tracing](https://micrometer.io/docs/tracing)
+      - [Datadog Java Log Injection](https://docs.datadoghq.com/tracing/other_telemetry/connect_logs_and_traces/java/)
+      - [OpenTelemetry Java MDC](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/logback/logback-1.0/library)
+      - [New Relic Java Log Injection](https://docs.newrelic.com/docs/logs/log-management/enable-log-management-host-ec2/configure-logs-context-apm/java-configure-logs-context-apm/)
+      - [Dynatrace Java Log Enrichment](https://www.dynatrace.com/support/help/platform-modules/infrastructure-monitoring/log-monitoring/log-enrichment/log-enrichment-java)
 
 ---
 
@@ -107,6 +136,9 @@ Controller → throws Exception
 | `starter/src/test/java/.../exception/GlobalExceptionHandlerTest.java` | Test principal (621 líneas). Sirve como referencia de patrones |
 | `ApiStandardAutoConfiguration.java` | Auto-configuración Spring Boot (beans registrados) |
 | `ApiStandardProperties.java` | Propiedades configurables via `application.properties` |
+| `api-standard-observability/.../MetricsEnricher.java` | Instrumentación de métricas con Micrometer |
+| `api-standard-observability/.../OpenTelemetryProblemEnricher.java` | Enriquecimiento de spans de OpenTelemetry |
+| `api-standard-observability/.../ApiStandardObservabilityAutoConfiguration.java` | Autoconfiguración condicional de métricas y trazas |
 
 ---
 

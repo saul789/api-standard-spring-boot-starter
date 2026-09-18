@@ -16,5 +16,9 @@ class ApiStandardPropertiesTest {
     props.getErrors().setTypeOverrides(Map.of("A", "B"));
     assertEquals("http://test.com", props.getErrors().getTypeBaseUri());
     assertEquals("B", props.getErrors().getTypeOverrides().get("A"));
+
+    assertFalse(props.getErrors().isStrictTranslationCheck());
+    props.getErrors().setStrictTranslationCheck(true);
+    assertTrue(props.getErrors().isStrictTranslationCheck());
   }
 }

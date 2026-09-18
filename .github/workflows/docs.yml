@@ -28,6 +28,17 @@ jobs:
       - name: Build project
         run: mvn clean package -DskipTests -pl sample-project -am
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install MkDocs Material & Plugins
+        run: pip install mkdocs-material mkdocs-static-i18n
+
+      - name: Build MkDocs Website
+        run: mkdocs build
+        
       - name: Extract OpenAPI JSON
         run: |
           # Levantar el Sample Project en background
@@ -44,7 +55,7 @@ jobs:
             sleep 2
           done
           
-          # Crear directorio temporal para el build
+          # Crear directorio temporal para el build de Swagger
           mkdir -p docs-build
           
           # Descargar el JSON de la especificación
@@ -56,11 +67,11 @@ jobs:
       - name: Generate Static HTML with Redocly
         run: |
           npx @redocly/cli build-docs docs-build/openapi.json \
-            -o docs-build/index.html \
-            --title "API Standard Starter Documentation"
+            -o site/api-reference.html \
+            --title "API Standard Reference"
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs-build
+          publish_dir: ./site

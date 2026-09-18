@@ -1,0 +1,55 @@
+# ===================================================================
+# API Standard Spring Boot Starter Configuration
+# ===================================================================
+
+api:
+  standard:
+    errors:
+      # If true, prevents application startup or fails build if any canonical
+      # ErrorCodes are missing translations in i18n properties files.
+      # Default: false (logs a loud warning instead of failing)
+      strict-translation-check: false
+
+      # Base URI used for the RFC 9457 'type' field suffix generation.
+      # Default: "urn:problem-type:"
+      type-base-uri: "urn:problem-type:"
+
+      # Custom problem type URI overrides per ErrorCode
+      type-overrides:
+        INTERNAL_ERROR: "https://api.example.com/errors/internal-error"
+
+    degraded-mode:
+      # Whether to auto-protect the API under high CPU/memory usage
+      # Default: true
+      enabled: true
+
+      # CPU threshold percentage to trigger degraded mode
+      # Default: 80.0
+      cpu-threshold: 80.0
+
+      # Whether to include a "degraded: true" field in the error JSON
+      # Default: false
+      show-in-json: false
+
+      # Whether to send the "X-API-Degraded: true" header
+      # Default: true
+      show-in-header: true
+
+    redaction:
+      # Whether to automatically mask sensitive field values in error responses
+      # Default: true
+      enabled: true
+
+      # The string to mask sensitive data with
+      # Default: "[REDACTED]"
+      mask: "[REDACTED]"
+
+      # List of field names to protect
+      fields:
+        - password
+        - token
+        - secret
+        - creditCard
+        - cvv
+        - ssn
+        - authorization

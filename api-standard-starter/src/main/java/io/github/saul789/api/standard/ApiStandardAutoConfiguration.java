@@ -13,6 +13,7 @@ import io.github.saul789.api.standard.exception.RedactionEnricher;
 import io.github.saul789.api.standard.exception.RedactionPolicy;
 import io.github.saul789.api.standard.exception.SystemLoadMonitor;
 import io.github.saul789.api.standard.filter.DegradedModeFilter;
+import io.github.saul789.api.standard.exception.TranslationValidator;
 import io.github.saul789.api.standard.filter.RequestLoggingFilter;
 import io.github.saul789.api.standard.filter.TraceContextFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -27,15 +28,19 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 /**
  * Auto-configuration for the API standard starter.
  *
- * <p>Registers the following beans when running in a Servlet web application, unless the
+ * <p>
+ * Registers the following beans when running in a Servlet web application,
+ * unless the
  * application already provides its own:
  *
  * <ul>
- *   <li>{@link TraceContextFilter} — W3C {@code traceparent} propagation and MDC binding
- *   <li>{@link RequestLoggingFilter} — structured per-request access log
- *   <li>{@link GlobalExceptionHandler} — RFC 9457 exception-to-response mapping
- *   <li>{@link MessageSource} — i18n resolver backed by {@code i18n/messages} and {@code messages}
- *       resource bundles
+ * <li>{@link TraceContextFilter} — W3C {@code traceparent} propagation and MDC
+ * binding
+ * <li>{@link RequestLoggingFilter} — structured per-request access log
+ * <li>{@link GlobalExceptionHandler} — RFC 9457 exception-to-response mapping
+ * <li>{@link MessageSource} — i18n resolver backed by {@code i18n/messages} and
+ * {@code messages}
+ * resource bundles
  * </ul>
  */
 @AutoConfiguration
@@ -60,7 +65,8 @@ public class ApiStandardAutoConfiguration {
   /**
    * Registers the global exception handler.
    *
-   * @param messageSource the i18n source used for title and detail resolution
+   * @param messageSource        the i18n source used for title and detail
+   *                             resolution
    * @param problemDetailService the service for building RFC 9457 responses
    * @return a fully configured {@link GlobalExceptionHandler}
    */
@@ -75,8 +81,8 @@ public class ApiStandardAutoConfiguration {
    * Registers the ProblemDetail service.
    *
    * @param messageSource the i18n source
-   * @param properties configuration properties for the starter
-   * @param enrichers list of registered enrichers
+   * @param properties    configuration properties for the starter
+   * @param enrichers     list of registered enrichers
    * @return a fully configured {@link ProblemDetailService}
    */
   @Bean
@@ -88,44 +94,45 @@ public class ApiStandardAutoConfiguration {
     return new ProblemDetailService(messageSource, properties, enrichers);
   }
 
-  /** Registers the traceId enricher. Disable with api.standard.enrichers.trace-id.enabled=false */
+  /**
+   * Registers the traceId enricher. Disable with
+   * api.standard.enrichers.trace-id.enabled=false
+   */
   @Bean
   @ConditionalOnMissingBean(TraceIdEnricher.class)
-  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
-      prefix = "api.standard.enrichers.trace-id", name = "enabled", havingValue = "true",
-      matchIfMissing = true)
+  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(prefix = "api.standard.enrichers.trace-id", name = "enabled", havingValue = "true", matchIfMissing = true)
   public ProblemDetailEnricher traceIdEnricher() {
     return new TraceIdEnricher();
   }
 
-  /** Registers the standard metadata enricher. Disable with api.standard.enrichers.metadata.enabled=false */
+  /**
+   * Registers the standard metadata enricher. Disable with
+   * api.standard.enrichers.metadata.enabled=false
+   */
   @Bean
   @ConditionalOnMissingBean(StandardMetadataEnricher.class)
-  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
-      prefix = "api.standard.enrichers.metadata", name = "enabled", havingValue = "true",
-      matchIfMissing = true)
+  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(prefix = "api.standard.enrichers.metadata", name = "enabled", havingValue = "true", matchIfMissing = true)
   public ProblemDetailEnricher standardMetadataEnricher() {
     return new StandardMetadataEnricher();
   }
-
   /**
    * Registers the Feign-specific exception handler if Feign is on the classpath.
    *
-   * @param properties configuration properties for the starter
+   * @param properties    configuration properties for the starter
    * @param messageSource the i18n source
    * @return a fully configured {@link FeignExceptionHandler}
    */
   @Bean
   @ConditionalOnMissingBean
-  @org.springframework.boot.autoconfigure.condition.ConditionalOnClass(
-      name = "feign.FeignException")
+  @org.springframework.boot.autoconfigure.condition.ConditionalOnClass(name = "feign.FeignException")
   public FeignExceptionHandler feignExceptionHandler(
       ApiStandardProperties properties, MessageSource messageSource) {
     return new FeignExceptionHandler(properties, messageSource);
   }
 
   /**
-   * Registers a {@link MessageSource} backed by the {@code i18n/messages} and {@code messages}
+   * Registers a {@link MessageSource} backed by the {@code i18n/messages} and
+   * {@code messages}
    * resource bundles.
    *
    * @return a UTF-8 {@link ResourceBundleMessageSource}
@@ -141,15 +148,15 @@ public class ApiStandardAutoConfiguration {
   }
 
   /**
-   * Registers the Actuator endpoint if spring-boot-actuator is present on the classpath.
+   * Registers the Actuator endpoint if spring-boot-actuator is present on the
+   * classpath.
    *
    * @param properties configuration properties for the starter
    * @return the {@link io.github.saul789.api.standard.actuator.ApiErrorsEndpoint}
    */
   @Bean
   @ConditionalOnMissingBean
-  @org.springframework.boot.autoconfigure.condition.ConditionalOnClass(
-      name = "org.springframework.boot.actuate.endpoint.annotation.Endpoint")
+  @org.springframework.boot.autoconfigure.condition.ConditionalOnClass(name = "org.springframework.boot.actuate.endpoint.annotation.Endpoint")
   public io.github.saul789.api.standard.actuator.ApiErrorsEndpoint apiErrorsEndpoint(
       ApiStandardProperties properties) {
     return new io.github.saul789.api.standard.actuator.ApiErrorsEndpoint(properties);
@@ -162,68 +169,60 @@ public class ApiStandardAutoConfiguration {
     return new DefaultSystemLoadMonitor(properties);
   }
 
-  /** Registers the degraded mode enricher. Disable with api.standard.enrichers.degraded-mode.enabled=false */
+  /**
+   * Registers the degraded mode enricher. Disable with
+   * api.standard.enrichers.degraded-mode.enabled=false
+   */
   @Bean
   @ConditionalOnMissingBean(DegradedModeEnricher.class)
-  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
-      prefix = "api.standard.enrichers.degraded-mode", name = "enabled", havingValue = "true",
-      matchIfMissing = true)
+  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(prefix = "api.standard.enrichers.degraded-mode", name = "enabled", havingValue = "true", matchIfMissing = true)
   public ProblemDetailEnricher degradedModeEnricher(
       SystemLoadMonitor loadMonitor, ApiStandardProperties properties) {
     return new DegradedModeEnricher(loadMonitor, properties);
   }
 
-  /** Registers the degraded mode filter. Disable with api.standard.degraded-mode.show-in-header=false */
+  /**
+   * Registers the degraded mode filter. Disable with
+   * api.standard.degraded-mode.show-in-header=false
+   */
   @Bean
   @ConditionalOnMissingBean(DegradedModeFilter.class)
-  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
-      prefix = "api.standard.degraded-mode", name = "show-in-header", havingValue = "true",
-      matchIfMissing = true)
+  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(prefix = "api.standard.degraded-mode", name = "show-in-header", havingValue = "true", matchIfMissing = true)
   public DegradedModeFilter degradedModeFilter(
       SystemLoadMonitor loadMonitor, ApiStandardProperties properties) {
     return new DegradedModeFilter(loadMonitor, properties);
   }
 
-  /** Registers the default redaction policy (reads from YML). Provide your own bean to override. */
+  /**
+   * Registers the default redaction policy (reads from YML). Provide your own
+   * bean to override.
+   */
   @Bean
   @ConditionalOnMissingBean(RedactionPolicy.class)
   public RedactionPolicy defaultRedactionPolicy(ApiStandardProperties properties) {
     return new DefaultRedactionPolicy(properties);
   }
 
-  /** Registers the redaction enricher. Disable with api.standard.enrichers.redaction.enabled=false */
+  /**
+   * Registers the redaction enricher. Disable with
+   * api.standard.enrichers.redaction.enabled=false
+   */
   @Bean
   @ConditionalOnMissingBean(RedactionEnricher.class)
-  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
-      prefix = "api.standard.enrichers.redaction", name = "enabled", havingValue = "true",
-      matchIfMissing = true)
+  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(prefix = "api.standard.enrichers.redaction", name = "enabled", havingValue = "true", matchIfMissing = true)
   public ProblemDetailEnricher redactionEnricher(
       RedactionPolicy redactionPolicy, ApiStandardProperties properties) {
     return new RedactionEnricher(redactionPolicy, properties);
   }
 
-  /** Registers the annotation enricher. Disable with api.standard.enrichers.annotation.enabled=false */
+  /**
+   * Registers the annotation enricher. Disable with
+   * api.standard.enrichers.annotation.enabled=false
+   */
   @Bean
   @ConditionalOnMissingBean(io.github.saul789.api.standard.exception.AnnotationEnricher.class)
-  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
-      prefix = "api.standard.enrichers.annotation", name = "enabled", havingValue = "true",
-      matchIfMissing = true)
+  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(prefix = "api.standard.enrichers.annotation", name = "enabled", havingValue = "true", matchIfMissing = true)
   public ProblemDetailEnricher annotationEnricher() {
     return new io.github.saul789.api.standard.exception.AnnotationEnricher();
-  }
-
-  /** Registers the metrics enricher. Only active if Micrometer is on the classpath. */
-  @Bean
-  @ConditionalOnMissingBean(io.github.saul789.api.standard.metrics.MetricsEnricher.class)
-  @org.springframework.boot.autoconfigure.condition.ConditionalOnClass(
-      name = "io.micrometer.core.instrument.MeterRegistry")
-  @org.springframework.boot.autoconfigure.condition.ConditionalOnBean(
-      type = "io.micrometer.core.instrument.MeterRegistry")
-  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
-      prefix = "api.standard.metrics", name = "enabled", havingValue = "true",
-      matchIfMissing = true)
-  public ProblemDetailEnricher metricsEnricher(
-      org.springframework.beans.factory.ObjectProvider<io.micrometer.core.instrument.MeterRegistry> registryProvider) {
-    return new io.github.saul789.api.standard.metrics.MetricsEnricher(registryProvider.getIfAvailable());
   }
 }

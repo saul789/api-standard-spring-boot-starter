@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/advanced/configuration.en/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/advanced/configuration.en/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/advanced/configuration.en/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/advanced/configuration/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/advanced/configuration/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/advanced/configuration/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/advanced/testing.en/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/advanced/testing.en/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/advanced/testing.en/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/advanced/testing/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/advanced/testing/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/advanced/testing/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/api-reference/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/api-reference/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/api-reference/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/concepts/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/concepts/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/concepts/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/contributing/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/contributing/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/contributing/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/cookbook/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/cookbook/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/cookbook/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/faq/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/faq/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/faq/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/installation/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/installation/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/installation/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/migration/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/migration/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/migration/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/quickstart/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/quickstart/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/quickstart/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/troubleshooting/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/troubleshooting/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/advanced/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/advanced/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/advanced/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/guide/custom-enrichers.en/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/guide/custom-enrichers.en/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/guide/custom-enrichers.en/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/guide/custom-enrichers/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/guide/custom-enrichers/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/guide/custom-enrichers/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/guide/error-intelligence.en/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/guide/error-intelligence.en/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/guide/error-intelligence.en/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/guide/error-intelligence/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/guide/error-intelligence/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/guide/error-intelligence/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/guide/exceptions-i18n.en/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/guide/exceptions-i18n.en/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/guide/exceptions-i18n.en/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/guide/exceptions-i18n/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/guide/exceptions-i18n/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/guide/exceptions-i18n/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/guide/observability.en/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/guide/observability.en/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/guide/observability.en/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/guide/observability/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/guide/observability/"/>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/guide/observability/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/advanced/configuration.en/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/advanced/configuration.en/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/advanced/configuration.en/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/advanced/configuration/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/advanced/configuration/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/advanced/configuration/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/advanced/testing.en/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/advanced/testing.en/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/advanced/testing.en/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/advanced/testing/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/advanced/testing/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/advanced/testing/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/api-reference/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/api-reference/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/api-reference/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/concepts/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/concepts/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/concepts/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/contributing/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/contributing/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/contributing/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/cookbook/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/cookbook/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/cookbook/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/faq/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/faq/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/faq/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/installation/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/installation/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/installation/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/migration/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/migration/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/migration/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/quickstart/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/quickstart/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/quickstart/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/troubleshooting/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/troubleshooting/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/troubleshooting/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/advanced/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/advanced/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/advanced/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/guide/custom-enrichers.en/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/guide/custom-enrichers.en/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/guide/custom-enrichers.en/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/guide/custom-enrichers/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/guide/custom-enrichers/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/guide/custom-enrichers/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/guide/error-intelligence.en/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/guide/error-intelligence.en/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/guide/error-intelligence.en/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/guide/error-intelligence/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/guide/error-intelligence/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/guide/error-intelligence/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/guide/exceptions-i18n.en/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/guide/exceptions-i18n.en/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/guide/exceptions-i18n.en/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/guide/exceptions-i18n/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/guide/exceptions-i18n/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/guide/exceptions-i18n/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/guide/observability.en/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/guide/observability.en/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/guide/observability.en/"/>
+    </url>
+    <url>
+        <loc>https://github.com/saul789/spring-boot-starter-api-standard/es/guide/observability/</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="es" href="https://github.com/saul789/spring-boot-starter-api-standard/es/guide/observability/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://github.com/saul789/spring-boot-starter-api-standard/guide/observability/"/>
+    </url>
+</urlset>

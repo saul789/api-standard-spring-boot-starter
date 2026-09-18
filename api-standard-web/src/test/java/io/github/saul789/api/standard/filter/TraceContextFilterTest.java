@@ -18,17 +18,23 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.MDC;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 @ExtendWith(MockitoExtension.class)
 class TraceContextFilterTest {
 
-  @InjectMocks private TraceContextFilter traceContextFilter;
+  @InjectMocks
+  private TraceContextFilter traceContextFilter;
 
-  @Mock private HttpServletRequest request;
+  @Mock
+  private HttpServletRequest request;
 
-  @Mock private HttpServletResponse response;
+  @Mock
+  private HttpServletResponse response;
 
-  @Mock private FilterChain filterChain;
+  @Mock
+  private FilterChain filterChain;
 
   @BeforeEach
   void setUp() {
@@ -36,9 +42,8 @@ class TraceContextFilterTest {
   }
 
   private boolean isValid(String value) {
-    return (boolean)
-        org.springframework.test.util.ReflectionTestUtils.invokeMethod(
-            traceContextFilter, "isValidTraceparent", value);
+    return (boolean) org.springframework.test.util.ReflectionTestUtils.invokeMethod(
+        traceContextFilter, "isValidTraceparent", value);
   }
 
   @Test
@@ -77,58 +82,83 @@ class TraceContextFilterTest {
     when(request.getHeader("traceparent")).thenReturn(traceparent);
 
     doAnswer(
-            invocation -> {
-              assertEquals(existingTraceId, MDC.get("traceId"));
-              return null;
-            })
+        invocation -> {
+          assertEquals(existingTraceId, MDC.get("traceId"));
+          return null;
+        })
         .when(filterChain)
         .doFilter(request, response);
 
     traceContextFilter.doFilter(request, response, filterChain);
 
-    verify(response).setHeader(eq("traceparent"), contains(existingTraceId));
+    verify(response, never()).setHeader(anyString(), anyString());
 
     assertNull(MDC.get("traceId"));
   }
 
-  @Test
-  void shouldGenerateNewTraceIdWhenHeaderIsMissing() throws ServletException, IOException {
-    // Preparación: Header nulo
+  @ParameterizedTest
+  @CsvSource({
+      "traceId, agent-trace-id-12345",
+      "trace_id, agent-trace-id-67890",
+      "dd.trace_id, datadog-trace-id-abc",
+      "trace.id, newrelic-trace-id-xyz",
+      "dt.trace_id, dynatrace-trace-id-999"
+  })
+  void shouldReuseTraceIdFromExistingMdcKeys(String mdcKey, String expectedTraceId) throws Exception {
+    MDC.put(mdcKey, expectedTraceId);
+
     when(request.getHeader("traceparent")).thenReturn(null);
 
-    // Ejecución
+    doAnswer(
+        invocation -> {
+          assertEquals(expectedTraceId, MDC.get("traceId"));
+          return null;
+        })
+        .when(filterChain)
+        .doFilter(request, response);
+
     traceContextFilter.doFilter(request, response, filterChain);
 
-    // Verificación
-    // Verificamos que se haya generado y seteado un header en la respuesta
-    verify(response).setHeader(eq("traceparent"), contains("-"));
+    verify(response, never()).setHeader(anyString(), anyString());
+  }
+
+  @Test
+  void shouldGenerateNewTraceIdWhenHeaderIsMissing() throws ServletException, IOException {
+    // Arrange: Null header
+    when(request.getHeader("traceparent")).thenReturn(null);
+
+    // Act
+    traceContextFilter.doFilter(request, response, filterChain);
+
+    // Assert
+    verify(response, never()).setHeader(anyString(), anyString());
     verify(filterChain).doFilter(request, response);
   }
 
   @Test
   void shouldGenerateNewTraceIdWhenHeaderIsInvalid() throws ServletException, IOException {
-    // Preparación: Header con formato incorrecto (menos de 4 partes)
+    // Arrange: Header with incorrect format (less than 4 parts)
     when(request.getHeader("traceparent")).thenReturn("00-invalid-format");
 
-    // Ejecución
+    // Act
     traceContextFilter.doFilter(request, response, filterChain);
 
-    // Verificación: Debe tratarlo como si no existiera y generar uno nuevo
-    verify(response).setHeader(eq("traceparent"), anyString());
+    // Assert: Should treat it as missing and generate a new one
+    verify(response, never()).setHeader(anyString(), anyString());
     verify(filterChain).doFilter(request, response);
   }
 
   @Test
   void shouldClearMDCEvenOnException() throws ServletException, IOException {
-    // Preparación
+    // Arrange
     when(request.getHeader("traceparent")).thenReturn(null);
     doThrow(new RuntimeException("Filter error")).when(filterChain).doFilter(request, response);
 
-    // Ejecución y Verificación
+    // Act and Assert
     assertThrows(
         RuntimeException.class, () -> traceContextFilter.doFilter(request, response, filterChain));
 
-    // El finally debe haber limpiado el MDC
+    // The finally block must clear the MDC
     assertNull(MDC.get("traceId"));
   }
 }

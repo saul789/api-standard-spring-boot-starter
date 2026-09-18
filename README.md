@@ -10,6 +10,11 @@
   [![Docs](https://img.shields.io/badge/docs-Redoc-blue.svg)](https://saul789.github.io/api-standard-spring-boot-starter/)
   
   <br/>
+  
+  [![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-Compliant-blueviolet.svg)](https://opentelemetry.io/)
+  [![W3C Trace Context](https://img.shields.io/badge/W3C_Trace_Context-Compliant-blue.svg)](https://www.w3.org/TR/trace-context/)
+  [![RFC 9457](https://img.shields.io/badge/RFC_9457-Problem_Details-success.svg)](https://www.rfc-editor.org/rfc/rfc9457)
+  <br/>
 </div>
 
 A plug-and-play Spring Boot starter that standardizes API responses, implements **RFC 9457** (Problem Details for HTTP APIs), and provides distributed tracing via Trace Context propagation.
@@ -75,13 +80,28 @@ graph TD
     end
 ```
 
+## 🌐 Standards Compliance & Enterprise Observability
+
+This starter is built from the ground up to adhere strictly to open industry standards for web APIs and telemetry:
+
+*   **RFC 9457 (Problem Details for HTTP APIs)**: Every error response is a standard `ProblemDetail` JSON payload with machine-readable `code` and dynamic tracking parameters.
+*   **W3C Trace Context Standard**: Intercepts, parses, and propagates standard W3C `traceparent` headers dynamically, linking your microservices into a single, cohesive distributed trace mesh.
+*   **OpenTelemetry Semantic Conventions**: Enriches your active spans with official semantic attributes:
+    *   Sets active span status to `StatusCode.ERROR`.
+    *   Logs the exact throwable as a native span event using `recordException(ex)`.
+    *   Injects standardised attributes: `exception.type`, `exception.message`, `error.type`, and `error.code`.
+*   **Micrometer Metrics Integration**: Captures HTTP failure metrics seamlessly (`api.errors.total` tagged with request method, status, error code, and MVC pattern) while avoiding Prometheus cardinality explosions.
+
+---
+
 ## 📦 Modules
 
 The project is divided into a multi-module architecture for better separation of concerns:
 - **`api-standard-core`**: Core contracts, base exceptions (`BusinessException`, `ProblemException`), and models. No Spring Web dependencies.
 - **`api-standard-web`**: Spring MVC adapters, `GlobalExceptionHandler`, filters, and optional integrations (Feign, Resilience4j).
 - **`api-standard-security`**: Native Spring Security exception handling mapped to RFC 9457 Problem Details.
-- **`api-standard-starter`**: The auto-configuration module that brings everything together as a plug-and-play dependency.
+- **`api-standard-observability`**: Micrometer metrics and OpenTelemetry trace span instrumentation.
+- **`api-standard-starter`**: The aggregate auto-configuration module that brings all dependencies together as a single plug-and-play starter.
 
 ## 🚀 Quick Start
 
@@ -263,6 +283,36 @@ Zero-code observability. If `micrometer-core` is on your classpath, the starter 
 
 ### 🩺 Diagnostic Actuator Endpoint
 Expose the internal state of the Error Intelligence platform. Access `/actuator/api-errors` to see live configuration of Degraded Mode, Redaction Engine, and current thresholds.
+
+### 🛡️ i18n Translation Validation (Governance-as-Code)
+Ensure your production APIs never leak unlocalized technical error codes to the users. The starter scans all `ErrorCode` values at startup and validates that their corresponding localized messages are configured in `messages.properties` and `messages_es.properties`.
+
+* **Friendly Warning Mode (Default)**: Logs a prominent, formatted `WARN` at startup pointing out the exact missing keys so you can fix them at your convenience.
+* **Strict Enforcement Mode**: Set `api.standard.errors.strict-translation-check: true` in your `application.yml` to prevent application startup if any translation is missing. Ideal for CI/CD gates.
+
+### 🌐 Distributed Tracing & OpenTelemetry Integration
+Achieve unified microservice observability. The starter acts as an intelligent gateway for correlation IDs and telemetry:
+
+* **Dynamic Trace ID Resolution**: The starter reads parent trace contexts non-invasively, detecting correlation IDs set by standard HTTP headers (`traceparent`) or pre-existing MDCs from container APM agents:
+  1. `traceId` / `trace_id` (Spring Boot Micrometer, OTel, W3C)
+  2. `dd.trace_id` (Datadog JVM Agent)
+  3. `trace.id` (New Relic JVM Agent)
+  4. `dt.trace_id` (Dynatrace Agent)
+  5. *Fallback*: Standard 32-character W3C-compliant lowercase hex correlation ID.
+* **Active Span Enrichment**: If OpenTelemetry (`opentelemetry-api`) is present in the classpath, the starter automatically registers the `OpenTelemetryProblemEnricher`. When an exception is intercepted, it enriches the current active Span with semantic attributes:
+  - Sets the Span status to `StatusCode.ERROR`.
+  - Records OTel exception attributes: `exception.type`, `exception.message`.
+  - Records the machine-readable error code: `error.type`.
+  - Records RFC 9457 standard metadata: `rfc9457.title` and `rfc9457.status`.
+
+Disable OTel enrichment at any time via `application.yml`:
+```yaml
+api:
+  standard:
+    enrichers:
+      opentelemetry:
+        enabled: false
+```
 
 ---
 
