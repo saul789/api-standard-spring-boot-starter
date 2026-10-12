@@ -12,7 +12,7 @@
     </Match>
 
     <Match>
-        <Class name="io.github.saul789.api.standard.metrics.MetricsEnricher" />
+        <Class name="io.github.saul789.api.standard.observability.MetricsEnricher" />
         <Bug pattern="EI_EXPOSE_REP2" />
     </Match>
 </FindBugsFilter>

@@ -78,10 +78,14 @@ public class TranslationValidator implements SmartInitializingSingleton {
       if (properties.getErrors().isStrictTranslationCheck()) {
         throw new IllegalStateException("Strict I18N Translation Check Failed!" + builder.toString());
       } else {
+        if (log.isWarnEnabled()) {
         log.warn(builder.toString());
       }
+      }
     } else {
+    if (log.isInfoEnabled()) {
       log.info("API Standard: All canonical ErrorCodes are successfully translated.");
+    }
     }
   }
 }
