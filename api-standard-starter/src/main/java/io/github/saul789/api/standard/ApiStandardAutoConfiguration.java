@@ -13,7 +13,6 @@ import io.github.saul789.api.standard.exception.RedactionEnricher;
 import io.github.saul789.api.standard.exception.RedactionPolicy;
 import io.github.saul789.api.standard.exception.SystemLoadMonitor;
 import io.github.saul789.api.standard.filter.DegradedModeFilter;
-import io.github.saul789.api.standard.exception.TranslationValidator;
 import io.github.saul789.api.standard.filter.RequestLoggingFilter;
 import io.github.saul789.api.standard.filter.TraceContextFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;

@@ -32,6 +32,19 @@ class MetricsEnricherTest {
   }
 
   @Test
+  void testOrder() {
+    assertEquals(999, enricher.order());
+  }
+
+  @Test
+  void testNullRegistry() {
+      MetricsEnricher nullRegistryEnricher = new MetricsEnricher(null);
+      ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+      nullRegistryEnricher.enrich(problem, null, null, null);
+      verifyNoInteractions(registry);
+  }
+
+  @Test
   @SuppressWarnings("unchecked")
   void shouldRecordMetricsWithCorrectTags() {
     // Arrange
@@ -58,6 +71,64 @@ class MetricsEnricherTest {
     assertTag(tags, "method", "POST");
     assertTag(tags, "uri", "/api/users/{id}");
   }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  void shouldRecordMetricsWithNullProperties() {
+    // Arrange
+    ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+    // don't set properties
+
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getMethod()).thenReturn("POST");
+    when(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE))
+        .thenReturn("/api/users/{id}");
+
+    // Act
+    enricher.enrich(problem, request, Locale.ENGLISH, null);
+
+    // Assert
+    ArgumentCaptor<List<Tag>> tagsCaptor = ArgumentCaptor.forClass(List.class);
+    verify(registry).counter(eq("api.errors.total"), tagsCaptor.capture());
+    verify(counter).increment();
+
+    List<Tag> tags = tagsCaptor.getValue();
+    assertEquals(4, tags.size());
+    assertTag(tags, "code", "UNKNOWN");
+    assertTag(tags, "status", "400");
+    assertTag(tags, "method", "POST");
+    assertTag(tags, "uri", "/api/users/{id}");
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  void shouldRecordMetricsWithNullCodeProperty() {
+    // Arrange
+    ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+    problem.setProperty("other", "value");
+    // don't set code
+
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getMethod()).thenReturn("POST");
+    when(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE))
+        .thenReturn("/api/users/{id}");
+
+    // Act
+    enricher.enrich(problem, request, Locale.ENGLISH, null);
+
+    // Assert
+    ArgumentCaptor<List<Tag>> tagsCaptor = ArgumentCaptor.forClass(List.class);
+    verify(registry).counter(eq("api.errors.total"), tagsCaptor.capture());
+    verify(counter).increment();
+
+    List<Tag> tags = tagsCaptor.getValue();
+    assertEquals(4, tags.size());
+    assertTag(tags, "code", "UNKNOWN");
+    assertTag(tags, "status", "400");
+    assertTag(tags, "method", "POST");
+    assertTag(tags, "uri", "/api/users/{id}");
+  }
+
 
   @Test
   @SuppressWarnings("unchecked")
@@ -99,6 +170,29 @@ class MetricsEnricherTest {
 
     List<Tag> tags = tagsCaptor.getValue();
     assertTag(tags, "uri", "UNMAPPED");
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  void shouldHandleNullCodeObjectValueGracefully() {
+      // Arrange
+      ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+      problem.setProperty("code", null);
+
+      HttpServletRequest request = mock(HttpServletRequest.class);
+      when(request.getMethod()).thenReturn("POST");
+      when(request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE)).thenReturn("/api");
+
+      // Act
+      enricher.enrich(problem, request, Locale.ENGLISH, null);
+
+      // Assert
+      ArgumentCaptor<List<Tag>> tagsCaptor = ArgumentCaptor.forClass(List.class);
+      verify(registry).counter(eq("api.errors.total"), tagsCaptor.capture());
+      verify(counter).increment();
+
+      List<Tag> tags = tagsCaptor.getValue();
+      assertTag(tags, "code", "UNKNOWN");
   }
 
   private void assertTag(List<Tag> tags, String key, String value) {
